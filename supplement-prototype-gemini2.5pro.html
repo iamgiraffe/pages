@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplement Finder Concept</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
+            margin-bottom: 20px;
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        h1 { font-size: 1.8em; margin-bottom: 10px; }
+        h2 { font-size: 1.4em; margin-top: 30px; margin-bottom: 15px; }
+
+        .step {
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        input[type="text"], select {
+            width: calc(100% - 22px);
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        input[type="text"]:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .suggestions {
+            border: 1px solid #ddd;
+            border-top: none;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: #fff;
+            border-radius: 0 0 5px 5px;
+            margin-top: -16px; /* Connect with input */
+            position: relative;
+            z-index: 10;
+        }
+        .suggestions div {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .suggestions div:hover {
+            background-color: #ecf0f1;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option-button {
+            padding: 12px 15px;
+            background-color: #e9ecef;
+            color: #495057;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+            font-size: 0.95em;
+        }
+        .option-button.selected {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        .option-button:hover:not(.selected) {
+            background-color: #dde2e6;
+        }
+        
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .checkbox-option input[type="checkbox"] {
+            margin-right: 10px;
+            width: auto; /* override general input style */
+            height: 1.2em;
+            width: 1.2em;
+        }
+        .checkbox-option label {
+            margin-bottom: 0;
+            font-weight: normal;
+            flex-grow: 1;
+        }
+        .info-icon {
+            font-style: normal;
+            font-weight: bold;
+            color: #3498db;
+            cursor: help;
+            margin-left: 8px;
+            border: 1px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            user-select: none;
+        }
+        .tooltip {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            z-index: 100;
+            width: 200px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        button.primary-btn {
+            background-color: #2ecc71;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.2s;
+            display: block;
+            margin: 20px auto 0;
+        }
+        button.primary-btn:hover {
+            background-color: #27ae60;
+        }
+        button.secondary-btn {
+            background-color: #95a5a6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s;
+            margin-right: 10px;
+        }
+        button.secondary-btn:hover {
+            background-color: #7f8c8d;
+        }
+
+        .results-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .result-card {
+            background-color: #fdfdfd;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .result-card h3 {
+            margin-top: 0;
+            color: #3498db;
+            font-size: 1.2em;
+        }
+        .result-card p {
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+        .result-card .price {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #27ae60;
+            margin: 10px 0;
+        }
+        .result-card .reviews {
+            color: #f39c12;
+            margin-bottom: 15px;
+        }
+        .result-card .store-link {
+            display: inline-block;
+            background-color: #e67e22;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .result-card .store-link:hover {
+            background-color: #d35400;
+        }
+
+        #appDownloadStep { text-align: center; }
+        #qrCode { margin: 20px auto; display: block; border: 1px solid #ccc; }
+        .app-store-buttons img {
+            height: 50px;
+            margin: 0 10px;
+            cursor: pointer;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            height: 10px;
+        }
+        .progress-bar {
+            width: 0%; /* Initial width */
+            height: 10px;
+            background-color: #2ecc71;
+            border-radius: 4px;
+            transition: width 0.3s ease-in-out;
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Supplement Finder</h1>
+        <p id="welcomeMessage" style="text-align:center; color: #555;">Let's find the right supplement for you. We'll start with Magnesium as an example.</p>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <!-- Step 1: Search Input -->
+        <div id="step1" class="step active">
+            <h2>What are you looking for?</h2>
+            <label for="searchInput">Search supplement (e.g., "magnesium")</label>
+            <input type="text" id="searchInput" placeholder="Type 'magn' or 'magnesium'">
+            <div id="suggestions" class="suggestions"></div>
+            <div class="nav-buttons">
+                <span></span> <!-- Placeholder for alignment -->
+                <button class="primary-btn" onclick="nextStep(1)" id="step1NextBtn" disabled>Next &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Benefit/Tag Selection -->
+        <div id="step2" class="step">
+            <h2>What are your main goals for <span id="selectedSupplementName" style="color:#3498db;"></span>?</h2>
+            <p>Select one or more benefits you're interested in:</p>
+            <div id="tagOptions" class="options-grid">
+                <!-- Tags will be populated by JS -->
+            </div>
+            <div class="nav-buttons">
+                <button class="secondary-btn" onclick="prevStep(2)">&larr; Back</button>
+                <button class="primary-btn" onclick="nextStep(2)">Next &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Dosage Selection -->
+        <div id="step3" class="step">
+            <h2>What dosage are you considering?</h2>
+            <p>Select a dosage for <span id="selectedSupplementNameDosage" style="color:#3498db;"></span>:</p>
+            <div id="dosageOptions" class="options-grid">
+                <!-- Dosages will be populated by JS -->
+            </div>
+            <div class="nav-buttons">
+                <button class="secondary-btn" onclick="prevStep(3)">&larr; Back</button>
+                <button class="primary-btn" onclick="nextStep(3)">Next &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Combination Selection -->
+        <div id="step4" class="step">
+            <h2>Any additional preferences?</h2>
+            <p>Consider options with other beneficial ingredients:</p>
+            <div id="combinationOptions">
+                <!-- Combinations will be populated by JS -->
+            </div>
+            <div class="nav-buttons">
+                <button class="secondary-btn" onclick="prevStep(4)">&larr; Back</button>
+                <button class="primary-btn" onclick="showResults()">Show Results &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 5: Results Display -->
+        <div id="step5" class="step">
+            <h2>Here are your top matches!</h2>
+            <p id="resultsSummary" style="text-align:center; margin-bottom:15px;"></p>
+            <div id="resultsContainer" class="results-container">
+                <!-- Results will be populated by JS -->
+            </div>
+            <div class="nav-buttons">
+                 <button class="secondary-btn" onclick="prevStep(5)">&larr; Back to Filters</button>
+                 <button class.secondary-btn onclick="startOver()">Start Over</button>
+            </div>
+        </div>
+
+        <!-- Step 6: App Download -->
+        <div id="appDownloadStep" class="step">
+            <h2>Get Our App for a Better Experience!</h2>
+            <p>Scan the QR code or use the store buttons to download.</p>
+            <img id="qrCode" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://yourapp.com/download" alt="QR Code for App Download">
+            <div class="app-store-buttons">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Download_on_the_App_Store_Badge.svg/1200px-Download_on_the_App_Store_Badge.svg.png" alt="Download on App Store" onclick="window.open('https://apple.com','_blank')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Google_Play_Store_badge_EN.svg/1200px-Google_Play_Store_badge_EN.svg.png" alt="Get it on Google Play" onclick="window.open('https://play.google.com','_blank')">
+            </div>
+            <div class="nav-buttons">
+                <button class="secondary-btn" onclick="showStep(5)">&larr; Back to Results</button>
+                <button class.secondary-btn onclick="startOver()">Start Over</button>
+            </div>
+        </div>
+
+    </div>
+    <div id="tooltip" class="tooltip"></div>
+
+    <script>
+        // --- Mock Data ---
+        const MOCK_SUPPLEMENTS_DB = {
+            "magnesium": {
+                displayName: "Magnesium",
+                tags: ["Better Sleep", "Muscle Restoration", "Stress Relief", "Energy Production", "Heart Health"],
+                dosages: ["100mg", "200mg", "250mg", "400mg", "500mg"],
+                combinations: [
+                    { name: "Calcium", info: "Often paired for bone health, but high doses can compete for absorption. Best taken at different times or in balanced formulas." },
+                    { name: "Zinc", info: "Important for immunity. High zinc can interfere with magnesium absorption if taken together in large amounts." },
+                    { name: "Vitamin D", info: "Helps with magnesium absorption and utilization in the body." },
+                    { name: "Vitamin B6", info: "Can enhance the cellular uptake of magnesium." }
+                ]
+            },
+            "magnesium citrate": {
+                displayName: "Magnesium Citrate",
+                tags: ["Bowel Regularity", "Better Sleep", "Muscle Function"],
+                dosages: ["200mg", "300mg", "450mg"],
+                combinations: [
+                    { name: "Potassium", info: "Often combined for electrolyte balance."}
+                ]
+            },
+            "vitamin c": {
+                displayName: "Vitamin C",
+                tags: ["Immune Support", "Antioxidant", "Skin Health"],
+                dosages: ["500mg", "1000mg", "2000mg"],
+                combinations: [
+                    { name: "Zinc", info: "Popular combination for enhanced immune support." },
+                    { name: "Bioflavonoids", info: "Often included to enhance Vitamin C absorption and efficacy." }
+                ]
+            }
+        };
+
+        const MOCK_PRODUCTS = [
+            // Magnesium Products
+            { id: "prod1", baseSupplement: "magnesium", form: "Oxide", name: "Basic Magnesium Oxide 250mg", price: 9.99, reviews: 3.8, reviewCount: 150, tags: ["Energy Production"], dosage: "250mg", storeLink: "https://store.com/basic-mag-oxide", image: "https://via.placeholder.com/100?text=Mg+Oxide" },
+            { id: "prod2", baseSupplement: "magnesium", form: "Citrate", name: "Pure Magnesium Citrate 200mg", price: 15.50, reviews: 4.5, reviewCount: 800, tags: ["Better Sleep", "Muscle Restoration"], dosage: "200mg", storeLink: "https://store.com/pure-mag-citrate", image: "https://via.placeholder.com/100?text=Mg+Citrate" },
+            { id: "prod3", baseSupplement: "magnesium", form: "Glycinate", name: "Premium Magnesium Glycinate 400mg", price: 25.00, reviews: 4.9, reviewCount: 1250, tags: ["Better Sleep", "Stress Relief"], dosage: "400mg", storeLink: "https://store.com/premium-mag-glycinate", image: "https://via.placeholder.com/100?text=Mg+Glycinate" },
+            { id: "prod4", baseSupplement: "magnesium", form: "Citrate", name: "Magnesium Citrate Complex 400mg with B6", price: 18.99, reviews: 4.6, reviewCount: 950, tags: ["Muscle Restoration", "Energy Production"], dosage: "400mg", combinations: ["Vitamin B6"], storeLink: "https://store.com/mag-citrate-b6", image: "https://via.placeholder.com/100?text=Mg+Citrate+B6" },
+            { id: "prod5", baseSupplement: "magnesium", form: "Malate", name: "Energetic Magnesium Malate 500mg", price: 22.00, reviews: 4.4, reviewCount: 600, tags: ["Energy Production", "Muscle Restoration"], dosage: "500mg", storeLink: "https://store.com/mag-malate", image: "https://via.placeholder.com/100?text=Mg+Malate" },
+            { id: "prod6", baseSupplement: "magnesium", form: "Taurate", name: "Cardio Magnesium Taurate 200mg with D3", price: 28.50, reviews: 4.7, reviewCount: 450, tags: ["Heart Health", "Stress Relief"], dosage: "200mg", combinations: ["Vitamin D"], storeLink: "https://store.com/mag-taurate-d3", image: "https://via.placeholder.com/100?text=Mg+Taurate+D3" },
+            
+            // Magnesium Citrate (specific form) Products - can overlap with generic magnesium
+             { id: "prod7", baseSupplement: "magnesium citrate", form: "Citrate", name: "High Absorb Magnesium Citrate 300mg", price: 17.00, reviews: 4.6, reviewCount: 700, tags: ["Bowel Regularity", "Muscle Function"], dosage: "300mg", storeLink: "https://store.com/high-absorb-mag-citrate", image: "https://via.placeholder.com/100?text=Mg+Citrate+300" },
+
+            // Vitamin C Products
+            { id: "prod8", baseSupplement: "vitamin c", form: "Ascorbic Acid", name: "Essential Vitamin C 1000mg", price: 12.00, reviews: 4.7, reviewCount: 2500, tags: ["Immune Support", "Antioxidant"], dosage: "1000mg", storeLink: "https://store.com/essential-vit-c", image: "https://via.placeholder.com/100?text=Vit+C+1000" },
+            { id: "prod9", baseSupplement: "vitamin c", form: "Ester-C", name: "Gentle Vitamin C Ester-C 500mg with Bioflavonoids", price: 19.99, reviews: 4.8, reviewCount: 1100, tags: ["Immune Support", "Skin Health"], dosage: "500mg", combinations: ["Bioflavonoids"], storeLink: "https://store.com/gentle-vit-c", image: "https://via.placeholder.com/100?text=Ester-C+Bio" },
+        ];
+
+        // --- State ---
+        let currentStep = 1;
+        const totalSteps = 5; // For progress bar, excluding app download
+        let userSelections = {
+            supplementKey: null,
+            supplementDisplayName: null,
+            tags: [],
+            dosage: null,
+            combinations: []
+        };
+
+        // --- DOM Elements ---
+        const searchInput = document.getElementById('searchInput');
+        const suggestionsDiv = document.getElementById('suggestions');
+        const step1NextBtn = document.getElementById('step1NextBtn');
+        const progressBar = document.getElementById('progressBar');
+        const tooltip = document.getElementById('tooltip');
+
+        // --- Functions ---
+        function updateProgressBar() {
+            const progress = (currentStep -1) / totalSteps * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function showStep(stepNumber) {
+            document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+            const targetStep = document.getElementById(`step${stepNumber}`);
+            if (targetStep) {
+                targetStep.classList.add('active');
+                currentStep = stepNumber;
+                updateProgressBar();
+
+                // If moving to app download step, no progress bar update beyond results
+                if (stepNumber === 6) { // App download step
+                     progressBar.style.width = `100%`; // Show full progress
+                }
+
+            } else if (stepNumber === 'appDownloadStep') { // Specific ID for app download
+                 document.getElementById('appDownloadStep').classList.add('active');
+                 progressBar.style.width = `100%`;
+            }
+             // Hide welcome message after first step
+            document.getElementById('welcomeMessage').style.display = 'none';
+        }
+
+        function nextStep(current) {
+            if (current === 1 && !userSelections.supplementKey) {
+                alert("Please select a supplement first.");
+                return;
+            }
+            if (current < 5) { // 5 is results step
+                showStep(current + 1);
+            }
+        }
+        
+        function prevStep(current) {
+            if (current > 1) {
+                showStep(current - 1);
+            }
+        }
+
+        function startOver() {
+            userSelections = {
+                supplementKey: null,
+                supplementDisplayName: null,
+                tags: [],
+                dosage: null,
+                combinations: []
+            };
+            searchInput.value = '';
+            suggestionsDiv.innerHTML = '';
+            step1NextBtn.disabled = true;
+            document.getElementById('welcomeMessage').style.display = 'block';
+            showStep(1);
+        }
+
+        // Step 1: Search and Autocomplete
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.toLowerCase();
+            suggestionsDiv.innerHTML = '';
+            step1NextBtn.disabled = true;
+            if (query.length < 2) return;
+
+            const filtered = Object.keys(MOCK_SUPPLEMENTS_DB)
+                .filter(key => key.includes(query) || MOCK_SUPPLEMENTS_DB[key].displayName.toLowerCase().includes(query))
+                .sort((a,b) => MOCK_SUPPLEMENTS_DB[a].displayName.localeCompare(MOCK_SUPPLEMENTS_DB[b].displayName));
+
+            filtered.forEach(key => {
+                const div = document.createElement('div');
+                div.textContent = MOCK_SUPPLEMENTS_DB[key].displayName;
+                div.onclick = () => selectSupplement(key);
+                suggestionsDiv.appendChild(div);
+            });
+        });
+
+        function selectSupplement(key) {
+            userSelections.supplementKey = key;
+            userSelections.supplementDisplayName = MOCK_SUPPLEMENTS_DB[key].displayName;
+            searchInput.value = userSelections.supplementDisplayName;
+            suggestionsDiv.innerHTML = '';
+            step1NextBtn.disabled = false;
+            
+            // Populate next steps based on selection
+            document.getElementById('selectedSupplementName').textContent = userSelections.supplementDisplayName;
+            document.getElementById('selectedSupplementNameDosage').textContent = userSelections.supplementDisplayName;
+            populateTags();
+            populateDosages();
+            populateCombinations();
+        }
+        
+        // Step 2: Populate Tags
+        function populateTags() {
+            const container = document.getElementById('tagOptions');
+            container.innerHTML = '';
+            const supplementData = MOCK_SUPPLEMENTS_DB[userSelections.supplementKey];
+            if (!supplementData || !supplementData.tags) return;
+
+            supplementData.tags.forEach(tag => {
+                const button = document.createElement('button');
+                button.classList.add('option-button');
+                button.textContent = tag;
+                button.onclick = () => toggleSelection(button, userSelections.tags, tag);
+                // Reselect if already chosen
+                if (userSelections.tags.includes(tag)) button.classList.add('selected');
+                container.appendChild(button);
+            });
+        }
+
+        // Step 3: Populate Dosages
+        function populateDosages() {
+            const container = document.getElementById('dosageOptions');
+            container.innerHTML = '';
+            const supplementData = MOCK_SUPPLEMENTS_DB[userSelections.supplementKey];
+            if (!supplementData || !supplementData.dosages) return;
+
+            supplementData.dosages.forEach(dosage => {
+                const button = document.createElement('button');
+                button.classList.add('option-button');
+                button.textContent = dosage;
+                button.onclick = () => {
+                    // Single selection for dosage
+                    container.querySelectorAll('.option-button').forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                    userSelections.dosage = dosage;
+                };
+                // Reselect if already chosen
+                if (userSelections.dosage === dosage) button.classList.add('selected');
+                container.appendChild(button);
+            });
+        }
+        
+        // Step 4: Populate Combinations
+        function populateCombinations() {
+            const container = document.getElementById('combinationOptions');
+            container.innerHTML = '';
+            const supplementData = MOCK_SUPPLEMENTS_DB[userSelections.supplementKey];
+            if (!supplementData || !supplementData.combinations) return;
+
+            supplementData.combinations.forEach(combo => {
+                const div = document.createElement('div');
+                div.classList.add('checkbox-option');
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `combo-${combo.name.replace(/\s+/g, '')}`;
+                checkbox.value = combo.name;
+                checkbox.onchange = () => {
+                    if (checkbox.checked) {
+                        if (!userSelections.combinations.includes(combo.name)) {
+                            userSelections.combinations.push(combo.name);
+                        }
+                    } else {
+                        userSelections.combinations = userSelections.combinations.filter(c => c !== combo.name);
+                    }
+                };
+                 // Reselect if already chosen
+                if (userSelections.combinations.includes(combo.name)) checkbox.checked = true;
+
+                const label = document.createElement('label');
+                label.htmlFor = checkbox.id;
+                label.textContent = `With ${combo.name}`;
+
+                const infoIcon = document.createElement('span');
+                infoIcon.classList.add('info-icon');
+                infoIcon.textContent = 'i';
+                infoIcon.onmouseenter = (e) => showTooltip(e, combo.info);
+                infoIcon.onmouseleave = hideTooltip;
+                infoIcon.ontouchstart = (e) => showTooltip(e, combo.info); // For touch devices
+
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                div.appendChild(infoIcon);
+                container.appendChild(div);
+            });
+        }
+
+        function toggleSelection(buttonElement, selectionArray, value) {
+            if (buttonElement.classList.contains('selected')) {
+                buttonElement.classList.remove('selected');
+                const index = selectionArray.indexOf(value);
+                if (index > -1) selectionArray.splice(index, 1);
+            } else {
+                buttonElement.classList.add('selected');
+                if (!selectionArray.includes(value)) {
+                     selectionArray.push(value);
+                }
+            }
+        }
+
+        function showTooltip(event, text) {
+            tooltip.textContent = text;
+            tooltip.style.display = 'block';
+            const rect = event.target.getBoundingClientRect();
+            tooltip.style.left = `${rect.left + window.scrollX + rect.width + 5}px`; // Position to the right
+            tooltip.style.top = `${rect.top + window.scrollY}px`;
+
+            // Adjust if tooltip goes off-screen
+            if (rect.left + rect.width + 5 + tooltip.offsetWidth > window.innerWidth) {
+                 tooltip.style.left = `${rect.left + window.scrollX - tooltip.offsetWidth - 5}px`; // Position to the left
+            }
+            if (rect.top + tooltip.offsetHeight > window.innerHeight) {
+                tooltip.style.top = `${rect.bottom + window.scrollY - tooltip.offsetHeight}px`;
+            }
+        }
+
+        function hideTooltip() {
+            tooltip.style.display = 'none';
+        }
+        
+        // Step 5: Show Results
+        function showResults() {
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.innerHTML = ''; // Clear previous results
+
+            let filteredProducts = MOCK_PRODUCTS.filter(p => {
+                let match = (p.baseSupplement === userSelections.supplementKey);
+
+                if (userSelections.tags.length > 0) {
+                    match = match && userSelections.tags.some(tag => p.tags.includes(tag));
+                }
+                if (userSelections.dosage) {
+                    match = match && p.dosage === userSelections.dosage;
+                }
+                if (userSelections.combinations.length > 0) {
+                    match = match && userSelections.combinations.every(combo => p.combinations && p.combinations.includes(combo));
+                }
+                return match;
+            });
+
+            document.getElementById('resultsSummary').textContent = 
+                `Showing results for ${userSelections.supplementDisplayName}` +
+                (userSelections.tags.length > 0 ? ` for ${userSelections.tags.join(', ')}` : '') +
+                (userSelections.dosage ? ` at ${userSelections.dosage}` : '') +
+                (userSelections.combinations.length > 0 ? ` with ${userSelections.combinations.join(', ')}` : '') +
+                `. Found ${filteredProducts.length} potential matches.`;
+
+
+            if (filteredProducts.length === 0) {
+                resultsContainer.innerHTML = "<p>No products match your exact criteria. Try adjusting your filters.</p>";
+                showStep(5);
+                return;
+            }
+
+            // Sort for "Best Price"
+            const bestPriceProduct = [...filteredProducts].sort((a, b) => a.price - b.price)[0];
+            
+            // Sort for "Best Reviews" (simple sort by review score, then count)
+            const bestReviewsProduct = [...filteredProducts].sort((a, b) => {
+                if (b.reviews === a.reviews) return b.reviewCount - a.reviewCount;
+                return b.reviews - a.reviews;
+            })[0];
+
+            // For "Best Value": This is conceptual. In a real app, it'd be a complex algorithm.
+            // Here, we'll pick one that's not the cheapest, not necessarily the highest reviewed but good, and possibly not the most expensive.
+            // Or, if we only have 1-2 products, we might duplicate.
+            let bestValueProduct = filteredProducts.find(p => p.price > (bestPriceProduct?.price || 0) && p.reviews >= 4.0 && p.id !== bestPriceProduct?.id && p.id !== bestReviewsProduct?.id);
+            if (!bestValueProduct && filteredProducts.length > 2) { // Fallback if no "middle" product
+                bestValueProduct = filteredProducts.find(p => p.id !== bestPriceProduct?.id && p.id !== bestReviewsProduct?.id) || filteredProducts[Math.floor(filteredProducts.length / 2)];
+            } else if (!bestValueProduct) { // If still no product (e.g. only 1-2 results total)
+                 bestValueProduct = bestReviewsProduct || bestPriceProduct || filteredProducts[0];
+            }
+
+
+            const productsToShow = new Map(); // Use Map to ensure unique products shown even if they qualify for multiple categories
+
+            if (bestPriceProduct) productsToShow.set(bestPriceProduct.id, { product: bestPriceProduct, category: "Best Price" });
+            if (bestReviewsProduct) productsToShow.set(bestReviewsProduct.id, { product: bestReviewsProduct, category: "Best Reviews" });
+            if (bestValueProduct) productsToShow.set(bestValueProduct.id, { product: bestValueProduct, category: "Best Value" });
+
+
+            // If we have fewer than 3 unique products, try to fill with remaining from filteredProducts
+            let displayCount = 0;
+            productsToShow.forEach(item => {
+                renderResultCard(item.product, item.category, resultsContainer);
+                displayCount++;
+            });
+            
+            // Fill up to 3 if not enough unique "best" options found
+            if (displayCount < 3) {
+                for (const p of filteredProducts) {
+                    if (displayCount >= 3) break;
+                    if (!productsToShow.has(p.id)) {
+                        renderResultCard(p, "Another Great Option", resultsContainer);
+                        displayCount++;
+                    }
+                }
+            }
+
+
+            showStep(5);
+        }
+
+        function renderResultCard(product, categoryTitle, container) {
+            const card = document.createElement('div');
+            card.classList.add('result-card');
+            card.innerHTML = `
+                <h3>${categoryTitle}</h3>
+                <img src="${product.image || 'https://via.placeholder.com/100?text=Product'}" alt="${product.name}" style="max-width:80px; height:auto; margin-bottom:10px;">
+                <h4>${product.name}</h4>
+                <p class="dosage">${product.dosage}</p>
+                <p class="price">$${product.price.toFixed(2)}</p>
+                <p class="reviews">⭐ ${product.reviews.toFixed(1)} (${product.reviewCount} reviews)</p>
+                <p class="tags-info">Good for: ${product.tags.join(', ')}</p>
+                ${product.combinations ? `<p class="combinations-info">Includes: ${product.combinations.join(', ')}</p>` : ''}
+                <a href="#" class="store-link" data-link="${product.storeLink}" onclick="handleProductSelection(event, '${product.storeLink}')">View at Store</a>
+            `;
+            container.appendChild(card);
+        }
+
+        function handleProductSelection(event, storeLink) {
+            event.preventDefault(); // Prevent default link navigation for now
+            console.log("Product selected, link:", storeLink);
+            // In a real app, you might track this selection
+            // Then show app download
+            document.getElementById('qrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(storeLink + '?ref=app')}`; // Example: add ref for tracking
+            showStep('appDownloadStep');
+        }
+
+
+        // --- Initialisation ---
+        showStep(1); // Show the first step on load
+
+        // Close tooltip if clicked outside
+        document.addEventListener('click', function(event) {
+            if (tooltip.style.display === 'block' && !tooltip.contains(event.target) && !event.target.classList.contains('info-icon')) {
+                hideTooltip();
+            }
+        });
+
+    </script>
+</body>
+</html>
