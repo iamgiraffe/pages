@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Supplement Finder</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #343a40;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .search-area {
+            margin-bottom: 20px;
+        }
+
+        #smartSearchInput {
+            width: calc(100% - 24px);
+            padding: 15px;
+            font-size: 1.1em;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        #smartSearchInput:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+
+        .active-filters-container, .contextual-guidance-container {
+            padding: 10px 0;
+            min-height: 30px; /* Reserve space */
+        }
+        .active-filters-container span, .contextual-guidance-container span {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-right: 5px;
+        }
+
+        .filter-pill, .suggestion-pill {
+            display: inline-block;
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 6px 12px;
+            border-radius: 16px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .filter-pill {
+            background-color: #007bff;
+            color: white;
+        }
+        .filter-pill .remove-filter {
+            margin-left: 8px;
+            font-weight: bold;
+        }
+        .filter-pill:hover {
+            background-color: #0056b3;
+        }
+        .suggestion-pill:hover {
+            background-color: #007bff;
+            color: white;
+        }
+        .suggestion-pill.type-supplement { border-left: 3px solid #17a2b8; }
+        .suggestion-pill.type-goal { border-left: 3px solid #28a745; }
+        .suggestion-pill.type-dosage { border-left: 3px solid #ffc107; }
+        .suggestion-pill.type-combination { border-left: 3px solid #fd7e14; }
+
+
+        .results-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .result-card {
+            background-color: #fdfdfd;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .result-card h3 { margin-top: 0; color: #007bff; font-size: 1.2em; }
+        .result-card h4.product-name { font-size: 1.05em; margin: 8px 0 5px; color: #333;}
+        .result-card p { margin-bottom: 10px; font-size: 0.95em; }
+        .result-card .price { font-size: 1.3em; font-weight: bold; color: #27ae60; margin: 10px 0; }
+        .result-card .reviews { color: #f39c12; margin-bottom: 15px; }
+        .result-card .store-link { display: inline-block; background-color: #e67e22; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold; transition: background-color 0.2s; }
+        .result-card .store-link:hover { background-color: #d35400; }
+
+        .app-download-section { text-align: center; margin-top:30px; padding-top: 20px; border-top: 1px solid #eee; }
+        .app-download-section.hidden { display: none; }
+        .app-download-section h2 { font-size: 1.3em; }
+        .app-download-section #qrCodeSmart { margin: 20px auto; display: block; border: 1px solid #ccc; }
+        .app-download-section .app-store-buttons img { height: 50px; margin: 0 10px; cursor: pointer; }
+
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Find Your Supplement</h1>
+
+        <div class="search-area">
+            <input type="text" id="smartSearchInput" placeholder="e.g., 'magnesium for sleep', 'vitamin for energy 500mg'">
+            <div class="active-filters-container" id="activeFilters">
+                <span>Active:</span>
+            </div>
+        </div>
+
+        <div class="contextual-guidance-container" id="contextualGuidance">
+            <!-- Contextual suggestions will appear here -->
+        </div>
+
+        <div class="results-container" id="resultsDisplay">
+            <!-- Product results will appear here -->
+        </div>
+        
+        <div class="app-download-section hidden" id="appDownloadSmart">
+            <h2>Get Our App for a Better Experience!</h2>
+            <p>Scan the QR code or use the store buttons to download.</p>
+            <img id="qrCodeSmart" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://yourapp.com/download" alt="QR Code for App Download">
+            <div class="app-store-buttons">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Download_on_the_App_Store_Badge.svg/1200px-Download_on_the_App_Store_Badge.svg.png" alt="Download on App Store" onclick="window.open('https://apple.com','_blank')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Google_Play_Store_badge_EN.svg/1200px-Google_Play_Store_badge_EN.svg.png" alt="Get it on Google Play" onclick="window.open('https://play.google.com','_blank')">
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Mock Data & Entities ---
+        const ALL_SUPPLEMENTS = {
+            "magnesium": { name: "Magnesium", commonGoals: ["sleep", "muscle", "stress"], commonDosages: ["200mg", "400mg"], commonCombinations: ["Vitamin D", "Zinc"] },
+            "vitamin c": { name: "Vitamin C", commonGoals: ["immune", "antioxidant", "skin"], commonDosages: ["500mg", "1000mg"], commonCombinations: ["Zinc", "Bioflavonoids"] },
+            "vitamin d": { name: "Vitamin D", commonGoals: ["bone", "immune", "mood"], commonDosages: ["1000 IU", "2000 IU", "5000 IU"], commonCombinations: ["Vitamin K2", "Magnesium"] },
+            "omega-3": { name: "Omega-3", commonGoals: ["heart", "brain", "inflammation"], commonDosages: ["500mg EPA/DHA", "1000mg EPA/DHA"], commonCombinations: ["Vitamin E"] },
+            "probiotics": { name: "Probiotics", commonGoals: ["gut", "digestion"], commonDosages: ["10 Billion CFU", "25 Billion CFU"], commonCombinations: ["Prebiotics"] }
+        };
+
+        const ALL_GOALS = {
+            "sleep": { name: "Better Sleep", relevantSupplements: ["magnesium", "melatonin", "valerian"] },
+            "muscle": { name: "Muscle Restoration", relevantSupplements: ["magnesium", "protein", "creatine"] },
+            "stress": { name: "Stress Relief", relevantSupplements: ["magnesium", "ashwagandha", "l-theanine"] },
+            "immune": { name: "Immune Support", relevantSupplements: ["vitamin c", "vitamin d", "zinc", "echinacea"] },
+            "bone": { name: "Bone Health", relevantSupplements: ["vitamin d", "calcium", "magnesium"] },
+            "energy": { name: "Energy Boost", relevantSupplements: ["b vitamins", "iron", "coq10", "magnesium"] },
+            "heart": { name: "Heart Health", relevantSupplements: ["omega-3", "coq10", "magnesium"] },
+            "gut": { name: "Gut Health", relevantSupplements: ["probiotics", "fiber", "l-glutamine"] }
+        };
+        const ALL_DOSAGES = ["100mg", "200mg", "250mg", "400mg", "500mg", "1000mg", "1000 IU", "2000 IU", "5000 IU", "10 Billion CFU"];
+        const ALL_COMBINATIONS = ["Vitamin D", "Zinc", "Calcium", "Vitamin B6", "Bioflavonoids", "Vitamin K2", "Prebiotics"];
+
+
+        // Mock Products (Simplified, assuming all are Magnesium for this demo if no supplement filter applied early)
+        const MOCK_PRODUCTS = [
+            { id: "p1", name: "Zen Magnesium Glycinate", base: "magnesium", goals: ["sleep", "stress"], dosage: "200mg", price: 22.99, reviews: 4.8, reviewCount: 1200, storeLink: "https://store.com/zen-mag", combinations: ["Vitamin B6"] },
+            { id: "p2", name: "Energize Magnesium Malate", base: "magnesium", goals: ["energy", "muscle"], dosage: "400mg", price: 18.50, reviews: 4.5, reviewCount: 750, storeLink: "https://store.com/energy-mag" },
+            { id: "p3", name: "Budget Magnesium Citrate", base: "magnesium", goals: ["muscle", "gut"], dosage: "250mg", price: 12.00, reviews: 4.2, reviewCount: 900, storeLink: "https://store.com/budget-mag-cit" },
+            { id: "p4", name: "Immune Boost Vitamin C", base: "vitamin c", goals: ["immune", "antioxidant"], dosage: "1000mg", price: 15.00, reviews: 4.7, reviewCount: 2000, storeLink: "https://store.com/immune-vitc", combinations: ["Zinc", "Bioflavonoids"] },
+            { id: "p5", name: "Sunshine Vitamin D3", base: "vitamin d", goals: ["bone", "immune", "mood"], dosage: "2000 IU", price: 10.99, reviews: 4.9, reviewCount: 3500, storeLink: "https://store.com/sun-vitd" },
+            { id: "p6", name: "Cardio Omega-3 Fish Oil", base: "omega-3", goals: ["heart", "brain"], dosage: "1000mg EPA/DHA", price: 25.00, reviews: 4.6, reviewCount: 1800, storeLink: "https://store.com/cardio-omega" },
+            { id: "p7", name: "Gut Harmony Probiotics", base: "probiotics", goals: ["gut", "digestion"], dosage: "25 Billion CFU", price: 30.00, reviews: 4.7, reviewCount: 950, storeLink: "https://store.com/gut-harmony" }
+        ];
+
+
+        // --- DOM Elements ---
+        const searchInput = document.getElementById('smartSearchInput');
+        const activeFiltersContainer = document.getElementById('activeFilters');
+        const contextualGuidanceContainer = document.getElementById('contextualGuidance');
+        const resultsDisplay = document.getElementById('resultsDisplay');
+        const appDownloadSection = document.getElementById('appDownloadSmart');
+        const qrCodeSmart = document.getElementById('qrCodeSmart');
+
+        // --- State ---
+        let currentFilters = {
+            supplement: null, // e.g., "magnesium" (key)
+            goal: null,       // e.g., "sleep" (key)
+            dosage: null,     // e.g., "400mg" (string)
+            combinations: []  // e.g., ["Vitamin D"]
+        };
+        let debounceTimer;
+
+        // --- Functions ---
+        function parseQuery(query) {
+            const parsed = { supplement: null, goal: null, dosage: null, rawKeywords: [] };
+            const lowerQuery = query.toLowerCase();
+            let words = lowerQuery.split(/\s+/);
+
+            // 1. Exact Supplement Match (simplistic)
+            for (const key in ALL_SUPPLEMENTS) {
+                if (lowerQuery.includes(key) || lowerQuery.includes(ALL_SUPPLEMENTS[key].name.toLowerCase())) {
+                    parsed.supplement = key;
+                    // Remove supplement name from words to avoid re-parsing
+                    words = words.filter(w => !key.includes(w) && !ALL_SUPPLEMENTS[key].name.toLowerCase().includes(w));
+                    break; 
+                }
+            }
+
+            // 2. Exact Goal Match (simplistic)
+            for (const key in ALL_GOALS) {
+                if (words.some(w => key.includes(w) || ALL_GOALS[key].name.toLowerCase().includes(w))) {
+                    parsed.goal = key;
+                     words = words.filter(w => !key.includes(w) && !ALL_GOALS[key].name.toLowerCase().includes(w));
+                    break;
+                }
+            }
+            
+            // 3. Dosage Match (simplistic regex)
+            const dosageMatch = lowerQuery.match(/(\d+)\s*(mg|iu|g|mcg|billion cfu)\b/);
+            if (dosageMatch) {
+                parsed.dosage = dosageMatch[0];
+                 words = words.filter(w => !dosageMatch[0].includes(w));
+            }
+            
+            parsed.rawKeywords = words.filter(w => w.length > 2 && w !== "for" && w !== "with"); // Filter out common small words
+
+            return parsed;
+        }
+
+        function updateActiveFiltersPills() {
+            activeFiltersContainer.innerHTML = '<span>Active:</span>';
+            let hasFilters = false;
+            if (currentFilters.supplement) {
+                addPill(ALL_SUPPLEMENTS[currentFilters.supplement].name, 'supplement', activeFiltersContainer);
+                hasFilters = true;
+            }
+            if (currentFilters.goal) {
+                addPill(ALL_GOALS[currentFilters.goal].name, 'goal', activeFiltersContainer);
+                hasFilters = true;
+            }
+            if (currentFilters.dosage) {
+                addPill(currentFilters.dosage, 'dosage', activeFiltersContainer);
+                hasFilters = true;
+            }
+            currentFilters.combinations.forEach(combo => {
+                addPill(combo, 'combination', activeFiltersContainer);
+                hasFilters = true;
+            });
+            if (!hasFilters) activeFiltersContainer.innerHTML += ' <em style="font-size:0.9em;">None - showing general suggestions.</em>';
+        }
+
+        function addPill(text, type, container, isSuggestion = false) {
+            const pill = document.createElement('div');
+            pill.classList.add(isSuggestion ? 'suggestion-pill' : 'filter-pill');
+            if(isSuggestion) pill.classList.add(`type-${type}`);
+            pill.textContent = text;
+
+            if (!isSuggestion) { // Active filter pill
+                const removeSpan = document.createElement('span');
+                removeSpan.classList.add('remove-filter');
+                removeSpan.innerHTML = '&times;';
+                removeSpan.onclick = (e) => {
+                    e.stopPropagation();
+                    removeFilter(type, text);
+                };
+                pill.appendChild(removeSpan);
+            } else { // Suggestion pill
+                pill.onclick = () => addFilterFromSuggestion(type, text);
+            }
+            container.appendChild(pill);
+        }
+
+        function removeFilter(type, value) {
+            if (type === 'supplement') currentFilters.supplement = null;
+            else if (type === 'goal') currentFilters.goal = null;
+            else if (type === 'dosage') currentFilters.dosage = null;
+            else if (type === 'combination') {
+                currentFilters.combinations = currentFilters.combinations.filter(c => c !== value);
+            }
+            // Potentially clear searchInput or parts of it - for now, just update pills and re-render
+            // searchInput.value = buildQueryFromFilters(); // Optional: sync input box
+            renderUI();
+        }
+        
+        function addFilterFromSuggestion(type, value) {
+            // Normalize value if it's a display name coming from suggestion
+            let keyToAdd = value;
+            if (type === 'supplement') {
+                keyToAdd = Object.keys(ALL_SUPPLEMENTS).find(k => ALL_SUPPLEMENTS[k].name === value) || value.toLowerCase();
+            } else if (type === 'goal') {
+                keyToAdd = Object.keys(ALL_GOALS).find(k => ALL_GOALS[k].name === value) || value.toLowerCase();
+            }
+
+            if (type === 'supplement') currentFilters.supplement = keyToAdd;
+            else if (type === 'goal') currentFilters.goal = keyToAdd;
+            else if (type === 'dosage') currentFilters.dosage = keyToAdd; // value is already formatted dosage
+            else if (type === 'combination') {
+                if (!currentFilters.combinations.includes(keyToAdd)) {
+                    currentFilters.combinations.push(keyToAdd);
+                }
+            }
+            // searchInput.value = buildQueryFromFilters(); // Optional: sync input box
+            searchInput.value = ''; // Clear input after selection for cleaner UX
+            renderUI();
+        }
+
+
+        function updateContextualGuidance() {
+            contextualGuidanceContainer.innerHTML = '<span>Suggestions:</span> ';
+            let suggestionsMade = false;
+
+            if (!currentFilters.supplement) {
+                contextualGuidanceContainer.innerHTML = '<span>Start by typing a supplement or a health goal:</span> ';
+                Object.values(ALL_SUPPLEMENTS).slice(0,3).forEach(s => addPill(s.name, 'supplement', contextualGuidanceContainer, true));
+                Object.values(ALL_GOALS).slice(0,3).forEach(g => addPill(g.name, 'goal', contextualGuidanceContainer, true));
+                suggestionsMade = true;
+            } else if (currentFilters.supplement && !currentFilters.goal) {
+                const supData = ALL_SUPPLEMENTS[currentFilters.supplement];
+                if (supData && supData.commonGoals) {
+                    contextualGuidanceContainer.innerHTML = `<span>Common goals for <strong>${supData.name}</strong>:</span> `;
+                    supData.commonGoals.forEach(goalKey => {
+                        if(ALL_GOALS[goalKey]) addPill(ALL_GOALS[goalKey].name, 'goal', contextualGuidanceContainer, true);
+                    });
+                    suggestionsMade = true;
+                }
+            } else if (currentFilters.supplement && currentFilters.goal) {
+                const supData = ALL_SUPPLEMENTS[currentFilters.supplement];
+                contextualGuidanceContainer.innerHTML = `<span>For <strong>${supData.name}</strong> (${ALL_GOALS[currentFilters.goal].name}):</span> `;
+                if (supData && supData.commonDosages && !currentFilters.dosage) {
+                    supData.commonDosages.forEach(d => addPill(d, 'dosage', contextualGuidanceContainer, true));
+                    suggestionsMade = true;
+                }
+                if (supData && supData.commonCombinations) {
+                    supData.commonCombinations.forEach(c => {
+                        if (!currentFilters.combinations.includes(c)) {
+                             addPill(`With ${c}`, 'combination', contextualGuidanceContainer, true); // Prefix "With" for clarity
+                             suggestionsMade = true;
+                        }
+                    });
+                }
+            } else if (!currentFilters.supplement && currentFilters.goal) {
+                 const goalData = ALL_GOALS[currentFilters.goal];
+                 if (goalData && goalData.relevantSupplements) {
+                    contextualGuidanceContainer.innerHTML = `<span>Supplements for <strong>${goalData.name}</strong>:</span> `;
+                    goalData.relevantSupplements.forEach(supKey => {
+                        if(ALL_SUPPLEMENTS[supKey]) addPill(ALL_SUPPLEMENTS[supKey].name, 'supplement', contextualGuidanceContainer, true);
+                    });
+                    suggestionsMade = true;
+                 }
+            }
+
+            if (!suggestionsMade && (currentFilters.supplement || currentFilters.goal)) {
+                contextualGuidanceContainer.innerHTML += ' <em style="font-size:0.9em;">No specific suggestions, viewing results.</em>';
+            } else if (!suggestionsMade) {
+                 contextualGuidanceContainer.innerHTML = '<span>Type to get started or refine your search.</span> ';
+            }
+        }
+
+
+        function fetchResults() {
+            resultsDisplay.innerHTML = ''; // Clear previous
+
+            let products = MOCK_PRODUCTS; // Start with all
+
+            if (currentFilters.supplement) {
+                products = products.filter(p => p.base === currentFilters.supplement);
+            }
+            if (currentFilters.goal) {
+                products = products.filter(p => p.goals && p.goals.includes(currentFilters.goal));
+            }
+            if (currentFilters.dosage) {
+                // Simplistic: exact match or if product name contains dosage string
+                products = products.filter(p => p.dosage === currentFilters.dosage || p.name.toLowerCase().includes(currentFilters.dosage.toLowerCase()));
+            }
+            if (currentFilters.combinations.length > 0) {
+                products = products.filter(p => {
+                    return currentFilters.combinations.every(combo => {
+                        const actualCombo = combo.startsWith("With ") ? combo.substring(5) : combo; // Remove "With " prefix
+                        return p.combinations && p.combinations.includes(actualCombo);
+                    });
+                });
+            }
+
+            if (products.length === 0) {
+                resultsDisplay.innerHTML = '<p class="no-results">No products match your current filters. Try adjusting them!</p>';
+                return;
+            }
+
+            // Determine 3 options: Best Price, Best Reviews, Balanced
+            const sortedByPrice = [...products].sort((a, b) => a.price - b.price);
+            const sortedByReviews = [...products].sort((a, b) => (b.reviews === a.reviews) ? (b.reviewCount - a.reviewCount) : (b.reviews - a.reviews));
+
+            const bestPrice = sortedByPrice[0];
+            const bestReviews = sortedByReviews[0];
+            
+            let balanced = products.find(p => 
+                p.id !== bestPrice?.id && 
+                p.id !== bestReviews?.id &&
+                p.reviews >= 4.0 && 
+                (bestPrice ? p.price > bestPrice.price * 0.9 && p.price < bestPrice.price * 2.5 : true) // Not too cheap, not overly expensive
+            );
+            if (!balanced && products.length > 2) {
+                balanced = products.filter(p => p.id !== bestPrice?.id && p.id !== bestReviews?.id)[0];
+            }
+            if (!balanced && products.length === 1) balanced = products[0];
+            else if (!balanced) balanced = bestReviews || bestPrice; // Fallback if still no balanced
+            
+
+            const displayMap = new Map();
+            if(bestPrice) displayMap.set(bestPrice.id, {product: bestPrice, category: "🌟 Best Price 🌟"});
+            if(bestReviews && !displayMap.has(bestReviews.id)) displayMap.set(bestReviews.id, {product: bestReviews, category: "🌟 Best Reviews 🌟"});
+            else if (bestReviews && displayMap.has(bestReviews.id) && displayMap.size === 1) { /* Best price is also best review */ }
+
+
+            if(balanced && !displayMap.has(balanced.id)) {
+                displayMap.set(balanced.id, {product: balanced, category: "🌟 Balanced Choice 🌟"});
+            } else if (balanced && displayMap.has(balanced.id) && displayMap.size <= 2 && bestPrice?.id !== bestReviews?.id ) { /* Balanced choice is one of the others */ }
+
+
+            // Fill up to 3 if needed
+            if (displayMap.size < 3) {
+                for (const p of products) {
+                    if (displayMap.size >= 3) break;
+                    if (!displayMap.has(p.id)) {
+                        displayMap.set(p.id, {product: p, category: "Also Recommended"});
+                    }
+                }
+            }
+            
+            displayMap.forEach(item => renderResultCard(item.product, item.category));
+        }
+
+        function renderResultCard(product, categoryTitle) {
+            const card = document.createElement('div');
+            card.classList.add('result-card');
+            card.innerHTML = `
+                <h3>${categoryTitle}</h3>
+                <img src="${product.image || `https://via.placeholder.com/80?text=${product.base}`}" alt="${product.name}" style="max-width:70px; height:auto; margin-bottom:10px;">
+                <h4 class="product-name">${product.name}</h4>
+                <p>${product.dosage}</p>
+                <p class="price">$${product.price.toFixed(2)}</p>
+                <p class="reviews">⭐ ${product.reviews.toFixed(1)} (${product.reviewCount} reviews)</p>
+                <a href="#" class="store-link" data-link="${product.storeLink}">View at Store</a>
+            `;
+            card.querySelector('.store-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                handleProductSelection(product.storeLink);
+            });
+            resultsDisplay.appendChild(card);
+        }
+        
+        function handleProductSelection(storeLink) {
+            appDownloadSection.classList.remove('hidden');
+            qrCodeSmart.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(storeLink + '?ref=app')}`;
+            appDownloadSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderUI() {
+            updateActiveFiltersPills();
+            updateContextualGuidance();
+            fetchResults();
+        }
+
+        searchInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const query = searchInput.value;
+                if (query.trim() === "" && !currentFilters.supplement && !currentFilters.goal && !currentFilters.dosage && currentFilters.combinations.length === 0) {
+                    // Reset if input is empty and no filters are manually set
+                    currentFilters = { supplement: null, goal: null, dosage: null, combinations: [] };
+                } else {
+                    const parsed = parseQuery(query);
+                    // Only update if new information is parsed and different or adds to current.
+                    // More sophisticated merging logic could go here.
+                    // For now, let's make it simple: if user types, it influences the filters.
+                    if(parsed.supplement) currentFilters.supplement = parsed.supplement;
+                    if(parsed.goal) currentFilters.goal = parsed.goal;
+                    if(parsed.dosage) currentFilters.dosage = parsed.dosage;
+                    // Raw keywords aren't directly used as filters yet, but could influence ranking or suggest combinations
+                }
+                renderUI();
+            }, 500); // Debounce for 500ms
+        });
+
+        // Initial Render
+        renderUI();
+
+    </script>
+</body>
+</html>

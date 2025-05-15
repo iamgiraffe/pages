@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplement Search Concept</title>
+    <style>
+        /* Basic Reset */
+        body, h1, h2, h3, p, ul, li, button, input { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; color: #333; line-height: 1.6; padding: 20px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+        .container { width: 100%; max-width: 700px; margin: auto; background: #fff; padding: 25px 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        h1 { text-align: center; margin-bottom: 25px; color: #1a73e8; font-size: 28px; }
+        h2 { font-size: 22px; color: #3c4043; margin-bottom: 15px; border-bottom: 2px solid #e8e8e8; padding-bottom: 8px; }
+        .view { display: none; margin-top: 20px; padding: 20px; border: 1px solid #dadce0; border-radius: 8px; background-color: #ffffff; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .view.active { display: block; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #5f6368; }
+        input[type="text"] { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; transition: border-color 0.3s ease; }
+        input[type="text"]:focus { border-color: #1a73e8; outline: none; box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2); }
+        button {
+            background-color: #1a73e8; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin-top: 10px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease; font-weight: 500;
+        }
+        button:hover { background-color: #1558b0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        button:active { background-color: #124a94; }
+        .next-btn { display: block; width: auto; margin-left: auto; }
+        .suggestions-list { list-style: none; padding: 0; margin-top: -15px; border: 1px solid #ccc; border-top: none; border-radius: 0 0 6px 6px; background-color: #fff; position: absolute; width: calc(100% - 60px); /* Adjust based on container padding */ max-width: calc(700px - 60px); z-index: 100; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto;}
+        .suggestions-list li { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #eee; }
+        .suggestions-list li:last-child { border-bottom: none; }
+        .suggestions-list li:hover { background-color: #f0f2f5; }
+        .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .option-card {
+            padding: 12px 15px; border: 1px solid #dadce0; border-radius: 8px; cursor: pointer; text-align: center; background-color: #fff;
+            transition: all 0.2s ease-in-out; font-size: 15px; display: flex; align-items: center; justify-content: center;
+        }
+        .option-card.selected { background-color: #e8f0fe; color: #1a73e8; border-color: #1a73e8; font-weight: 600; }
+        .option-card:hover:not(.selected) { background-color: #f8f9fa; border-color: #c0c0c0; }
+        .info-icon {
+            display: inline-flex; width: 18px; height: 18px; background-color: #70757a; color: white; border-radius: 50%;
+            text-align: center; font-size: 11px; line-height: 18px; cursor: help; position: relative; margin-left: 8px; align-items: center; justify-content: center; font-style: normal;
+        }
+        .info-icon .tooltip {
+            visibility: hidden; min-width: 220px; background-color: #3c4043; color: #fff; text-align: left; border-radius: 6px;
+            padding: 10px; position: absolute; z-index: 1; bottom: 130%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s;
+            font-size: 13px; line-height: 1.5; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .info-icon:hover .tooltip { visibility: visible; opacity: 1; }
+        .product-card { border: 1px solid #dadce0; border-radius: 8px; padding: 20px; margin-bottom: 20px; background-color: #fff; transition: box-shadow 0.3s ease; }
+        .product-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .product-card h3 { margin-top: 0; color: #1a73e8; font-size: 20px; margin-bottom: 10px; }
+        .product-card p { margin-bottom: 10px; font-size: 15px; color: #5f6368;}
+        .product-card p strong { color: #3c4043; }
+        .product-card .store-link-btn {
+            display: inline-block; background-color: #e67e22; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;
+            font-weight: 500; margin-top: 10px; transition: background-color 0.3s ease;
+        }
+        .product-card .store-link-btn:hover { background-color: #d35400; }
+        .qr-code-container { text-align: center; margin-top: 25px; }
+        .qr-code-container img { max-width: 180px; height: auto; margin-bottom: 20px; border: 1px solid #dadce0; border-radius: 4px; padding: 5px; background: white; }
+        .store-buttons button { margin: 5px; padding: 12px 18px; font-size: 15px; }
+        .store-buttons .app-store { background-color: #007aff; }
+        .store-buttons .app-store:hover { background-color: #005bb5; }
+        .store-buttons .google-play { background-color: #4CAF50; }
+        .store-buttons .google-play:hover { background-color: #388E3C; }
+        .hidden { display: none !important; }
+        #searchInputContainer { position: relative; } /* For positioning suggestions list */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Supplement Advisor</h1>
+
+        <!-- Step 1: Search Input -->
+        <div id="searchView" class="view active">
+            <h2>Find Your Supplement</h2>
+            <div id="searchInputContainer">
+                <label for="searchInput">What are you looking for?</label>
+                <input type="text" id="searchInput" placeholder="e.g., magnesium, vitamin c...">
+                <ul id="suggestionsList" class="suggestions-list hidden"></ul>
+            </div>
+        </div>
+
+        <!-- Step 2: Tag Selection -->
+        <div id="tagsView" class="view">
+            <h2 id="tagsViewTitle">Select Benefits for [Supplement]</h2>
+            <div id="tagsOptions" class="options-grid"></div>
+            <button id="nextToDosageBtn" class="next-btn">Next: Select Dosage</button>
+        </div>
+
+        <!-- Step 3: Dosage Selection -->
+        <div id="dosageView" class="view">
+            <h2 id="dosageViewTitle">Select Dosage for [Supplement]</h2>
+            <div id="dosageOptions" class="options-grid"></div>
+            <button id="nextToRefinementsBtn" class="next-btn">Next: Refine Your Search</button>
+        </div>
+
+        <!-- Step 4: Refinements -->
+        <div id="refinementsView" class="view">
+            <h2 id="refinementsViewTitle">Additional Preferences for [Supplement]</h2>
+            <div id="refinementOptions" class="options-grid"></div>
+            <button id="showResultsBtn" class="next-btn">Show Results</button>
+        </div>
+
+        <!-- Step 5: Results Display -->
+        <div id="resultsView" class="view">
+            <h2>Your Supplement Options</h2>
+            <div id="productResults"></div>
+            <button id="searchAgainFromResultsBtn">Search for Another Supplement</button>
+        </div>
+
+        <!-- Step 6: App Promotion -->
+        <div id="appPromotionView" class="view">
+            <h2>Get Our App!</h2>
+            <p>For a personalized experience, exclusive deals, and easy reordering, download our app.</p>
+            <div class="qr-code-container">
+                <img id="qrCodeImg" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://yourapp.example.com/download" alt="QR Code for App Download">
+            </div>
+            <div class="store-buttons" style="text-align: center;">
+                <button class="app-store">Download on the App Store</button>
+                <button class="google-play">Get it on Google Play</button>
+            </div>
+            <button id="startOverBtn" style="margin-top: 20px; background-color: #5f6368;">Start New Search</button>
+        </div>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const suggestionsList = document.getElementById('suggestionsList');
+        const views = {
+            search: document.getElementById('searchView'),
+            tags: document.getElementById('tagsView'),
+            dosage: document.getElementById('dosageView'),
+            refinements: document.getElementById('refinementsView'),
+            results: document.getElementById('resultsView'),
+            appPromotion: document.getElementById('appPromotionView')
+        };
+        const tagsViewTitle = document.getElementById('tagsViewTitle');
+        const tagsOptions = document.getElementById('tagsOptions');
+        const dosageViewTitle = document.getElementById('dosageViewTitle');
+        const dosageOptions = document.getElementById('dosageOptions');
+        const refinementsViewTitle = document.getElementById('refinementsViewTitle');
+        const refinementOptions = document.getElementById('refinementOptions');
+        const productResults = document.getElementById('productResults');
+        const qrCodeImg = document.getElementById('qrCodeImg');
+
+        const supplementData = {
+            "magnesium": {
+                fullName: "Magnesium",
+                tags: ["Better Sleep", "Muscle Restoration", "Stress Relief", "Nerve Function", "Heart Health"],
+                dosages: ["100mg", "200mg", "250mg", "400mg", "500mg"],
+                refinements: [
+                    { name: "With Calcium", description: "Calcium and Magnesium work synergistically for bone health, nerve transmission, and muscle function. Ensure appropriate ratios." },
+                    { name: "With Zinc", description: "Zinc is crucial for immune function and cellular metabolism. Often combined in ZMA formulas for recovery." },
+                    { name: "Vegan Formula", description: "Certified vegan, ensuring no animal-derived ingredients or byproducts are used in the supplement." },
+                    { name: "Glycinate Form", description: "Magnesium Glycinate is known for high bioavailability and gentleness on the stomach, good for sleep and relaxation." },
+                    { name: "Citrate Form", description: "Magnesium Citrate has good bioavailability and a mild laxative effect, often used for regularity." }
+                ]
+            },
+            "vitamin c": {
+                fullName: "Vitamin C",
+                tags: ["Immune Support", "Antioxidant", "Skin Health", "Collagen Production", "Iron Absorption"],
+                dosages: ["250mg", "500mg", "1000mg", "Liposomal"],
+                refinements: [
+                    { name: "With Rose Hips", description: "Rose hips are a natural source of Vitamin C and bioflavonoids, which may enhance absorption and antioxidant activity." },
+                    { name: "Buffered (Gentle)", description: "Mineral ascorbates (e.g., calcium ascorbate) are less acidic than ascorbic acid, ideal for sensitive stomachs." },
+                    { name: "Chewable Tablets", description: "A convenient option for those who have difficulty swallowing pills, often flavored." },
+                    { name: "With Bioflavonoids", description: "Plant compounds that can work with Vitamin C to support antioxidant defenses and vascular health."}
+                ]
+            },
+            "vitamin d": {
+                fullName: "Vitamin D3",
+                tags: ["Bone Health", "Immune Support", "Mood Regulation", "Calcium Absorption", "Muscle Function"],
+                dosages: ["1000 IU", "2000 IU", "4000 IU", "5000 IU"],
+                refinements: [
+                    { name: "With K2 (MK-7)", description: "Vitamin K2 (especially MK-7) helps direct calcium to bones and teeth, preventing arterial calcification." },
+                    { name: "Liquid Drops", description: "Easy to dose precisely and often preferred for better absorption or for children/elderly." },
+                    { name: "Plant-Based D3", description: "Sourced from lichen, suitable for vegans, as most D3 comes from lanolin (sheep's wool)." },
+                    { name: "In Olive Oil", description: "Vitamin D is fat-soluble; suspension in a healthy oil like olive oil can improve absorption."}
+                ]
+            }
+        };
+
+        const allSupplements = [];
+        for (const key in supplementData) {
+            allSupplements.push({ key: key, name: supplementData[key].fullName });
+            // Add common forms if not covered by refinements to make search richer
+            if (key === "magnesium") {
+                 allSupplements.push({key: "magnesium citrate", name: "Magnesium Citrate", baseKey: "magnesium"});
+                 allSupplements.push({key: "magnesium glycinate", name: "Magnesium Glycinate", baseKey: "magnesium"});
+                 allSupplements.push({key: "magnesium l-threonate", name: "Magnesium L-Threonate", baseKey: "magnesium"});
+            }
+        }
+        allSupplements.sort((a,b) => a.name.localeCompare(b.name));
+
+
+        let currentSelections = {
+            supplementKey: null, // e.g. "magnesium"
+            supplementName: null, // e.g. "Magnesium Glycinate"
+            tags: [],
+            dosage: null,
+            refinements: []
+        };
+
+        function switchView(viewName) {
+            Object.values(views).forEach(view => view.classList.remove('active'));
+            if (views[viewName]) {
+                views[viewName].classList.add('active');
+            }
+        }
+        
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.trim().toLowerCase();
+            suggestionsList.innerHTML = '';
+            if (query.length < 2) {
+                suggestionsList.classList.add('hidden');
+                return;
+            }
+            suggestionsList.classList.remove('hidden');
+
+            const filteredSupplements = allSupplements.filter(s =>
+                s.name.toLowerCase().includes(query)
+            );
+            
+            filteredSupplements.sort((a, b) => {
+                const aStarts = a.name.toLowerCase().startsWith(query);
+                const bStarts = b.name.toLowerCase().startsWith(query);
+                if (aStarts && !bStarts) return -1;
+                if (!aStarts && bStarts) return 1;
+                return a.name.localeCompare(b.name); // Alphabetical for same-level matches
+            });
+
+            filteredSupplements.slice(0, 5).forEach(supplement => {
+                const li = document.createElement('li');
+                li.textContent = supplement.name;
+                li.addEventListener('click', () => {
+                    currentSelections.supplementKey = supplement.baseKey || supplement.key; // Use baseKey if it's a variant
+                    currentSelections.supplementName = supplement.name;
+                    searchInput.value = supplement.name;
+                    suggestionsList.innerHTML = '';
+                    suggestionsList.classList.add('hidden');
+                    loadTagsStep();
+                });
+                suggestionsList.appendChild(li);
+            });
+        });
+        
+        document.addEventListener('click', function(event) {
+            if (!searchInput.contains(event.target) && !suggestionsList.contains(event.target) && !event.target.closest('.suggestions-list')) {
+                 suggestionsList.classList.add('hidden');
+            }
+        });
+
+        function createOptionCard(text, value, type, description = null) {
+            const card = document.createElement('div');
+            card.classList.add('option-card');
+            
+            const textNode = document.createTextNode(text);
+            card.appendChild(textNode);
+
+            if (description) {
+                const info = document.createElement('i'); // Using <i> for icon
+                info.classList.add('info-icon');
+                info.textContent = 'i';
+                const tooltip = document.createElement('span');
+                tooltip.classList.add('tooltip');
+                tooltip.textContent = description;
+                info.appendChild(tooltip);
+                card.appendChild(info);
+            }
+            
+            card.dataset.value = value;
+            card.addEventListener('click', () => {
+                if (type === 'tags' || type === 'refinements') {
+                    card.classList.toggle('selected');
+                    const selectionArray = currentSelections[type];
+                    if (card.classList.contains('selected')) {
+                        if (!selectionArray.includes(value)) selectionArray.push(value);
+                    } else {
+                        const index = selectionArray.indexOf(value);
+                        if (index > -1) selectionArray.splice(index, 1);
+                    }
+                } else { 
+                    const parent = card.parentNode;
+                    parent.querySelectorAll('.option-card.selected').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    currentSelections[type] = value;
+                }
+            });
+            return card;
+        }
+
+        function loadTagsStep() {
+            const data = supplementData[currentSelections.supplementKey];
+            if (!data) {
+                alert("Data for " + currentSelections.supplementName + " not found. Please try another search.");
+                resetAndGoToSearch();
+                return;
+            }
+            tagsViewTitle.textContent = `Select Benefits for ${currentSelections.supplementName}`;
+            tagsOptions.innerHTML = '';
+            currentSelections.tags = []; 
+            data.tags.forEach(tag => {
+                tagsOptions.appendChild(createOptionCard(tag, tag, 'tags'));
+            });
+            switchView('tags');
+        }
+
+        document.getElementById('nextToDosageBtn').addEventListener('click', () => loadDosageStep());
+
+        function loadDosageStep() {
+            const data = supplementData[currentSelections.supplementKey];
+            dosageViewTitle.textContent = `Select Dosage for ${currentSelections.supplementName}`;
+            dosageOptions.innerHTML = '';
+            currentSelections.dosage = null; 
+            data.dosages.forEach(dosage => {
+                dosageOptions.appendChild(createOptionCard(dosage, dosage, 'dosage'));
+            });
+            switchView('dosage');
+        }
+
+        document.getElementById('nextToRefinementsBtn').addEventListener('click', () => {
+            if (!currentSelections.dosage) {
+                alert("Please select a dosage.");
+                return;
+            }
+            loadRefinementsStep();
+        });
+
+        function loadRefinementsStep() {
+            const data = supplementData[currentSelections.supplementKey];
+            refinementsViewTitle.textContent = `Additional Preferences for ${currentSelections.supplementName}`;
+            refinementOptions.innerHTML = '';
+            currentSelections.refinements = []; 
+            data.refinements.forEach(ref => {
+                refinementOptions.appendChild(createOptionCard(ref.name, ref.name, 'refinements', ref.description));
+            });
+            switchView('refinements');
+        }
+
+        document.getElementById('showResultsBtn').addEventListener('click', () => loadResultsStep());
+
+        function loadResultsStep() {
+            productResults.innerHTML = ''; 
+            const baseProductInfo = supplementData[currentSelections.supplementKey];
+            const displayName = currentSelections.supplementName || baseProductInfo.fullName;
+
+            const products = [
+                {
+                    id: "price-opt",
+                    name: `${displayName} - Best Price`,
+                    description: `An affordable choice for your needs. Dosage: ${currentSelections.dosage}. ${currentSelections.tags.length ? 'Aimed for: ' + currentSelections.tags.join(', ') + '.' : ''} ${currentSelections.refinements.length ? 'Preferences: ' + currentSelections.refinements.join(', ') + '.' : ''}`,
+                    price: "$9.99",
+                    reviews: "3.9 stars (210 reviews)",
+                    link: `https://store.com/${currentSelections.supplementKey}-best-price`
+                },
+                {
+                    id: "reviews-opt",
+                    name: `${displayName} - Top Rated`,
+                    description: `Highly reviewed by customers. Dosage: ${currentSelections.dosage}. ${currentSelections.tags.length ? 'Popular for: ' + currentSelections.tags.join(', ') + '.' : ''} ${currentSelections.refinements.length ? 'Preferences: ' + currentSelections.refinements.join(', ') + '.' : ''}`,
+                    price: "$19.99",
+                    reviews: "4.8 stars (1350 reviews)",
+                    link: `https://store.com/${currentSelections.supplementKey}-top-rated`
+                },
+                {
+                    id: "balanced-opt",
+                    name: `${displayName} - Balanced Choice`,
+                    description: `A smart balance of quality and value. Dosage: ${currentSelections.dosage}. ${currentSelections.tags.length ? 'Good for: ' + currentSelections.tags.join(', ') + '.' : ''} ${currentSelections.refinements.length ? 'Preferences: ' + currentSelections.refinements.join(', ') + '.' : ''}`,
+                    price: "$14.99",
+                    reviews: "4.5 stars (780 reviews)",
+                    link: `https://store.com/${currentSelections.supplementKey}-balanced`
+                }
+            ];
+
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.classList.add('product-card');
+                card.innerHTML = `
+                    <h3>${product.name}</h3>
+                    <p>${product.description}</p>
+                    <p><strong>Price:</strong> ${product.price}</p>
+                    <p><strong>Reviews:</strong> ${product.reviews}</p>
+                    <a href="${product.link}" target="_blank" class="store-link-btn" data-productid="${product.id}">View Product & Go to Store</a>
+                `;
+                card.querySelector('.store-link-btn').addEventListener('click', (e) => {
+                    // For prototype, we go to app promotion. In real app, target="_blank" handles store link.
+                    // e.preventDefault(); // Uncomment if you don't want the link to open for the prototype
+                    loadAppPromotionStep(product.link); 
+                });
+                productResults.appendChild(card);
+            });
+            switchView('results');
+        }
+
+        function loadAppPromotionStep(storeLink) {
+            qrCodeImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent("https://yourapp.example.com/product-redirect?ref=" + storeLink)}`;
+            switchView('appPromotion');
+        }
+        
+        function resetAndGoToSearch() {
+            currentSelections = { supplementKey: null, supplementName: null, tags: [], dosage: null, refinements: [] };
+            searchInput.value = '';
+            suggestionsList.innerHTML = '';
+            suggestionsList.classList.add('hidden');
+            Object.values(views).forEach(view => { // Clear selections from option cards
+                view.querySelectorAll('.option-card.selected').forEach(card => card.classList.remove('selected'));
+            });
+            switchView('search');
+        }
+
+        document.getElementById('startOverBtn').addEventListener('click', resetAndGoToSearch);
+        document.getElementById('searchAgainFromResultsBtn').addEventListener('click', resetAndGoToSearch);
+
+        // Initialize
+        switchView('search');
+    </script>
+</body>
+</html>

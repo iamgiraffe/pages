@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplement Chat Finder v2.4 (Fixed)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            background-color: #e9ebee;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px 20px 0; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease-in-out;
+            position: relative; 
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .system-message {
+            background-color: #f1f0f0;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        .system-message strong { color: #0073e0; }
+
+        .user-message {
+            background-color: #0084ff;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .user-message.choice-button {
+             background-color: #0073e0;
+        }
+
+        .input-area-wrapper {
+            position: relative; 
+            padding: 0 15px; 
+            background-color: #fff;
+        }
+
+        .input-area {
+            padding: 15px 0; 
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .input-area input[type="text"] {
+            padding: 12px 15px; 
+            border: 1px solid #ccc;
+            border-radius: 22px; 
+            flex-grow: 1;
+            font-size: 1em;
+            margin-bottom: 10px;
+            width: 100%; 
+            box-sizing: border-box; 
+        }
+        .input-area input[type="text"]:focus {
+            outline: none;
+            border-color: #0084ff;
+            box-shadow: 0 0 0 2px rgba(0, 132, 255, 0.2);
+        }
+
+        .suggestions-overlay {
+            position: absolute;
+            bottom: 100%; 
+            left: 15px; 
+            right: 15px; 
+            max-height: 200px; 
+            overflow-y: auto;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-bottom: none; 
+            border-radius: 8px 8px 0 0; 
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 100; 
+        }
+        .suggestions-overlay div { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #eee; }
+        .suggestions-overlay div:last-child { border-bottom: none; }
+        .suggestions-overlay div:hover { background-color: #f0f8ff; }
+
+        .quick-replies { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start; margin-top: 5px; }
+
+        .quick-reply-button, .action-button, .back-button-chat { padding: 10px 15px; border: 1px solid #0084ff; color: #0084ff; background-color: #fff; border-radius: 20px; cursor: pointer; font-size: 0.95em; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+        .quick-reply-button:hover, .action-button:hover, .back-button-chat:hover { background-color: #e6f3ff; }
+        .quick-reply-button.selected { background-color: #0084ff; color: white; }
+        .quick-reply-button.recommended { border: 2px dotted #2ecc71; color: #28a745; }
+        .quick-reply-button.recommended:hover { background-color: #e6ffe6; }
+
+        .action-button.primary { background-color: #2ecc71; color: white; border-color: #2ecc71; }
+        .action-button.primary:hover { background-color: #27ae60; }
+        
+        .back-button-chat { font-size: 0.85em; padding: 5px 10px; border-color: #aaa; color: #777; margin-top: 8px; display: inline-block; }
+        .back-button-chat:hover { background-color: #f0f0f0; }
+
+        .dosage-question-container { display: flex; align-items: center; margin-bottom: 5px; }
+        .dosage-question-container .info-icon-chat { margin-left: 8px; }
+
+        .checkbox-option-chat { display: flex; align-items: center; background-color: #f8f9fa; padding: 10px; border-radius: 20px; border: 1px solid #dee2e6; margin-bottom: 8px; cursor: pointer; }
+        .checkbox-option-chat input[type="checkbox"] { margin-right: 10px; height: 1.2em; width: 1.2em; }
+        .checkbox-option-chat label { margin-bottom: 0; font-weight: normal; flex-grow: 1; }
+        
+        .info-icon-chat { font-style: normal; font-weight: bold; color: #0084ff; cursor: help; border: 1px solid #0084ff; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8em; user-select: none; flex-shrink: 0; }
+        .tooltip-chat { display: none; position: fixed; background-color: #333; color: white; padding: 10px; border-radius: 4px; font-size: 0.9em; z-index: 1000; width: 220px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        .result-card-chat { background-color: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin: 10px 0; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+        .result-card-chat h3 { margin-top: 0; color: #007bff; font-size: 1.15em; font-weight: 600; }
+        .result-card-chat h4.product-name { font-size: 1em; margin: 8px 0 5px; color: #333;}
+        .result-card-chat p { margin: 5px 0; font-size: 0.9em; }
+        .result-card-chat .price { font-weight: bold; color: #27ae60; font-size: 1.05em; }
+        .result-card-chat .reviews { color: #f39c12; }
+        .result-card-chat .store-link-chat { display: inline-block; background-color: #e67e22; color: white; padding: 8px 12px; text-decoration: none; border-radius: 5px; font-size: 0.9em; margin-top: 10px; transition: background-color 0.2s; }
+        .result-card-chat .store-link-chat:hover { background-color: #d35400; }
+        
+        .app-download-content img { height: 40px; margin: 5px; cursor: pointer; }
+        .app-download-content #qrCodeChat { display: block; margin: 10px auto; border: 1px solid #ccc; }
+        
+        .typing-indicator span { height: 8px; width: 8px; background-color: #aaa; border-radius: 50%; display: inline-block; margin: 0 1px; animation: bounce 1.4s infinite ease-in-out both; }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container" id="chatContainer"></div>
+    <div class="input-area-wrapper">
+        <div id="suggestionsContainerChat" class="suggestions-overlay hidden"></div>
+        <div class="input-area" id="inputArea">
+            <div id="textInputContainer">
+                <input type="text" id="chatInput" placeholder="Type supplement name...">
+            </div>
+            <div id="quickReplyContainer" class="quick-replies"></div>
+            <div id="dynamicInputControls"></div>
+        </div>
+    </div>
+    <div id="tooltipChat" class="tooltip-chat"></div>
+
+    <script>
+        // --- Mock Data (Simplified for "Magnesium" focus) ---
+        const MOCK_SUPPLEMENTS_DB = {
+            "magnesium": { 
+                displayName: "Magnesium", 
+                tags: ["Better Sleep", "Muscle Restoration", "Stress Relief", "Energy Production", "Heart Health"], 
+                dosages: [{value:"100mg"}, {value:"200mg", isRecommended: true}, {value:"250mg"}, {value:"400mg"}, {value:"500mg"}], 
+                combinations: [ 
+                    { name: "Calcium", info: "Often paired for bone health, but high doses can compete for absorption." }, 
+                    { name: "Zinc", info: "Important for immunity. High zinc can interfere." }, 
+                    { name: "Vitamin D", info: "Helps with magnesium absorption." }, 
+                    { name: "Vitamin B6", info: "Can enhance cellular uptake." } 
+                ]
+            },
+            "magnesium citrate": { displayName: "Magnesium Citrate", tags: [], dosages: [], combinations: [] }, 
+            "vitamin c": { displayName: "Vitamin C", tags: [], dosages: [], combinations: [] },
+            "vitamin d": { displayName: "Vitamin D", tags: [], dosages: [], combinations: [] },
+            "omega-3": { displayName: "Omega-3", tags: [], dosages: [], combinations: [] },
+            "probiotics": { displayName: "Probiotics", tags: [], dosages: [], combinations: [] },
+            "turmeric": { displayName: "Turmeric", tags: [], dosages: [], combinations: [] },
+            "ashwagandha": { displayName: "Ashwagandha", tags: [], dosages: [], combinations: [] }
+        };
+        const PREDEFINED_MAGNESIUM_RESULTS = [
+            { id: "pmr1", baseSupplement: "magnesium", name: "Budget Magnesium Glycinate 200mg", price: 12.99, reviews: 4.2, reviewCount: 300, dosage: "200mg", storeLink: "https://store.com/budget-mag", image: "https://via.placeholder.com/80?text=Mg+Budget" },
+            { id: "pmr2", baseSupplement: "magnesium", name: "Premium Magnesium Complex 250mg", price: 28.50, reviews: 4.9, reviewCount: 1500, dosage: "250mg", storeLink: "https://store.com/premium-mag", image: "https://via.placeholder.com/80?text=Mg+Premium" },
+            { id: "pmr3", baseSupplement: "magnesium", name: "Everyday Magnesium Citrate 200mg", price: 19.75, reviews: 4.6, reviewCount: 850, dosage: "200mg", storeLink: "https://store.com/everyday-mag", image: "https://via.placeholder.com/80?text=Mg+Everyday" },
+        ];
+
+        const chatContainer = document.getElementById('chatContainer');
+        const inputArea = document.getElementById('inputArea');
+        const chatInput = document.getElementById('chatInput');
+        const suggestionsContainerChat = document.getElementById('suggestionsContainerChat');
+        const quickReplyContainer = document.getElementById('quickReplyContainer');
+        const dynamicInputControls = document.getElementById('dynamicInputControls');
+        const textInputContainer = document.getElementById('textInputContainer');
+        const tooltipChat = document.getElementById('tooltipChat');
+
+        let currentChatState = 'INIT';
+        let previousChatStates = []; 
+        let userSelections = { 
+            supplementKey: "magnesium", 
+            supplementDisplayName: "Magnesium",
+            userInputtedSupplementName: null, 
+            tags: [], 
+            dosage: null, 
+            combinations: [],
+            _lastStoreLink: null 
+        };
+        const TYPING_DELAY = 300; 
+
+        function scrollToBottom() {
+            setTimeout(() => { 
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 50);
+        }
+
+        function addMessage(text, sender = 'system', type = 'text', options = {}) {
+            const bubble = document.createElement('div');
+            bubble.classList.add('message-bubble');
+            if (sender === 'system') {
+                bubble.classList.add('system-message');
+                if (type === 'typing') {
+                    bubble.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
+                } else {
+                    bubble.innerHTML = text; 
+                    if (options.showBackButton && previousChatStates.length > 0) {
+                        const backButton = document.createElement('button');
+                        backButton.classList.add('back-button-chat');
+                        backButton.innerHTML = '&larr; Go Back';
+                        backButton.onclick = () => {
+                            addMessage('I\'d like to go back.', 'user', 'text', {isChoiceButton: true});
+                            handleBackNavigation();
+                        };
+                        bubble.appendChild(document.createElement('br')); 
+                        bubble.appendChild(backButton);
+                    }
+                }
+            } else {
+                bubble.classList.add('user-message');
+                if (options.isChoiceButton) bubble.classList.add('choice-button');
+                bubble.textContent = text;
+            }
+            chatContainer.appendChild(bubble);
+            scrollToBottom();
+            return bubble; 
+        }
+
+        async function showTypingIndicator() {
+            const typingBubble = addMessage('', 'system', 'typing');
+            await new Promise(resolve => setTimeout(resolve, TYPING_DELAY));
+            typingBubble.remove();
+        }
+
+        function clearInputArea() {
+            chatInput.value = '';
+            suggestionsContainerChat.innerHTML = '';
+            suggestionsContainerChat.classList.add('hidden');
+            quickReplyContainer.innerHTML = '';
+            dynamicInputControls.innerHTML = '';
+            textInputContainer.classList.remove('hidden');
+            chatInput.placeholder = "Type supplement name...";
+        }
+        
+        function updateChatState(newState) { 
+            if (currentChatState !== newState) { 
+                if (currentChatState !== 'INIT') { 
+                    previousChatStates.push({
+                        state: currentChatState, 
+                        selections: JSON.parse(JSON.stringify(userSelections)) 
+                    });
+                }
+                currentChatState = newState; 
+            }
+        }
+
+        async function handleBackNavigation() {
+            clearInputArea(); 
+            if (previousChatStates.length > 0) {
+                const lastStateInfo = previousChatStates.pop();
+                userSelections = JSON.parse(JSON.stringify(lastStateInfo.selections));
+                
+                await showTypingIndicator();
+                currentChatState = lastStateInfo.state; 
+                handleState(null, true); 
+            } else {
+                addMessage("Can't go back further."); 
+                updateChatState('INIT'); 
+                handleState();
+            }
+        }
+
+        async function processUserInput(input = null, options = {}) {
+            const { isButtonSelection = false, fromBackNav = false } = options;
+
+            if (!fromBackNav) {
+                 clearInputArea();
+            }
+
+            if (!fromBackNav && input) {
+                let addUserBubble = true;
+                if (currentChatState === 'ASK_SUPPLEMENT_SEARCH') { 
+                    addUserBubble = false; 
+                }
+                const commandInputs = ["Tags selected", "Combinations set"]; 
+                if (isButtonSelection && commandInputs.includes(input)) {
+                    addUserBubble = false; 
+                }
+
+                if (addUserBubble) { 
+                    // ******** CORRECTED LINE ********
+                    addMessage(input, 'user', 'text', { isChoiceButton: isButtonSelection }); 
+                }
+            }
+            
+            if (!fromBackNav) await showTypingIndicator();
+            handleState(input, fromBackNav);
+        }
+        
+        async function handleState(userInput, isNavigation = false) { 
+            let showBackButton = true; 
+            const effectiveSupplementKey = "magnesium";
+            const magnesiumData = MOCK_SUPPLEMENTS_DB[effectiveSupplementKey];
+
+            switch (currentChatState) {
+                case 'INIT':
+                    userSelections = { 
+                        supplementKey: "magnesium", 
+                        supplementDisplayName: "Magnesium",
+                        userInputtedSupplementName: null,
+                        tags: [], dosage: null, combinations: [], _lastStoreLink: null 
+                    }; 
+                    previousChatStates = []; 
+                    addMessage("Hi! I'm your Supplement Assistant. 👋<br>What are you looking for today? (e.g., Magnesium)", 'system', 'text', {showBackButton: false});
+                    chatInput.focus();
+                    chatInput.placeholder = "Type supplement name...";
+                    updateChatState('ASK_SUPPLEMENT_SEARCH');
+                    break;
+
+                case 'ASK_SUPPLEMENT_SEARCH':
+                    if (userInput) { 
+                        userSelections.userInputtedSupplementName = MOCK_SUPPLEMENTS_DB[userInput]?.displayName || userInput; 
+                        userSelections.supplementKey = effectiveSupplementKey;
+                        userSelections.supplementDisplayName = magnesiumData.displayName;
+                        
+                        if (!isNavigation) {
+                            addMessage(userSelections.userInputtedSupplementName, 'user', 'text', {isChoiceButton: true});
+                        }
+                        await showTypingIndicator(); 
+
+                        addMessage(`Great! We'll focus on <strong>${userSelections.supplementDisplayName}</strong>.<br>What are your main goals for it? (Select one or more)`, 'system', 'text', {showBackButton});
+                        populateQuickReplies(magnesiumData.tags, 'tags', true);
+                        updateChatState('ASK_TAGS');
+
+                    } else if (isNavigation) { 
+                         addMessage("Okay, which supplement are you looking for?", 'system', 'text', {showBackButton: false}); 
+                         chatInput.focus();
+                         chatInput.placeholder = "Type supplement name...";
+                    }
+                    break;
+                
+                case 'ASK_TAGS':
+                    if (isNavigation || userInput === 'Tags selected' || userInput === null) {
+                        if (!isNavigation && userInput === 'Tags selected') {
+                            addMessage(`Selected Goals: ${userSelections.tags.length > 0 ? userSelections.tags.join(', ') : 'None specified'}`, 'user', 'text', {isChoiceButton: true});
+                        }
+                         await showTypingIndicator();
+                        
+                        let dosagePrompt = `<div class="dosage-question-container">What dosage are you considering for <strong>${userSelections.supplementDisplayName}</strong>?`;
+                        dosagePrompt += `<span class="info-icon-chat" onmouseenter="showTooltipChat(event, 'Dosage varies by individual & product. Common dosages are often a good start. Consult a professional for specific advice. The highlighted option is a popular general dosage.')" onmouseleave="hideTooltipChat()" ontouchstart="event.preventDefault(); showTooltipChat(event, 'Dosage varies by individual & product. Common dosages are often a good start. Consult a professional for specific advice. The highlighted option is a popular general dosage.')">?</span></div>`;
+                        dosagePrompt += `The <span style="color: #28a745; border: 1px dotted #2ecc71; padding: 0 2px; border-radius: 3px;">highlighted option</span> is often a good starting point.`;
+
+                        addMessage(dosagePrompt, 'system', 'text', {showBackButton});
+                        populateQuickReplies(magnesiumData.dosages, 'dosage');
+                        updateChatState('ASK_DOSAGE');
+                    }
+                    break;
+
+                case 'ASK_DOSAGE':
+                    if (isNavigation || userInput) { 
+                        if (!isNavigation && userInput) { 
+                             userSelections.dosage = userInput; 
+                             addMessage(`Dosage: ${userSelections.dosage}`, 'user', 'text', {isChoiceButton: true});
+                        }
+                        await showTypingIndicator();
+                        
+                        const combinations = magnesiumData.combinations || [];
+
+                        addMessage(`Got it: <strong>${userSelections.dosage || 'Any dosage'}</strong>.<br>Any additional preferences? Such as combining with other ingredients?`, 'system', 'text', {showBackButton});
+                        populateCombinationCheckboxes(combinations);
+                        updateChatState('ASK_COMBINATIONS');
+                    }
+                    break;
+
+                case 'ASK_COMBINATIONS':
+                     if (isNavigation || userInput === 'Combinations set' || userInput === null) {
+                        if (!isNavigation && userInput === 'Combinations set') {
+                             addMessage(`Other Preferences: ${userSelections.combinations.length > 0 ? 'With ' + userSelections.combinations.join(', ') : 'None'}`, 'user', 'text', {isChoiceButton: true});
+                        }
+                        await showTypingIndicator();
+                        addMessage(`Okay! Let me find some options for <strong>${userSelections.supplementDisplayName}</strong> based on your choices...`, 'system', 'text', {showBackButton});
+                        await showTypingIndicator(); 
+                        displayResults(); 
+                        updateChatState('SHOW_RESULTS');
+                    }
+                    break;
+                
+                case 'SHOW_RESULTS':
+                    showBackButton = true; 
+                    if (userInput && userInput.startsWith('https://store.com')) { 
+                        if (!isNavigation) {
+                            addMessage(`Checking out product...`, 'user', 'text', {isChoiceButton: true});
+                            userSelections._lastStoreLink = userInput; 
+                        }
+                        await showTypingIndicator();
+                        addMessage(`You're interested in that product! For the best experience and to easily access this later, consider downloading our app.`, 'system', 'text', {showBackButton});
+                        displayAppDownload(userInput);
+                        updateChatState('SHOW_APP_DOWNLOAD');
+                    } else if (userInput === 'RESTART_FROM_RESULTS') {
+                        startOver();
+                    } else if (userInput === 'REFINE_FROM_RESULTS') {
+                         if (!isNavigation) addMessage("Refine Search", 'user', 'text', {isChoiceButton: true});
+                         await showTypingIndicator();
+                         promptRefineOptions("Okay, what would you like to change about your search for " + `<strong>${userSelections.supplementDisplayName}</strong>?`);
+                         updateChatState('REFINE_CHOICE');
+                    } else if (isNavigation) { 
+                        displayResults(); 
+                    }
+                    break;
+
+                case 'SHOW_APP_DOWNLOAD':
+                     showBackButton = true;
+                    if (userInput === 'RESTART_FROM_APP') {
+                        startOver();
+                    } else if (userInput === 'REFINE_FROM_APP') {
+                         if (!isNavigation) addMessage("Refine Previous Search", 'user', 'text', {isChoiceButton: true});
+                         await showTypingIndicator();
+                         promptRefineOptions("Okay, let's refine your previous search for " + `<strong>${userSelections.supplementDisplayName}</strong>.`);
+                         updateChatState('REFINE_CHOICE');
+                    } else if (isNavigation) { 
+                        const lastStoreLink = userSelections._lastStoreLink || "https://yourapp.com/download_generic";
+                        addMessage(`For the best experience, consider downloading our app.`, 'system', 'text', {showBackButton});
+                        displayAppDownload(lastStoreLink);
+                    }
+                    break;
+                
+                case 'REFINE_CHOICE':
+                     showBackButton = true;
+                    if (userInput) { 
+                        if (!isNavigation) addMessage(`Change ${userInput}`, 'user', 'text', {isChoiceButton: true});
+                        await showTypingIndicator();
+                        
+                        let targetState = '';
+                        if (userInput === 'supplement') {
+                            currentChatState = 'INIT'; 
+                            handleState(); 
+                            return; 
+                        } else {
+                            if (userInput === 'tags') { userSelections.tags = []; userSelections.dosage = null; userSelections.combinations = []; targetState = 'ASK_TAGS'; }
+                            else if (userInput === 'dosage') { userSelections.dosage = null; userSelections.combinations = []; targetState = 'ASK_DOSAGE'; }
+                            else if (userInput === 'combinations') { userSelections.combinations = []; targetState = 'ASK_COMBINATIONS'; }
+                            else { targetState = currentChatState; } 
+                            
+                            currentChatState = targetState; 
+                            handleState(null, true); 
+                            return; 
+                        }
+                    } else if (isNavigation) { 
+                        promptRefineOptions("What would you like to change about your search for " + `<strong>${userSelections.supplementDisplayName}</strong>?`);
+                    }
+                    break;
+            }
+        }
+        
+        chatInput.addEventListener('input', () => {
+            if (currentChatState !== 'ASK_SUPPLEMENT_SEARCH') return;
+            const query = chatInput.value.toLowerCase();
+            suggestionsContainerChat.innerHTML = '';
+            
+            if (query.length < 1) { 
+                suggestionsContainerChat.classList.add('hidden');
+                return;
+            }
+            suggestionsContainerChat.classList.remove('hidden');
+            const filtered = Object.keys(MOCK_SUPPLEMENTS_DB)
+                .filter(key => key.toLowerCase().includes(query) || MOCK_SUPPLEMENTS_DB[key].displayName.toLowerCase().includes(query))
+                .sort((a,b) => MOCK_SUPPLEMENTS_DB[a].displayName.localeCompare(MOCK_SUPPLEMENTS_DB[b].displayName))
+                .slice(0, 7); 
+
+            if (filtered.length > 0) {
+                filtered.forEach(key => {
+                    const div = document.createElement('div');
+                    div.textContent = MOCK_SUPPLEMENTS_DB[key].displayName;
+                    div.onclick = () => {
+                        chatInput.value = ''; 
+                        suggestionsContainerChat.classList.add('hidden');
+                        processUserInput(key); 
+                    };
+                    suggestionsContainerChat.appendChild(div);
+                });
+            } else {
+                suggestionsContainerChat.classList.add('hidden');
+            }
+        });
+        document.addEventListener('click', function(event) {
+            if (!suggestionsContainerChat.contains(event.target) && event.target !== chatInput) {
+                suggestionsContainerChat.classList.add('hidden');
+            }
+        });
+
+        function populateQuickReplies(optionsData, type, multiSelect = false) {
+            clearInputArea(); 
+            textInputContainer.classList.add('hidden');
+            chatInput.placeholder = ""; 
+
+            if (!optionsData || !Array.isArray(optionsData)) { 
+                console.error(`populateQuickReplies: optionsData for type '${type}' is invalid.`, optionsData);
+                addMessage("I'm having trouble finding the options for this step. Please try going back or restarting.", 'system');
+                return;
+            }
+
+            optionsData.forEach(optionItem => { 
+                const value = typeof optionItem === 'string' ? optionItem : optionItem.value;
+                const isRecommended = typeof optionItem === 'object' && optionItem.isRecommended;
+
+                const button = document.createElement('button');
+                button.classList.add('quick-reply-button');
+                button.textContent = value;
+                if (isRecommended) button.classList.add('recommended');
+
+                if (multiSelect) { 
+                    if (userSelections[type] && userSelections[type].includes(value)) button.classList.add('selected'); 
+                    button.onclick = () => {
+                        button.classList.toggle('selected');
+                        if (!userSelections[type]) userSelections[type] = []; 
+                        if (userSelections[type].includes(value)) {
+                            userSelections[type] = userSelections[type].filter(item => item !== value);
+                        } else {
+                            userSelections[type].push(value);
+                        }
+                    };
+                } else { 
+                    if (userSelections[type] === value) button.classList.add('selected'); 
+                    button.onclick = () => processUserInput(value, {isButtonSelection: true});
+                }
+                quickReplyContainer.appendChild(button);
+            });
+
+            if (multiSelect) {
+                const doneButton = document.createElement('button');
+                doneButton.classList.add('action-button', 'primary');
+                doneButton.textContent = (type === 'tags') ? "Done with Goals" : "Continue";
+                doneButton.style.marginLeft = "auto"; 
+                doneButton.onclick = () => processUserInput( (type === 'tags' ? "Tags selected" : "Preferences set") , {isButtonSelection: true});
+                quickReplyContainer.appendChild(doneButton);
+            }
+        }
+
+        function populateCombinationCheckboxes(combinations) {
+            clearInputArea();
+            textInputContainer.classList.add('hidden');
+            chatInput.placeholder = "";
+            
+            if (!combinations || !Array.isArray(combinations)) { 
+                console.warn("populateCombinationCheckboxes: combinations data is missing or invalid for this supplement. Will show no options.", userSelections.supplementDisplayName, combinations);
+            } else {
+                combinations.forEach(combo => {
+                    const div = document.createElement('div');
+                    div.classList.add('checkbox-option-chat');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `combo-chat-${combo.name.replace(/\s+/g, '')}`;
+                    checkbox.value = combo.name;
+                    checkbox.checked = userSelections.combinations && userSelections.combinations.includes(combo.name);
+                    checkbox.onchange = () => {
+                        if (!userSelections.combinations) userSelections.combinations = []; 
+                        if (checkbox.checked) {
+                            if (!userSelections.combinations.includes(combo.name)) userSelections.combinations.push(combo.name);
+                        } else {
+                            userSelections.combinations = userSelections.combinations.filter(c => c !== combo.name);
+                        }
+                    };
+                    const label = document.createElement('label');
+                    label.htmlFor = checkbox.id;
+                    label.textContent = `With ${combo.name}`;
+                    const infoIcon = document.createElement('span');
+                    infoIcon.classList.add('info-icon-chat');
+                    infoIcon.textContent = 'i';
+                    infoIcon.onmouseenter = (e) => showTooltipChat(e, combo.info);
+                    infoIcon.onmouseleave = hideTooltipChat;
+                    infoIcon.ontouchstart = (e) => { e.preventDefault(); showTooltipChat(e, combo.info); };
+                    div.appendChild(checkbox); div.appendChild(label); div.appendChild(infoIcon);
+                    dynamicInputControls.appendChild(div);
+                });
+            }
+
+            const continueButton = document.createElement('button');
+            continueButton.classList.add('action-button', 'primary');
+            continueButton.style.marginTop = "10px";
+            continueButton.textContent = "Show Results";
+            continueButton.onclick = () => processUserInput("Combinations set", {isButtonSelection: true});
+            dynamicInputControls.appendChild(continueButton);
+        }
+        
+        function displayResults() {
+            let summary = `Here are some top suggestions for <strong>${userSelections.supplementDisplayName}</strong>, considering your preferences for ` +
+                (userSelections.tags && userSelections.tags.length > 0 ? `goals (${userSelections.tags.join(', ')})` : 'general use') +
+                (userSelections.dosage ? `, dosage (${userSelections.dosage})` : '') +
+                (userSelections.combinations && userSelections.combinations.length > 0 ? `, and combinations (with ${userSelections.combinations.join(', ')})` : '') +
+                `:`;
+
+            addMessage(summary, 'system', 'text', {showBackButton:true});
+            
+            let resultsHTML = "";
+            const categories = ["🌟 Best Price 🌟", "🌟 Best Reviews 🌟", "🌟 Balanced Choice 🌟"];
+            PREDEFINED_MAGNESIUM_RESULTS.forEach((product, index) => {
+                resultsHTML += `
+                    <div class="result-card-chat">
+                        <h3>${categories[index % categories.length]}</h3>
+                        <img src="${product.image || 'https://via.placeholder.com/80?text=Product'}" alt="${product.name}" style="float:left; width:60px; height:60px; object-fit:contain; margin-right:10px; border-radius:4px;">
+                        <h4 class="product-name">${product.name}</h4>
+                        <p><strong>Dosage:</strong> ${product.dosage}</p>
+                        <p class="price">$${product.price.toFixed(2)} <span class="reviews">⭐ ${product.reviews.toFixed(1)} (${product.reviewCount})</span></p>
+                        <div style="clear:both;"></div>
+                        <a href="#" class="store-link-chat" data-link="${product.storeLink}" onclick="event.preventDefault(); processUserInput('${product.storeLink}');">View Product Details</a>
+                    </div>
+                `;
+            });
+            addMessage(resultsHTML);
+            
+            clearInputArea();
+            textInputContainer.classList.add('hidden');
+            const refineButton = document.createElement('button');
+            refineButton.classList.add('action-button');
+            refineButton.textContent = "Refine This Search";
+            refineButton.onclick = () => processUserInput('REFINE_FROM_RESULTS', {isButtonSelection:true});
+            quickReplyContainer.appendChild(refineButton);
+
+            const startOverBtn = document.createElement('button');
+            startOverBtn.classList.add('action-button');
+            startOverBtn.textContent = "Start New Search";
+            startOverBtn.onclick = () => processUserInput('RESTART_FROM_RESULTS', {isButtonSelection:true});
+            quickReplyContainer.appendChild(startOverBtn);
+        }
+
+        function promptRefineOptions(message) {
+            clearInputArea();
+            textInputContainer.classList.add('hidden');
+            addMessage(message, 'system', 'text', {showBackButton: true}); 
+            const options = [
+                { text: "Change Supplement", value: "supplement" },
+                { text: "Adjust Goals/Tags", value: "tags" },
+                { text: "Select Different Dosage", value: "dosage" },
+                { text: "Modify Other Preferences", value: "combinations" }
+            ];
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.classList.add('quick-reply-button');
+                btn.textContent = opt.text;
+                btn.onclick = () => processUserInput(opt.value, {isButtonSelection: true});
+                quickReplyContainer.appendChild(btn);
+            });
+        }
+
+        function displayAppDownload(storeLink) {
+            clearInputArea();
+            textInputContainer.classList.add('hidden');
+            const appContent = `<div class="app-download-content"><p>Scan the QR code or use the store buttons to download:</p><img id="qrCodeChat" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(storeLink + '?ref=app')}" alt="QR Code"><div style="text-align:center;"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Download_on_the_App_Store_Badge.svg/1200px-Download_on_the_App_Store_Badge.svg.png" alt="App Store" onclick="window.open('https://apple.com','_blank')"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Google_Play_Store_badge_EN.svg/1200px-Google_Play_Store_badge_EN.svg.png" alt="Google Play" onclick="window.open('https://play.google.com','_blank')"></div></div>`;
+            addMessage(appContent, 'system', 'text', {showBackButton:true});
+            
+            const refineButton = document.createElement('button');
+            refineButton.classList.add('action-button');
+            refineButton.textContent = "Refine Previous Search";
+            refineButton.onclick = () => processUserInput('REFINE_FROM_APP', {isButtonSelection:true});
+            quickReplyContainer.appendChild(refineButton);
+
+            const startOverBtn = document.createElement('button');
+            startOverBtn.classList.add('action-button');
+            startOverBtn.textContent = "Start New Search";
+            startOverBtn.onclick = () => processUserInput('RESTART_FROM_APP', {isButtonSelection:true});
+            quickReplyContainer.appendChild(startOverBtn);
+        }
+
+        function startOver() {
+            clearInputArea();
+            chatContainer.innerHTML = ''; 
+            handleState(); 
+        }
+        
+        function showTooltipChat(event, text) {
+            tooltipChat.textContent = text;
+            tooltipChat.style.display = 'block';
+            const rect = event.target.getBoundingClientRect();
+            let top = rect.top - tooltipChat.offsetHeight - 10;
+            let left = rect.left + (rect.width / 2) - (tooltipChat.offsetWidth / 2);
+            if (top < 5) top = rect.bottom + 10;
+            if (left < 5) left = 5;
+            if (left + tooltipChat.offsetWidth > window.innerWidth) left = window.innerWidth - tooltipChat.offsetWidth - 5;
+            tooltipChat.style.left = `${left}px`; tooltipChat.style.top = `${top}px`;
+        }
+        function hideTooltipChat() { tooltipChat.style.display = 'none'; }
+        document.addEventListener('click', (event) => { if (tooltipChat.style.display === 'block' && !tooltipChat.contains(event.target) && !event.target.classList.contains('info-icon-chat')) hideTooltipChat(); });
+
+        handleState();
+    </script>
+</body>
+</html>

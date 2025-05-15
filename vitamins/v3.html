@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VitaSearch - Find Your Perfect Supplement</title>
+    <style>
+        :root {
+            --primary: #4285f4;
+            --primary-dark: #3367d6;
+            --secondary: #34a853;
+            --accent: #ea4335;
+            --background: #f8f9fa;
+            --card: #ffffff;
+            --text: #202124;
+            --text-light: #5f6368;
+            --border: #dadce0;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: inline-block;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .search-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .search-container {
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 1.1rem;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            outline: none;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-color: var(--primary);
+        }
+
+        .search-results {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--card);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-top: 8px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .search-result-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .search-result-item:hover {
+            background-color: var(--background);
+        }
+
+        .search-result-item-main {
+            font-weight: 500;
+        }
+
+        .search-result-item-sub {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .section {
+            background-color: var(--card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 24px;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .section-title {
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            color: var(--primary-dark);
+        }
+
+        .tags-container, .dosage-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .tag-item, .dosage-item {
+            background-color: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .tag-item:hover, .dosage-item:hover {
+            border-color: var(--primary);
+        }
+
+        .tag-item.selected, .dosage-item.selected, .option-item.selected {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            background-color: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .option-item:hover {
+            border-color: var(--primary);
+        }
+
+        .info-icon {
+            margin-left: 8px;
+            color: var(--primary);
+            cursor: help;
+            position: relative;
+            font-size: 0.9rem;
+        }
+
+        .tooltip {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--text);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            width: 200px;
+            z-index: 10;
+            display: none;
+            margin-top: 8px;
+        }
+
+        .info-icon:hover .tooltip {
+            display: block;
+        }
+
+        .recommendations {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .recommendation-card {
+            background-color: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .recommendation-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-dark);
+        }
+
+        .recommendation-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .recommendation-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .stars {
+            color: gold;
+            margin-right: 5px;
+        }
+
+        .recommendation-details {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+
+        .recommendation-link {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .recommendation-link:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .app-download {
+            text-align: center;
+        }
+
+        .qr-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .store-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .store-button {
+            background-color: var(--text);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .store-button:hover {
+            background-color: #000;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .action-button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 25px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .action-button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .back-button {
+            background-color: var(--background);
+            color: var(--text);
+            border: 1px solid var(--border);
+            margin-right: 10px;
+        }
+
+        /* Progress bar */
+        .progress-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 30px;
+            display: none;
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .progress-step::before {
+            content: "";
+            position: absolute;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--border);
+            z-index: 0;
+        }
+
+        .progress-step:first-child::before {
+            width: 50%;
+            left: 50%;
+        }
+
+        .progress-step:last-child::before {
+            width: 50%;
+            right: 50%;
+        }
+
+        .progress-marker {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--border);
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 8px;
+        }
+
+        .progress-step.active .progress-marker,
+        .progress-step.completed .progress-marker {
+            background-color: var(--primary);
+        }
+
+        .progress-text {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .progress-step.active .progress-text,
+        .progress-step.completed .progress-text {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 15px;
+            }
+            
+            header {
+                padding: 20px 0;
+            }
+            
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .search-input {
+                padding: 14px 16px;
+            }
+            
+            .section {
+                padding: 18px;
+            }
+            
+            .recommendations {
+                grid-template-columns: 1fr;
+            }
+            
+            .store-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">Vita<span>Search</span></div>
+            <p style="margin-top: 10px; color: var(--text-light);">Find the perfect supplement for your needs</p>
+        </header>
+        
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-step active">
+                    <div class="progress-marker"></div>
+                    <div class="progress-text">Supplement</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-marker"></div>
+                    <div class="progress-text">Benefits</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-marker"></div>
+                    <div class="progress-text">Dosage</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-marker"></div>
+                    <div class="progress-text">Options</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-marker"></div>
+                    <div class="progress-text">Results</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="search-section" id="search-section">
+            <div class="search-container">
+                <input type="text" class="search-input" id="search-input" placeholder="Search for supplements (try 'magn')">
+                <div class="search-results" id="search-results"></div>
+            </div>
+        </div>
+
+        <div class="section" id="tags-section">
+            <h2 class="section-title">What benefits are you looking for?</h2>
+            <div class="tags-container" id="tags-container">
+                <div class="tag-item" data-tag="sleep">Better Sleep</div>
+                <div class="tag-item" data-tag="muscle">Muscle Recovery</div>
+                <div class="tag-item" data-tag="stress">Stress Relief</div>
+                <div class="tag-item" data-tag="energy">Energy Boost</div>
+                <div class="tag-item" data-tag="bone">Bone Health</div>
+                <div class="tag-item" data-tag="heart">Heart Health</div>
+            </div>
+            <div class="button-container">
+                <button class="action-button back-button" id="back-to-search">Back</button>
+                <button class="action-button" id="continue-to-dosage">Continue</button>
+            </div>
+        </div>
+
+        <div class="section" id="dosage-section">
+            <h2 class="section-title">Select your preferred dosage</h2>
+            <div class="dosage-container" id="dosage-container">
+                <div class="dosage-item" data-dosage="100">100mg</div>
+                <div class="dosage-item" data-dosage="200">200mg</div>
+                <div class="dosage-item" data-dosage="400">400mg</div>
+                <div class="dosage-item" data-dosage="600">600mg</div>
+            </div>
+            <div class="button-container">
+                <button class="action-button back-button" id="back-to-tags">Back</button>
+                <button class="action-button" id="continue-to-options">Continue</button>
+            </div>
+        </div>
+
+        <div class="section" id="options-section">
+            <h2 class="section-title">Additional considerations</h2>
+            <div class="options-container" id="options-container">
+                <div class="option-item" data-option="calcium">
+                    <span>Include Calcium</span>
+                    <div class="info-icon">ⓘ
+                        <div class="tooltip">Calcium combined with magnesium improves absorption and supports bone health. The recommended ratio is 2:1 calcium to magnesium.</div>
+                    </div>
+                </div>
+                <div class="option-item" data-option="zinc">
+                    <span>Include Zinc</span>
+                    <div class="info-icon">ⓘ
+                        <div class="tooltip">Zinc and magnesium work synergistically for immune function and testosterone production. Often found in ZMA supplements.</div>
+                    </div>
+                </div>
+                <div class="option-item" data-option="b6">
+                    <span>Include Vitamin B6</span>
+                    <div class="info-icon">ⓘ
+                        <div class="tooltip">Vitamin B6 enhances magnesium absorption and helps with stress reduction. Both nutrients support neurotransmitter function.</div>
+                    </div>
+                </div>
+                <div class="option-item" data-option="none">
+                    <span>Magnesium Only</span>
+                    <div class="info-icon">ⓘ
+                        <div class="tooltip">Pure magnesium supplements offer maximum flexibility in dosing and pairing with your existing supplement regimen.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="button-container">
+                <button class="action-button back-button" id="back-to-dosage">Back</button>
+                <button class="action-button" id="show-recommendations">See Recommendations</button>
+            </div>
+        </div>
+
+        <div class="section" id="results-section">
+            <h2 class="section-title">Recommended Products</h2>
+            <div class="recommendations" id="recommendations-container">
+                <!-- Recommendations will be inserted here by JavaScript -->
+            </div>
+            <div class="button-container">
+                <button class="action-button back-button" id="back-to-options">Back</button>
+            </div>
+        </div>
+
+        <div class="section" id="app-section">
+            <h2 class="section-title">Download Our App for Personalized Recommendations</h2>
+            <div class="app-download">
+                <div class="qr-container" id="qr-code">
+                    <!-- QR code will be inserted here by JavaScript -->
+                </div>
+                <p>Scan to download or use the links below:</p>
+                <div class="store-buttons">
+                    <button class="store-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.707,9.293l-5-5c-0.391-0.391-1.023-0.391-1.414,0l-5,5c-0.391,0.391-0.391,1.023,0,1.414 C6.488,10.902,6.744,11,7,11s0.512-0.098,0.707-0.293L12,6.414l4.293,4.293C16.488,10.902,16.744,11,17,11 s0.512-0.098,0.707-0.293C18.098,10.316,18.098,9.684,17.707,9.293z"></path><path d="M17.707,13.293L13.414,17.5l-4.707-4.707c-0.391-0.391-1.023-0.391-1.414,0s-0.391,1.023,0,1.414l5,5 C12.488,19.402,12.744,19.5,13,19.5s0.512-0.098,0.707-0.293l5-5c0.391-0.391,0.391-1.023,0-1.414S18.098,12.902,17.707,13.293z"></path></svg>
+                        App Store
+                    </button>
+                    <button class="store-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M5,20.5v-17c0-0.8,0.7-1.5,1.5-1.5h11c0.8,0,1.5,0.7,1.5,1.5v17c0,0.8-0.7,1.5-1.5,1.5h-11C5.7,22,5,21.3,5,20.5z M6.5,4  C6.2,4,6,4.2,6,4.5v15C6,19.8,6.2,20,6.5,20h11c0.3,0,0.5-0.2,0.5-0.5v-15C18,4.2,17.8,4,17.5,4H6.5z"></path><circle cx="12" cy="17" r="1"></circle></svg>
+                        Google Play
+                    </button>
+                </div>
+            </div>
+            <div class="button-container">
+                <button class="action-button back-button" id="back-to-results">Back to Results</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Variables to store user selections
+            let selectedSupplement = null;
+            let selectedTags = [];
+            let selectedDosage = null;
+            let selectedOptions = [];
+            
+            // Elements
+            const searchInput = document.getElementById('search-input');
+            const searchResults = document.getElementById('search-results');
+            const searchSection = document.getElementById('search-section');
+            const tagsSection = document.getElementById('tags-section');
+            const dosageSection = document.getElementById('dosage-section');
+            const optionsSection = document.getElementById('options-section');
+            const resultsSection = document.getElementById('results-section');
+            const appSection = document.getElementById('app-section');
+            const progressContainer = document.querySelector('.progress-container');
+            const progressSteps = document.querySelectorAll('.progress-step');
+            
+            // Sample data for search results
+            const supplements = [
+                { 
+                    name: 'Magnesium', 
+                    description: 'Essential mineral for many bodily functions',
+                    type: 'mineral'
+                },
+                { 
+                    name: 'Magnesium Citrate', 
+                    description: 'Highly absorbable form of magnesium',
+                    type: 'mineral'
+                },
+                { 
+                    name: 'Magnesium Glycinate', 
+                    description: 'Gentle form, less likely to cause digestive issues',
+                    type: 'mineral'
+                },
+                { 
+                    name: 'Magnesium L-Threonate', 
+                    description: 'May support cognitive function',
+                    type: 'mineral'
+                },
+                { 
+                    name: 'Magnesium Oxide', 
+                    description: 'Common form, higher magnesium content',
+                    type: 'mineral'
+                }
+            ];
+            
+            // Mock product recommendations
+            const products = {
+                bestPrice: {
+                    title: "Nature's Best Magnesium",
+                    price: "$14.99",
+                    rating: 4.2,
+                    details: "200mg elemental magnesium per serving. 120 capsules (4 month supply).",
+                    link: "https://store.com/option-1"
+                },
+                bestReviews: {
+                    title: "Premium Magnesium Complex",
+                    price: "$24.99",
+                    rating: 4.9,
+                    details: "High absorption chelated magnesium with vitamin B6. 90 tablets (3 month supply).",
+                    link: "https://store.com/option-2"
+                },
+                bestValue: {
+                    title: "Balanced Magnesium Formula",
+                    price: "$18.99",
+                    rating: 4.6,
+                    details: "Magnesium citrate with calcium and zinc. 100 capsules with optimal absorption rate.",
+                    link: "https://store.com/option-3"
+                }
+            };
+            
+            // Search input autocomplete functionality
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                
+                if (query.length < 2) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                const filteredSupplements = supplements.filter(item => 
+                    item.name.toLowerCase().includes(query)
+                );
+                
+                if (filteredSupplements.length > 0) {
+                    searchResults.innerHTML = '';
+                    
+                    filteredSupplements.forEach(item => {
+                        const resultItem = document.createElement('div');
+                        resultItem.className = 'search-result-item';
+                        resultItem.innerHTML = `
+                            <div class="search-result-item-main">${item.name}</div>
+                            <div class="search-result-item-sub">${item.description}</div>
+                        `;
+                        
+                        resultItem.addEventListener('click', function() {
+                            selectedSupplement = item;
+                            searchInput.value = item.name;
+                            searchResults.style.display = 'none';
+                            
+                            // Show tags section
+                            searchSection.style.display = 'flex';
+                            tagsSection.style.display = 'block';
+                            progressContainer.style.display = 'block';
+                            updateProgressBar(1);
+                        });
+                        
+                        searchResults.appendChild(resultItem);
+                    });
+                    
+                    searchResults.style.display = 'block';
+                } else {
+                    searchResults.style.display = 'none';
+                }
+            });
+            
+            // Tag selection
+            document.querySelectorAll('.tag-item').forEach(tag => {
+                tag.addEventListener('click', function() {
+                    const tagValue = this.getAttribute('data-tag');
+                    
+                    if (this.classList.contains('selected')) {
+                        this.classList.remove('selected');
+                        selectedTags = selectedTags.filter(t => t !== tagValue);
+                    } else {
+                        this.classList.add('selected');
+                        selectedTags.push(tagValue);
+                    }
+                });
+            });
+            
+            // Dosage selection
+            document.querySelectorAll('.dosage-item').forEach(dosage => {
+                dosage.addEventListener('click', function() {
+                    document.querySelectorAll('.dosage-item').forEach(d => {
+                        d.classList.remove('selected');
+                    });
+                    
+                    this.classList.add('selected');
+                    selectedDosage = this.getAttribute('data-dosage');
+                });
+            });
+            
+            // Options selection
+            document.querySelectorAll('.option-item').forEach(option => {
+                option.addEventListener('click', function() {
+                    const optionValue = this.getAttribute('data-option');
+                    
+                    if (optionValue === 'none') {
+                        document.querySelectorAll('.option-item').forEach(o => {
+                            o.classList.remove('selected');
+                        });
+                        this.classList.add('selected');
+                        selectedOptions = ['none'];
+                    } else {
+                        // Remove the "none" option if selected
+                        document.querySelector('.option-item[data-option="none"]').classList.remove('selected');
+                        
+                        if (this.classList.contains('selected')) {
+                            this.classList.remove('selected');
+                            selectedOptions = selectedOptions.filter(o => o !== optionValue);
+                        } else {
+                            this.classList.add('selected');
+                            selectedOptions.push(optionValue);
+                            
+                            // Remove 'none' from selected options if it was there
+                            selectedOptions = selectedOptions.filter(o => o !== 'none');
+                        }
+                    }
+                });
+            });
+            
+            // Navigation buttons
+            document.getElementById('continue-to-dosage').addEventListener('click', function() {
+                if (selectedTags.length === 0) {
+                    alert('Please select at least one benefit');
+                    return;
+                }
+                
+                tagsSection.style.display = 'none';
+                dosageSection.style.display = 'block';
+                updateProgressBar(2);
+            });
+            
+            document.getElementById('back-to-search').addEventListener('click', function() {
+                tagsSection.style.display = 'none';
+                searchSection.style.display = 'flex';
+                progressContainer.style.display = 'none';
+            });
+            
+            document.getElementById('continue-to-options').addEventListener('click', function() {
+                if (!selectedDosage) {
+                    alert('Please select a dosage');
+                    return;
+                }
+                
+                dosageSection.style.display = 'none';
+                optionsSection.style.display = 'block';
+                updateProgressBar(3);
+            });
+            
+            document.getElementById('back-to-tags').addEventListener('click', function() {
+                dosageSection.style.display = 'none';
+                tagsSection.style.display = 'block';
+                updateProgressBar(1);
+            });
+            
+            document.getElementById('show-recommendations').addEventListener('click', function() {
+                if (selectedOptions.length === 0) {
+                    alert('Please select at least one option');
+                    return;
+                }
+                
+                optionsSection.style.display = 'none';
+                resultsSection.style.display = 'block';
+                updateProgressBar(4);
+                showRecommendations();
+            });
+            
+            document.getElementById('back-to-dosage').addEventListener('click', function() {
+                optionsSection.style.display = 'none';
+                dosageSection.style.display = 'block';
+                updateProgressBar(2);
+            });
+            
+            document.getElementById('back-to-options').addEventListener('click', function() {
+                resultsSection.style.display = 'none';
+                optionsSection.style.display = 'block';
+                updateProgressBar(3);
+            });
+            
+            document.getElementById('back-to-results').addEventListener('click', function() {
+                appSection.style.display = 'none';
+                resultsSection.style.display = 'block';
+            });
+            
+            // Function to display recommendations
+            function showRecommendations() {
+                const recommendationsContainer = document.getElementById('recommendations-container');
+                recommendationsContainer.innerHTML = '';
+                
+                // Create cards for each recommendation type
+                const bestPriceCard = createRecommendationCard(
+                    'Best Price',
+                    products.bestPrice.title,
+                    products.bestPrice.price,
+                    products.bestPrice.rating,
+                    products.bestPrice.details,
+                    products.bestPrice.link
+                );
+                
+                const bestReviewsCard = createRecommendationCard(
+                    'Highest Rated',
+                    products.bestReviews.title,
+                    products.bestReviews.price,
+                    products.bestReviews.rating,
+                    products.bestReviews.details,
+                    products.bestReviews.link
+                );
+                
+                const bestValueCard = createRecommendationCard(
+                    'Best Value',
+                    products.bestValue.title,
+                    products.bestValue.price,
+                    products.bestValue.rating,
+                    products.bestValue.details,
+                    products.bestValue.link
+                );
+                
+                recommendationsContainer.appendChild(bestPriceCard);
+                recommendationsContainer.appendChild(bestReviewsCard);
+                recommendationsContainer.appendChild(bestValueCard);
+            }
+            
+            function createRecommendationCard(category, title, price, rating, details, link) {
+                const card = document.createElement('div');
+                card.className = 'recommendation-card';
+                
+                // Generate star rating display
+                const stars = '★'.repeat(Math.floor(rating)) + '☆'.repeat(5 - Math.floor(rating));
+                
+                card.innerHTML = `
+                    <div class="recommendation-category" style="font-size: 0.8rem; color: var(--primary); margin-bottom: 5px;">${category}</div>
+                    <div class="recommendation-title">${title}</div>
+                    <div class="recommendation-price">${price}</div>
+                    <div class="recommendation-rating">
+                        <span class="stars">${stars}</span>
+                        <span>${rating.toFixed(1)}/5</span>
+                    </div>
+                    <div class="recommendation-details">${details}</div>
+                    <a href="${link}" class="recommendation-link" target="_blank" data-link="${link}">Buy Now</a>
+                `;
+                
+                // Add event listener for the Buy Now button
+                card.querySelector('.recommendation-link').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productLink = this.getAttribute('data-link');
+                    
+                    // Show QR code section
+                    resultsSection.style.display = 'none';
+                    appSection.style.display = 'block';
+                    updateProgressBar(5);
+                    
+                    // Generate mock QR code
+                    generateQRCode();
+                });
+                
+                return card;
+            }
+            
+            // Function to generate a mock QR code
+            function generateQRCode() {
+                const qrContainer = document.getElementById('qr-code');
+                
+                // Create a simple visual representation of a QR code
+                const qrSvg = `
+                    <svg width="180" height="180" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="180" height="180" fill="white" />
+                        <g fill="black">
+                            <!-- Corner squares -->
+                            <rect x="15" y="15" width="30" height="30" />
+                            <rect x="20" y="20" width="20" height="20" fill="white" />
+                            <rect x="25" y="25" width="10" height="10" />
+                            
+                            <rect x="135" y="15" width="30" height="30" />
+                            <rect x="140" y="20" width="20" height="20" fill="white" />
+                            <rect x="145" y="25" width="10" height="10" />
+                            
+                            <rect x="15" y="135" width="30" height="30" />
+                            <rect x="20" y="140" width="20" height="20" fill="white" />
+                            <rect x="25" y="145" width="10" height="10" />
+                            
+                            <!-- Random QR code pattern -->
+                            <rect x="60" y="15" width="10" height="10" />
+                            <rect x="80" y="15" width="10" height="10" />
+                            <rect x="100" y="15" width="10" height="10" />
+                            
+                            <rect x="15" y="60" width="10" height="10" />
+                            <rect x="35" y="60" width="10" height="10" />
+                            <rect x="55" y="60" width="10" height="10" />
+                            <rect x="75" y="65" width="40" height="5" />
+                            <rect x="115" y="60" width="10" height="10" />
+                            <rect x="135" y="60" width="10" height="10" />
+                            <rect x="155" y="60" width="10" height="10" />
+                            
+                            <rect x="15" y="80" width="10" height="10" />
+                            <rect x="35" y="80" width="10" height="10" />
+                            <rect x="55" y="80" width="10" height="10" />
+                            <rect x="75" y="80" width="10" height="10" />
+                            <rect x="95" y="80" width="10" height="10" />
+                            <rect x="115" y="80" width="10" height="10" />
+                            <rect x="135" y="80" width="10" height="10" />
+                            <rect x="155" y="80" width="10" height="10" />
+                            
+                            <rect x="15" y="100" width="10" height="10" />
+                            <rect x="35" y="100" width="10" height="10" />
+                            <rect x="55" y="100" width="10" height="10" />
+                            <rect x="95" y="100" width="10" height="10" />
+                            <rect x="115" y="100" width="10" height="10" />
+                            <rect x="135" y="100" width="10" height="10" />
+                            <rect x="155" y="100" width="10" height="10" />
+                            
+                            <rect x="60" y="135" width="10" height="10" />
+                            <rect x="80" y="135" width="10" height="10" />
+                            <rect x="100" y="135" width="10" height="10" />
+                            <rect x="120" y="135" width="10" height="10" />
+                            <rect x="140" y="135" width="10" height="10" />
+                            
+                            <text x="90" y="165" text-anchor="middle" font-size="7" font-family="sans-serif">VitaSearch App</text>
+                        </g>
+                    </svg>
+                `;
+                
+                qrContainer.innerHTML = qrSvg;
+            }
+            
+            // Update progress bar
+            function updateProgressBar(step) {
+                progressSteps.forEach((progressStep, index) => {
+                    if (index < step) {
+                        progressStep.classList.add('completed');
+                        progressStep.classList.remove('active');
+                    } else if (index === step - 1) {
+                        progressStep.classList.add('active');
+                        progressStep.classList.remove('completed');
+                    } else {
+                        progressStep.classList.remove('active');
+                        progressStep.classList.remove('completed');
+                    }
+                });
+            }
+            
+            // Document click event to hide search results when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+                    searchResults.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
