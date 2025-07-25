@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UMID – Med‑Tech Pitch</title>
+  <!-- Reveal.js core & theme -->
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js/dist/reveal.css" />
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js/dist/theme/black.css" id="theme" />
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary:#14b8a6; /* teal */
+      --accent:#fbbf24; /* amber */
+      --danger:#ef4444; /* red for problem */
+    }
+    body {font-family:'Inter',sans-serif;}
+    h2 {color:var(--primary);font-weight:700;margin-bottom:.6em;letter-spacing:-.02em;}
+    .note{font-size:.8em;opacity:.8;margin-top:.8em;}
+    /* --- Slide 1 styles --- */
+    .ps-container{display:flex;gap:2rem;align-items:stretch;}
+    .ps-block{flex:1;padding:1.2rem;border-radius:.8rem;color:#fff;display:flex;flex-direction:column;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.25);} 
+    .problem{background:var(--danger);}
+    .solution{background:var(--primary);}    
+    .ps-block h3{margin:0 0 .6rem 0;font-weight:700;font-size:1.6rem;letter-spacing:-.01em;}
+    .stat{font-size:2.2rem;font-weight:700;line-height:1.1;}
+    .sub{font-size:1rem;margin-top:.3rem;}
+
+    /* --- Roadmap slide --- */
+    .roadmap{display:grid;grid-template-columns:repeat(5,minmax(140px,1fr));gap:1rem;align-items:start;margin-top:1.2rem;}
+    .stage{background:var(--primary);color:#fff;border-radius:.6rem;padding:.8rem;text-align:center;position:relative;box-shadow:0 2px 6px rgba(0,0,0,.25);}
+    .stage:after{content:"";position:absolute;top:50%;right:-.6rem;width:1.2rem;height:.2rem;background:var(--accent);transform:translateY(-50%);}  
+    .stage:last-child:after{display:none;}
+    .stage h4{margin:.2rem 0 .4rem;font-size:1.1rem;}
+    .stage p{font-size:.85rem;line-height:1.2;margin:0;}
+
+    /* --- Slide 3 impact --- */
+    .impact{display:flex;flex-direction:column;align-items:center;gap:1rem;margin-top:1rem;}
+    .big{font-size:2.4rem;font-weight:700;color:var(--primary);}    
+    .pill-row{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;}
+    .pill{background:var(--accent);color:#000;font-weight:600;padding:.4rem .8rem;border-radius:9999px;font-size:.95rem;box-shadow:0 2px 6px rgba(0,0,0,.15);}    
+
+    /* --- Responsive adjustments --- */
+    @media(max-width:768px){
+      .ps-container{flex-direction:column;}
+      .roadmap{grid-template-columns:1fr;}
+      .stage:after{display:none;}
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- Slide 1: Problem ➔ Solution -->
+      <section>
+        <h2>Disconnected Today • Connected Tomorrow</h2>
+        <div class="ps-container">
+          <div class="ps-block problem">
+            <h3>PROBLEM</h3>
+            <div class="stat">18.8 M</div>
+            <div class="sub">people lack reliable care</div>
+            <div class="stat" style="font-size:1.6rem;">35 % bed<br>capacity</div>
+            <div class="sub">public hospitals</div>
+            <div class="stat" style="font-size:1.6rem;">$20 vs $5</div>
+            <div class="sub">clinic visit vs daily wage</div>
+          </div>
+          <div class="ps-block solution">
+            <h3>SOLUTION: AI CARE</h3>
+            <div class="stat">80 %</div>
+            <div class="sub">primary issues solved by AI triage</div>
+            <div class="stat" style="font-size:1.6rem;">4×</div>
+            <div class="sub">higher accuracy on complex cases</div>
+            <div class="stat" style="font-size:1.6rem;">&lt;$0.50</div>
+            <div class="sub">per consult cost</div>
+          </div>
+        </div>
+        <p class="note">Sources: PAHO 2024; MSF 2025; Microsoft MedPrompt 2024; Babylon NHS Trial 2023</p>
+      </section>
+
+      <!-- Slide 2: Horizontal Roadmap -->
+      <section>
+        <h2>UMID Roll‑out Roadmap</h2>
+        <div class="roadmap">
+          <div class="stage">
+            <h4>1️⃣ AI Assistant</h4>
+            <p>Launch pilot · Spanish NLP · offline mode</p>
+          </div>
+          <div class="stage">
+            <h4>2️⃣ Tele‑Med</h4>
+            <p>Escalate 20 % cases<br>eRx & e‑payments</p>
+          </div>
+          <div class="stage">
+            <h4>3️⃣ Labs & Rx</h4>
+            <p>Partner labs upload results · drug matching</p>
+          </div>
+          <div class="stage">
+            <h4>4️⃣ UMID</h4>
+            <p>Nation‑wide health ID<br>public ↔ private sync</p>
+          </div>
+          <div class="stage">
+            <h4>5️⃣ Monetize</h4>
+            <p>Insurance API · analytics · pharma channel</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 3: Impact & Ask -->
+      <section>
+        <h2>Impact & Partnership Opportunity</h2>
+        <div class="impact">
+          <div class="big">Save 7,200 lives / year</div>
+          <div class="pill-row">
+            <div class="pill">Cut ER wait by 45 %</div>
+            <div class="pill">$150 M public savings</div>
+            <div class="pill">10 K new digital jobs</div>
+            <div class="pill">51 % IRR (5 yr)</div>
+          </div>
+          <p style="margin-top:1rem;font-size:1.2rem;">We’re seeking <strong>$4 M seed</strong> to launch nationwide within 18 months.<br>Join us to build AI‑powered universal healthcare for Venezuela.</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Reveal.js -->
+  <script src="https://unpkg.com/reveal.js/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      transition:'fade',
+      hash:true,
+      slideNumber:true,
+      width:960,
+      height:540,
+      margin:0.05,
+      mobileViewDistance:500
+    });
+  </script>
+</body>
+</html>
