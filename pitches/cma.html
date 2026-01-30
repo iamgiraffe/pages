@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMA Small Systems AB - Investor Pitch</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: #fff;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .slide {
+            width: 100%;
+            min-height: 100vh;
+            padding: 60px 80px;
+            page-break-after: always;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .slide:last-child {
+            page-break-after: avoid;
+        }
+
+        /* Brand Colors */
+        .brand-green { color: #4ECDC4; }
+        .brand-dark { color: #2C3E50; }
+        .bg-green { background: #4ECDC4; }
+        .bg-dark { background: #2C3E50; color: white; }
+        .bg-light { background: #F8F9FA; }
+
+        /* Title Slide */
+        .title-slide {
+            background: linear-gradient(135deg, #2C3E50 0%, #1a252f 100%);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .title-slide h1 {
+            font-size: 72px;
+            font-weight: 300;
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+        }
+
+        .title-slide h2 {
+            font-size: 28px;
+            font-weight: 300;
+            color: #4ECDC4;
+            margin-bottom: 60px;
+        }
+
+        .title-slide .subtitle {
+            font-size: 18px;
+            opacity: 0.8;
+            margin-top: 40px;
+        }
+
+        /* Section Headers */
+        .section-header {
+            background: #4ECDC4;
+            color: #2C3E50;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .section-header h1 {
+            font-size: 56px;
+            font-weight: 600;
+        }
+
+        /* Regular Slides */
+        .slide h1 {
+            font-size: 42px;
+            color: #2C3E50;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .slide h2 {
+            font-size: 24px;
+            color: #4ECDC4;
+            margin-bottom: 40px;
+            font-weight: 400;
+        }
+
+        .slide h3 {
+            font-size: 22px;
+            color: #2C3E50;
+            margin: 25px 0 15px 0;
+            font-weight: 600;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+        }
+
+        .three-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 40px;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th {
+            background: #2C3E50;
+            color: white;
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        td {
+            padding: 12px 20px;
+            border-bottom: 1px solid #E0E0E0;
+        }
+
+        tr:nth-child(even) {
+            background: #F8F9FA;
+        }
+
+        /* Stats */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 30px 20px;
+            background: #F8F9FA;
+            border-radius: 10px;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 700;
+            color: #4ECDC4;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        /* Cards */
+        .card {
+            background: #F8F9FA;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .card h4 {
+            color: #2C3E50;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .card-accent {
+            border-left: 4px solid #4ECDC4;
+        }
+
+        /* Lists */
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul li {
+            padding: 8px 0 8px 30px;
+            position: relative;
+            font-size: 18px;
+        }
+
+        ul li:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 16px;
+            width: 10px;
+            height: 10px;
+            background: #4ECDC4;
+            border-radius: 50%;
+        }
+
+        /* Highlight Box */
+        .highlight {
+            background: linear-gradient(135deg, #4ECDC4 0%, #3BA99C 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .highlight h3 {
+            color: white;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .highlight p {
+            font-size: 20px;
+            opacity: 0.95;
+        }
+
+        /* Quote */
+        .quote {
+            font-size: 32px;
+            font-style: italic;
+            color: #2C3E50;
+            text-align: center;
+            padding: 40px;
+            border-left: 4px solid #4ECDC4;
+            background: #F8F9FA;
+            margin: 30px 0;
+        }
+
+        /* Footer */
+        .slide-footer {
+            position: absolute;
+            bottom: 30px;
+            left: 80px;
+            right: 80px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4ECDC4;
+            letter-spacing: 2px;
+        }
+
+        /* Pillar boxes */
+        .pillar {
+            background: white;
+            border: 2px solid #E0E0E0;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 10px 0;
+        }
+
+        .pillar-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: #4ECDC4;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: 700;
+            margin-right: 15px;
+        }
+
+        .pillar h4 {
+            display: inline;
+            font-size: 20px;
+            color: #2C3E50;
+        }
+
+        .pillar p {
+            margin-top: 15px;
+            color: #666;
+            font-size: 16px;
+        }
+
+        /* Comparison table */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .comp-box {
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .comp-box.left { background: #F0F0F0; }
+        .comp-box.center { background: #2C3E50; color: white; }
+        .comp-box.right { background: #F0F0F0; }
+
+        .comp-box h4 {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .comp-box.center h4 { color: #4ECDC4; }
+
+        /* CTA Slide */
+        .cta-slide {
+            background: linear-gradient(135deg, #2C3E50 0%, #1a252f 100%);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .cta-slide h1 {
+            color: white;
+            font-size: 48px;
+            margin-bottom: 30px;
+        }
+
+        .cta-slide p {
+            font-size: 24px;
+            max-width: 900px;
+            line-height: 1.8;
+            opacity: 0.9;
+        }
+
+        .cta-slide .accent {
+            color: #4ECDC4;
+        }
+
+        @media print {
+            .slide {
+                page-break-after: always;
+                height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Slide 1: Title -->
+<div class="slide title-slide">
+    <div class="logo">cma</div>
+    <h1>CMA Small Systems AB</h1>
+    <h2>Trusted Transaction Backbone for the AI Economy</h2>
+    <p class="subtitle">Investor Presentation</p>
+</div>
+
+<!-- Slide 2: The Opportunity -->
+<div class="slide">
+    <h1>The Opportunity</h1>
+    <h2>Payments are about to change forever</h2>
+
+    <div class="content">
+        <div class="quote">
+            AI agents are beginning to handle transactions autonomously - settling invoices across continents, managing procurement, executing payments 24/7 without human intervention.
+        </div>
+
+        <div class="three-column" style="margin-top: 40px;">
+            <div class="card card-accent">
+                <h4>The Problem</h4>
+                <p>Today's payment systems assume a human clicks "pay." With autonomous AI agents, this assumption breaks.</p>
+            </div>
+            <div class="card card-accent">
+                <h4>The Gap</h4>
+                <p>No trusted infrastructure exists to authenticate, authorize, and route AI-initiated transactions at scale.</p>
+            </div>
+            <div class="card card-accent">
+                <h4>The Solution</h4>
+                <p>CMA fills that gap - evolving from national payment infrastructure to the global backbone for agentic payments.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-footer">
+        <span class="logo">cma</span>
+        <span>Confidential</span>
+    </div>
+</div>
+
+<!-- Slide 3: Who We Are -->
+<div class="slide">
+    <h1>Who We Are</h1>
+    <h2>Swedish fintech infrastructure company | 30+ years powering national payment systems</h2>
+
+    <div class="content">
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="stat-number">55</div>
+                <div class="stat-label">Central Bank Clients</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">1,500+</div>
+                <div class="stat-label">Commercial Banks</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">50+</div>
+                <div class="stat-label">Countries</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">$100B+</div>
+                <div class="stat-label">Daily Transactions</div>
+            </div>
+        </div>
+
+        <div class="two-column" style="margin-top: 30px;">
+            <div>
+                <h3>Global Presence</h3>
+                <p style="font-size: 16px; color: #666;">Offices in Sweden, Armenia, Brunei, Bahrain, Singapore, Tunisia, Pakistan, Indonesia</p>
+                <p style="font-size: 16px; color: #666; margin-top: 10px;">Systems operating across 24 time zones</p>
+
+                <h3>Recognition</h3>
+                <ul>
+                    <li>Central Banking Awards 2022 & 2024</li>
+                    <li>SWIFT Certified Application</li>
+                    <li>ISO 27001 & ISO 9001 Certified</li>
+                    <li>AAA Creditworthiness Rating</li>
+                </ul>
+            </div>
+            <div>
+                <h3>Technology Suite</h3>
+                <table>
+                    <tr><td><strong>RTS/X</strong></td><td>Real-Time Gross Settlement</td></tr>
+                    <tr><td><strong>IPS</strong></td><td>Instant Payments System</td></tr>
+                    <tr><td><strong>BCS/X</strong></td><td>Automated Clearing House</td></tr>
+                    <tr><td><strong>DEPO/X</strong></td><td>Central Securities Depository</td></tr>
+                    <tr><td><strong>TRAD/X</strong></td><td>Universal Trading Platform</td></tr>
+                    <tr><td><strong>TMS/X</strong></td><td>Transaction Management</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-footer">
+        <span class="logo">cma</span>
+        <span>Confidential</span>
+    </div>
+</div>
+
+<!-- Slide 4: Track Record -->
+<div class="slide">
+    <h1>Proven Track Record</h1>
+    <h2>Recent implementations across emerging markets</h2>
+
+    <div class="content">
+        <div class="two-column">
+            <div>
+                <h3>Payment Systems (2019-2023)</h3>
+                <table>
+                    <tr><th>Year</th><th>Implementations</th></tr>
+                    <tr><td>2023</td><td>Oman, Pakistan, GCC-UAE</td></tr>
+                    <tr><td>2022</td><td>Moldova, Paraguay, Tunisia</td></tr>
+                    <tr><td>2021</td><td>Kuwait, Philippines, Pakistan RAAST</td></tr>
+                    <tr><td>2020</td><td>BUNA Regional, Afghanistan, Vietnam, Azerbaijan</td></tr>
+                    <tr><td>2019</td><td>Mauritius, Nepal, Tajikistan</td></tr>
+                </table>
+            </div>
+            <div>
+                <h3>Notable Flagship Projects</h3>
+                <div class="card">
+                    <h4>BUNA - Arab Monetary Fund</h4>
+                    <p>Multi-currency regional RTGS/IPS for cross-border payments across Arab region</p>
+                </div>
+                <div class="card">
+                    <h4>Pakistan RAAST</h4>
+                    <p>National instant payment system serving 220M+ population</p>
+                </div>
+                <div class="card">
+                    <h4>Nigeria Central Bank</h4>
+                    <p>RTGS and CSD powering Africa's largest economy</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-footer">
+        <span class="logo">cma</span>
+        <span>Confidential</span>
+    </div>
+</div>
+
+<!-- Slide 5: Vision -->
+<div class="slide section-header">
+    <h1>The Vision</h1>
+    <p style="font-size: 28px; max-width: 800px; margin-top: 30px;">
+        Trusted Transaction Backbone for AI Agents
+    </p>
+</div>
+
+<!-- Slide 6: Vision Details -->
+<div class="slide">
+    <h1>Our Strategic Evolution</h1>
+    <h2>From national infrastructure provider to global agentic payments backbone</h2>
+
+    <div class="content">
+        <div class="highlight">
+            <h3>The Goal</h3>
+            <p>Become the "network of networks" - the universal translator between payment systems worldwide, enabling AI agents to move value securely across any border.</p>
+        </div>
+
+        <div class="three-column" style="margin-top: 30px;">
+            <div class="card">
+                <h4>What We Have</h4>
+                <ul>
+                    <li>Battle-tested platforms in 50+ countries</li>
+                    <li>$100B+ daily transaction processing</li>
+                    <li>Deep central bank relationships</li>
+                    <li>Full-cycle infrastructure capability</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h4>What We'll Add</h4>
+                <ul>
+                    <li>Agent authorization protocols</li>
+                    <li>Open APIs for fintechs</li>
+                    <li>AI-powered fraud detection</li>
+                    <li>Cross-network interoperability</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h4>The Outcome</h4>
+                <ul>
+                    <li>Transactions by algorithms</li>
+                    <li>Guarded by ironclad trust</li>
+                    <li>Recurring revenue at scale</li>
+                    <li>Global category leadership</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-footer">
+        <span class="logo">cma</span>
+        <span>Confidential</span>
+    </div>
+</div>
+
+<!-- Slide 7: Market Opportunity -->
+<div class="slide">
+    <h1>Market Opportunity</h1>
+    <h2>Three massive tailwinds driving growth</h2>
+
+    <div class="content">
+        <div class="three-column">
+            <div class="card">
+                <h4>1. Cross-Border B2B Payments</h4>
+                <table>
+                    <tr><td>LatAm B2B Volume</td><td><strong>$1.37T</strong></td></tr>
+                    <tr><td>Growth Rate</td><td><strong>11% CAGR</strong></td></tr>
+                    <tr><td>Intra-African Trade</td><td><strong>$192B</strong></td></tr>
+                    <tr><td>AfCFTA Uplift</td><td><strong>+45%</strong></td></tr>
+                    <tr><td>FX Spreads (SME)</td><td><strong>3-10%</strong></td></tr>
+                </table>
+            </div>
+            <div class="card">
+                <h4>2. Agentic AI Explosion</h4>
+                <table>
+                    <tr><td>API Banking (2030)</td><td><strong>$118-132B</strong></td></tr>
+                    <tr><td>AI Agent Adoption</td><td><strong>81%</strong></td></tr>
+                    <tr><td>AI Commerce</td><td><strong>$1T+</strong></td></tr>
+                    <tr><td>Bank AI ROI</td><td><strong>30-40%</strong></td></tr>
+                </table>
+            </div>
+            <div class="card">
+                <h4>3. Emerging Market Digitization</h4>
+                <table>
+                    <tr><td>Africa IPS Networks</td><td><strong>2 to 14</strong></td></tr>
+                    <tr><td>Africa IPS Volume</td><td><strong>$1T (2023)</strong></td></tr>
+                    <tr><td>Mobile Money Accounts</td><td><strong>1.1B</strong></td></tr>
+                    <tr><td>Brazil Pix Monthly</td><td><strong>5B+ txns</strong></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="highlight" style="margin-top: 30px;">
+            <p>Low-value cross-border transactions totaled <strong>$12 Trillion</strong> in 2022, accounting for <strong>33% of global payment revenues</strong> due to high margins.</p>
+        </div>
+    </div>
+
+    <div class="slide-footer">
+        <span class="logo">cma</span>
+        <span>Confidential</span>
+    </div>
+</div>
+
+<!-- Slide 8: Solution -->
+<div class="slide">
+    <h1>The Solution</h1>
+    <h2>Four pillars of agentic payment infrastructure</h2>
+
+    <div class="content">
+        <div class="two-column">
+            <div>
+                <div class="pillar">
+                    <span class="pillar-number">1</span>
+                    <h4>Secure Transaction Routing</h4>
+                    <p>Intelligently route AI/IoT-initiated payments across networks. Real-time, fail-safe delivery. Multi-step orchestration: verify, check FX, execute.</p>
+                </div>
+                <div class="pillar">
+                    <span class="pillar-number">2</span>
+                    <h4>Identity & Authorization</h4>
+                    <p>Validate agent identity with cryptographic mandates. Enforce real-time checks. Non-repudiable proof of intent for every autonomous transaction.</p>
+                </div>
+            </div>
+            <div>
+                <div class="pillar">
+                    <span class="pillar-number">3</span>
+                    <h4>Integrated Fraud Detection</h4>
+                    <p>AI/ML anomaly detection across all CMA networks globally. Cross-network pattern recognition. Real-time flagging of suspicious behavior.</p>
+                </div>
+                <div class="pillar">
+                    <span class="pillar-number">4</span>
+                    <h4>Future-Facing Interoperability</h4>
+                    <p>ISO 20022 standards. Connect SWIFT, cards, blockchain, stablecoins. Bridge PAPSS, BUNA, any regional network. Handle any conversion.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-footer">
+        <span class="logo">cma</span>
+        <span>Confidential</span>
+    </div>
+</div>
+
+<!-- Slide 9: Business Model -->
+<div class="slide">
+    <h1>Business Model Transformation</h1>
+    <h2>From project revenue to recurring revenue at scale</h2>
+
+    <div class="content">
+        <div class="two-column">
+            <div>
+                <div class="card" style="background: #FFE5E5;">
+                    <h4>Current Model</h4>
+                    <ul>
+                        <li>One-time license fees</li>
+                        <li>Integration projects (~41%)</li>
+                        <li>Maintenance contracts (~56%)</li>
+                        <li>~$20M annual revenue</li>
+                    </ul>
+                </div>
+            </div>
+            <div>
+                <div class="card" style="background: #E5FFE5;">
+                    <h4>New Model</h4>
+                    <ul>
+                        <li>Per-transaction fees</li>
+                        <li>API usage charges</li>
+                        <li>SaaS subscriptions</li>
+                        <li>Scales with volume</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h3>Three New Revenue Streams</h3>
+        <table>
+            <tr>
+                <th>Stream</th>
+                <th>Description</th>
+                <th>Model</th>
+            </tr>
+            <tr>
+                <td><strong>Cross-Border Rails</strong></td>
+                <td>Africa-LatAm instant payments, FX conversion, settlement</td>
+                <td>0.2% of corridor flows</td>
+            </tr>
+            <tr>
+                <td><strong>Agentic APIs</strong></td>
+                <td>Payment initiation, identity, fraud scoring</td>
+                <td>Per-call + SaaS tiers</td>
+            </tr>
+            <tr>
+                <td><strong>Overlay Services</strong></td>
+                <td>Compliance, AML, analytics, dispute resolution</td>
+                <td>Annual subscription + per-use</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="slide-footer">
+        <span class="logo">cma</span>
+        <span>Confidential</span>
+    </div>
+</div>
+
+<!-- Slide 10: Competitive Position -->
+<div class="slide">
+    <h1>Competitive Position</h1>
+    <h2>We occupy the sweet spot</h2>
+
+    <div class="content">
+        <div class="comparison">
+            <div class="comp-box left">
+                <h4>Legacy Providers</h4>
+                <p style="font-size: 14px;">Montran, Nasdaq, Percival</p>
+                <hr style="margin: 15px 0;">
+                <p style="font-size: 14px;"><strong>+</strong> Credibility</p>
+                <p style="font-size: 14px;"><strong>-</strong> Slow to adapt</p>
+                <p style="font-size: 14px;"><strong>-</strong> Project-based</p>
+            </div>
+            <div class="comp-box center">
+                <h4>CMA</h4>
+                <p style="font-size: 14px;">The Sweet Spot</p>
+                <hr style="margin: 15px 0; border-color: #4ECDC4;">
+                <p style="font-size: 14px;"><strong>+</strong> Central bank trust</p>
+                <p style="font-size: 14px;"><strong>+</strong> AI-ready innovation</p>
+                <p style="font-size: 14px;"><strong>+</strong> Recurring model</p>
+            </div>
+            <div class="comp-box right">
+                <h4>New-Gen Fintechs</h4>
+                <p style="font-size: 14px;">Stripe, MFS Africa, Flutterwave</p>
+                <hr style="margin: 15px 0;">
+                <p style="font-size: 14px;"><strong>+</strong> Innovation</p>
+                <p style="font-size: 14px;"><strong>-</strong> No institutional trust</p>
+                <p style="font-size: 14px;"><strong>-</strong> Regulatory hurdles</p>
+            </div>
+        </div>
+
+        <h3>Our Competitive Moat</h3>
+        <div class="three-column">
+            <div class="card">
+                <p><strong>55 central banks</strong> trust us with their national infrastructure</p>
+            </div>
+            <div class="card">
+                <p><strong>BUNA success</strong> proves we can build regional platforms</p>
+            </div>
+            <div class="card">
+                <p><strong>First mover</strong> on agentic payments infrastructure</p>
+            </div>
+        </div>
+
+        <p style="margin-top: 20px; font-size: 16px; color: #666;"><strong>Key insight:</strong> Many competitors become partners. Stripe or Flutterwave can plug INTO our backbone for settlement. We're the neutral, trusted layer.</p>
+    </div>
+
+    <div class="slide-footer">
+        <span class="logo">cma</span>
+        <span>Confidential</span>
+    </div>
+</div>
+
+<!-- Slide 11: Geographic Strategy -->
+<div class="slide">
+    <h1>Geographic Strategy</h1>
+    <h2>Leveraging our installed base as distribution</h2>
+
+    <div class="content">
+        <div class="three-column">
+            <div>
+                <h3 style="color: #4ECDC4;">Africa</h3>
+                <p style="font-size: 14px; color: #666; margin-bottom: 15px;">Largest market cluster - 20+ nations</p>
+                <table style="font-size: 14px;">
+                    <tr><td><strong>Nigeria</strong></td><td>PAPSS integration, API gateway</td></tr>
+                    <tr><td><strong>Rwanda</strong></td><td>AI-to-AI trade pilot</td></tr>
+                    <tr><td><strong>COMESA</strong></td><td>AI routing engine</td></tr>
+                    <tr><td><strong>Mauritius</strong></td><td>Africa-Asia bridge</td></tr>
+                    <tr><td><strong>BCEAO</strong></td><td>PAPSS compatibility</td></tr>
+                </table>
+            </div>
+            <div>
+                <h3 style="color: #4ECDC4;">Latin America</h3>
+                <p style="font-size: 14px; color: #666; margin-bottom: 15px;">Strategic expansion region</p>
+                <table style="font-size: 14px;">
+                    <tr><td><strong>Paraguay</strong></td><td>Cross-border IPS extension</td></tr>
+                    <tr><td><strong>Central Am</strong></td><td>Modernization bundle</td></tr>
+                    <tr><td><strong>Regional</strong></td><td>LatAm-Africa bridge</td></tr>
+                </table>
+            </div>
+            <div>
+                <h3 style="color: #4ECDC4;">Middle East</h3>
+                <p style="font-size: 14px; color: #666; margin-bottom: 15px;">Established presence</p>
+                <table style="font-size: 14px;">
+                    <tr><td><strong>BUNA</strong></td><td>Expansion to Africa</td></tr>
+                    <tr><td><strong>GCC</strong></td><td>Regional RTGS modules</td></tr>
+                    <tr><td><strong>Jordan</strong></td><td>Full ecosystem client</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="highlight" style="margin-top: 30px;">
+            <p>Our installed base is our distribution channel. We're not entering cold markets - we're expanding with existing clients.</p>
+        </div>
+    </div>
+
+    <div class="slide-footer">
+        <span class="logo">cma</span>
+        <span>Confidential</span>
+    </div>
+</div>
+
+<!-- Slide 12: Market Size -->
+<div class="slide">
+    <h1>Market Size & Projections</h1>
+    <h2>Total addressable market across three segments</h2>
+
+    <div class="content">
+        <table>
+            <tr>
+                <th>Segment</th>
+                <th>Total Addressable Market</th>
+                <th>CMA Target (Mid-term)</th>
+            </tr>
+            <tr>
+                <td><strong>B2B Cross-Border</strong> (Africa/LatAm)</td>
+                <td>$5-10B+ annual fees</td>
+                <td>$100-200M</td>
+            </tr>
+            <tr>
+                <td><strong>Agentic Payment APIs</strong></td>
+                <td>$10B+ by 2030</td>
+                <td>$50-100M</td>
+            </tr>
+            <tr>
+                <td><strong>Infrastructure Deals</strong></td>
+                <td>$100-150M/year globally</td>
+                <td>$30-50M new contracts</td>
+            </tr>
+        </table>
+
+        <div class="two-column" style="margin-top: 40px;">
+            <div class="card" style="text-align: center;">
+                <h4>Current Revenue</h4>
+                <div class="stat-number">~$20M</div>
+                <p>Annual revenue</p>
+            </div>
+            <div class="card" style="text-align: center; background: #E5FFE5;">
+                <h4>Potential</h4>
+                <div class="stat-number" style="color: #2C3E50;">10x</div>
+                <p>Growth over next several years</p>
+            </div>
+        </div>
+
+        <p style="margin-top: 20px; font-size: 16px; color: #666;"><strong>Value drivers:</strong> Shift to recurring revenue | Transaction fees scale with volume | Higher margins on API/SaaS | Multiple streams per client | Network effects</p>
+    </div>
+
+    <div class="slide-footer">
+        <span class="logo">cma</span>
+        <span>Confidential</span>
+    </div>
+</div>
+
+<!-- Slide 13: Milestones -->
+<div class="slide">
+    <h1>First Steps & Milestones</h1>
+    <h2>Immediate priorities for transformation</h2>
+
+    <div class="content">
+        <div class="two-column">
+            <div>
+                <h3>Technical Development</h3>
+                <div class="card">
+                    <ul>
+                        <li>Agent authorization protocols & API gateway</li>
+                        <li>Fraud detection as monetizable module</li>
+                        <li>PAPSS integration layer for Africa</li>
+                        <li>Developer sandbox for fintech partners</li>
+                    </ul>
+                </div>
+
+                <h3>Commercial Pilots</h3>
+                <div class="card">
+                    <ul>
+                        <li>Cross-border corridor: Nigeria-Ghana or Nigeria-Kenya</li>
+                        <li>Agentic pilot: AI procurement payments for SMEs</li>
+                        <li>Transaction pricing pilot with fintech consortium</li>
+                    </ul>
+                </div>
+            </div>
+            <div>
+                <h3>Business Model Transition</h3>
+                <div class="card">
+                    <ul>
+                        <li>Lower upfront fees + perpetual transaction fees</li>
+                        <li>Prove model with forward-thinking markets</li>
+                        <li>Target early adopters: Paraguay, Rwanda, Bahrain</li>
+                        <li>Scale to broader central bank clients</li>
+                    </ul>
+                </div>
+
+                <h3>Target Markets for Pilots</h3>
+                <div class="card">
+                    <table style="font-size: 14px;">
+                        <tr><td><strong>Paraguay</strong></td><td>Complete stack, cross-border ready</td></tr>
+                        <tr><td><strong>Rwanda</strong></td><td>Tech-forward government</td></tr>
+                        <tr><td><strong>Bahrain</strong></td><td>Regional fintech hub</td></tr>
+                        <tr><td><strong>Nigeria</strong></td><td>Largest African fintech ecosystem</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-footer">
+        <span class="logo">cma</span>
+        <span>Confidential</span>
+    </div>
+</div>
+
+<!-- Slide 14: Investment Thesis -->
+<div class="slide">
+    <h1>Investment Thesis</h1>
+    <h2>Why CMA, Why Now</h2>
+
+    <div class="content">
+        <div class="two-column">
+            <div>
+                <h3>What We Offer Investors</h3>
+                <div class="card card-accent">
+                    <ul>
+                        <li>Exposure to $100B+ market opportunity</li>
+                        <li>Proven technology and team (30+ years)</li>
+                        <li>Clear path from project to recurring revenue</li>
+                        <li>First-mover advantage in agentic payments</li>
+                        <li>Emerging market growth exposure</li>
+                        <li>Central bank relationships as moat</li>
+                    </ul>
+                </div>
+            </div>
+            <div>
+                <h3>Use of Funds</h3>
+                <div class="card card-accent">
+                    <ul>
+                        <li><strong>Product:</strong> Agentic APIs, fraud detection, cross-border modules</li>
+                        <li><strong>Commercial:</strong> Sales teams for Africa/LatAm corridors</li>
+                        <li><strong>Pilots:</strong> Cross-border and agentic payment trials</li>
+                        <li><strong>Infrastructure:</strong> Cloud deployment, developer tools</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="highlight" style="margin-top: 30px;">
+            <h3>The Result</h3>
+            <p>CMA becomes the backbone that every AI agent and enterprise relies on to move value securely - whether across the street or across the globe.</p>
+        </div>
+    </div>
+
+    <div class="slide-footer">
+        <span class="logo">cma</span>
+        <span>Confidential</span>
+    </div>
+</div>
+
+<!-- Slide 15: Closing -->
+<div class="slide cta-slide">
+    <h1>Investing in CMA's transformation is<br>investing in the <span class="accent">future of payments</span>.</h1>
+    <p style="margin-top: 40px;">
+        A future where our platform quietly powers <strong>billions of autonomous transactions</strong> - with every single one carrying the CMA assurance of <span class="accent">security</span>, <span class="accent">trust</span>, and <span class="accent">speed</span>.
+    </p>
+    <div style="margin-top: 60px;">
+        <p class="logo" style="font-size: 36px;">cma</p>
+        <p style="font-size: 16px; margin-top: 20px; opacity: 0.7;">www.cma.se | info@cma.se | +46 8 566 30 800</p>
+    </div>
+</div>
+
+<!-- Slide 16: Appendix -->
+<div class="slide">
+    <h1>Appendix</h1>
+    <h2>Partners & Certifications</h2>
+
+    <div class="content">
+        <div class="two-column">
+            <div>
+                <h3>Strategic Partners</h3>
+                <div class="card">
+                    <p style="font-size: 18px; line-height: 2;">
+                        Visa | SWIFT | Korea Exchange | IBM | Oracle | Microsoft | Red Hat | Hewlett Packard Enterprise | DXC Technology | R3 | FPT
+                    </p>
+                </div>
+
+                <h3>Commercial Bank Clients</h3>
+                <div class="card">
+                    <p style="font-size: 18px; line-height: 2;">
+                        HSBC | Citi | ICICI Bank | Standard Chartered | UBL | HBL | RHB | BBK | GIB | Home Credit Bank
+                    </p>
+                </div>
+            </div>
+            <div>
+                <h3>Standards & Certifications</h3>
+                <div class="card">
+                    <ul>
+                        <li>SWIFT Certified Application</li>
+                        <li>ISO 27001:2013 (Information Security)</li>
+                        <li>ISO 9001:2015 (Quality Management)</li>
+                        <li>BSI/ANAB Accredited</li>
+                        <li>UC Certified</li>
+                        <li>AAA Creditworthiness (Highest Rating)</li>
+                    </ul>
+                </div>
+
+                <h3>Contact</h3>
+                <div class="card">
+                    <p><strong>CMA Small Systems AB</strong></p>
+                    <p>Olof Palmes gata 29, 4th floor</p>
+                    <p>111 22 Stockholm, Sweden</p>
+                    <p style="margin-top: 15px;">Phone: +46 8 566 30 800</p>
+                    <p>Email: info@cma.se</p>
+                    <p>Web: www.cma.se</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-footer">
+        <span class="logo">cma</span>
+        <span>Confidential</span>
+    </div>
+</div>
+
+</body>
+</html>
