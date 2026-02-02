@@ -1,0 +1,1538 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Smart Supplements Search – Prototype (Single HTML)</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a33;
+      --panel2: #0f1730;
+      --text: #e7ebff;
+      --muted: #aab3da;
+      --border: rgba(255,255,255,0.12);
+      --good: #2ee59d;
+      --warn: #ffcc66;
+      --bad: #ff6b6b;
+      --link: #8ab4ff;
+      --chip: rgba(138,180,255,0.12);
+      --shadow: rgba(0,0,0,0.4);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 600px at 20% 0%, rgba(138,180,255,0.18), transparent 55%),
+                  radial-gradient(1200px 600px at 80% 0%, rgba(46,229,157,0.10), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.4;
+    }
+    header {
+      padding: 24px 16px 10px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      letter-spacing: 0.2px;
+    }
+    .sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 70ch;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 980px) {
+      .wrap { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 12px 40px var(--shadow);
+    }
+    .panel h2 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+    .row { display: flex; gap: 10px; align-items: center; }
+    .row > * { flex: 1; }
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    input[type="text"], select, input[type="number"] {
+      width: 100%;
+      padding: 10px 11px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      outline: none;
+    }
+    input[type="text"]::placeholder { color: rgba(231,235,255,0.45); }
+    button {
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.12);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    button:hover { background: rgba(255,255,255,0.08); }
+    button.primary {
+      border-color: rgba(138,180,255,0.35);
+      background: rgba(138,180,255,0.16);
+    }
+    .chips {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+    }
+    .chip {
+      border: 1px solid rgba(138,180,255,0.25);
+      background: var(--chip);
+      color: var(--text);
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .chip:hover { background: rgba(138,180,255,0.18); }
+    .hint {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .divider {
+      margin: 12px 0;
+      height: 1px;
+      background: var(--border);
+    }
+    .toggle {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .toggle input { width: 18px; height: 18px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border);
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--muted);
+      background: rgba(0,0,0,0.14);
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+    .badge strong { color: var(--text); font-weight: 600; }
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 980px) {
+      .grid2 { grid-template-columns: 1fr; }
+    }
+
+    /* Results */
+    .resultsHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .resultsHeader h2 { margin-bottom: 0; }
+    .pill {
+      border: 1px solid rgba(46,229,157,0.28);
+      background: rgba(46,229,157,0.08);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--text);
+    }
+    .cards { display: grid; gap: 10px; margin-top: 10px; }
+    .card {
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.14);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .cardTop {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .kpis {
+      display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;
+    }
+    .kpi {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      padding: 8px 10px;
+      border-radius: 12px;
+      min-width: 140px;
+    }
+    .kpi .label { color: var(--muted); font-size: 11px; margin: 0; }
+    .kpi .val { margin: 3px 0 0; font-size: 14px; font-weight: 700; }
+    .good { color: var(--good); }
+    .warn { color: var(--warn); }
+    .bad { color: var(--bad); }
+    details {
+      margin-top: 10px;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+    summary { cursor: pointer; color: var(--link); font-size: 13px; }
+    ul { margin: 8px 0 0 18px; padding: 0; }
+    li { margin: 4px 0; color: var(--text); }
+    .sectionTitle {
+      margin: 18px 0 8px;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .noteBox {
+      border: 1px dashed rgba(255,255,255,0.22);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(0,0,0,0.10);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .mono { font-family: var(--mono); }
+    .footer {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 16px 20px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      margin-right: 6px;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <h1>Smart Supplements Search – Single‑File Prototype</h1>
+  <p class="sub">
+    Demo: query → ingredient intent → outcome expansion → value ranking (cost/day to target dose) → explanations.
+    Works offline. Data is a tiny sample dataset you can replace with your own extracted catalog.
+  </p>
+</header>
+
+<div class="wrap">
+  <!-- LEFT: Controls -->
+  <section class="panel">
+    <h2>Try a scenario</h2>
+    <div class="chips" id="scenarioChips"></div>
+    <p class="hint">
+      Scenarios preload a query and pick a goal (outcome). You can then tweak the target dose or filters.
+    </p>
+
+    <div class="divider"></div>
+
+    <h2>Search</h2>
+    <label for="q">User query</label>
+    <div class="row">
+      <input id="q" type="text" placeholder="e.g. omega, sleep, stress, creatine, gut" />
+      <button id="btnSearch" class="primary" style="flex:0 0 auto;">Search</button>
+    </div>
+
+    <div class="grid2" style="margin-top:10px;">
+      <div>
+        <label for="goal">Goal / outcome</label>
+        <select id="goal"></select>
+      </div>
+      <div>
+        <label for="dose">Target daily dose (editable)</label>
+        <input id="dose" type="number" min="0" step="0.01" />
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:10px;">
+      <div>
+        <label for="maxCost">Max cost/day (optional)</label>
+        <input id="maxCost" type="number" min="0" step="0.01" placeholder="e.g. 1.50" />
+      </div>
+      <div>
+        <label for="diet">Diet filter (optional)</label>
+        <select id="diet">
+          <option value="">Any</option>
+          <option value="vegan">Vegan</option>
+          <option value="vegetarian">Vegetarian</option>
+          <option value="pescatarian">Pescatarian</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="toggle">
+      <input id="showMath" type="checkbox" checked />
+      <label for="showMath" style="margin:0;">Show scoring math & reasoning</label>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2>What this prototype simulates</h2>
+    <div class="noteBox">
+      <ul>
+        <li><span class="mono">LLM query understanding</span> → simulated by rules + synonym triggers.</li>
+        <li><span class="mono">Outcome graph</span> → small hardcoded ingredient↔outcome map.</li>
+        <li><span class="mono">Value scoring</span> → cost/day to reach target dose (plus a practicality note).</li>
+        <li><span class="mono">Explanations</span> → assembled from structured fields (no hallucinated numbers).</li>
+      </ul>
+    </div>
+
+    <div class="divider"></div>
+    <p class="small">
+      ⚠️ Informational demo only. Not medical advice. Don’t use this prototype to make health decisions.
+    </p>
+  </section>
+
+  <!-- RIGHT: Results -->
+  <section class="panel">
+    <div class="resultsHeader">
+      <h2>Results</h2>
+      <div class="pill" id="statusPill">Ready</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div id="intentBox"></div>
+
+    <div class="sectionTitle">Direct matches</div>
+    <div class="cards" id="directCards"></div>
+
+    <div class="sectionTitle">Related but not dose‑match</div>
+    <div class="cards" id="relatedCards"></div>
+
+    <div class="sectionTitle">Alternatives for the same goal</div>
+    <div id="altIntro" class="noteBox" style="display:none;"></div>
+    <div class="cards" id="altCards"></div>
+  </section>
+</div>
+
+<div class="footer">
+  <div class="divider" style="max-width:1100px;margin:0 auto 12px;"></div>
+  <p>
+    <strong>How to customize:</strong> Replace the <span class="mono">PRODUCTS</span> array with your own extracted catalog.
+    In production you’d (1) parse HTML → structured fields, (2) build hybrid search indexes, (3) call an LLM for intent parsing + explanation generation, and (4) keep scoring deterministic.
+  </p>
+</div>
+
+<script>
+/**
+ * ---------------------------
+ * DEMO DATASET (tiny)
+ * Replace this with your extracted product catalog (JSON) in a real build.
+ * ---------------------------
+ */
+const PRODUCTS = [
+  // --- Omega-3 / EPA+DHA ---
+  {
+    id: "oceanpure_fish_oil",
+    name: "OceanPure Fish Oil 1000",
+    brand: "OceanPure",
+    form: "softgel",
+    price: 18.99,
+    currency: "USD",
+    servingsPerContainer: 45,
+    servingSize: "2 softgels",
+    tags: ["omega3", "fish-oil"],
+    diet: ["pescatarian"],
+    actives: {
+      epa: { amount: 360, unit: "mg" },
+      dha: { amount: 240, unit: "mg" }
+    },
+    ingredientsText: "Concentrated fish oil providing omega‑3 fatty acids (EPA + DHA)."
+  },
+  {
+    id: "cardioomega_high_strength",
+    name: "CardioOmega High Strength",
+    brand: "CardioOmega",
+    form: "softgel",
+    price: 29.99,
+    currency: "USD",
+    servingsPerContainer: 60,
+    servingSize: "2 softgels",
+    tags: ["omega3", "fish-oil", "high-potency"],
+    diet: ["pescatarian"],
+    actives: {
+      epa: { amount: 720, unit: "mg" },
+      dha: { amount: 480, unit: "mg" }
+    },
+    ingredientsText: "High-strength fish oil concentrate with EPA + DHA."
+  },
+  {
+    id: "vegan_algae_omega3",
+    name: "Vegan Algae Omega‑3",
+    brand: "GreenSea",
+    form: "capsule",
+    price: 34.99,
+    currency: "USD",
+    servingsPerContainer: 30,
+    servingSize: "2 capsules",
+    tags: ["omega3", "algae-oil", "vegan"],
+    diet: ["vegan"],
+    actives: {
+      epa: { amount: 300, unit: "mg" },
+      dha: { amount: 600, unit: "mg" }
+    },
+    ingredientsText: "Algal oil omega‑3 providing DHA + EPA (plant-based)."
+  },
+  {
+    id: "krill_oil_500",
+    name: "Krill Oil 500",
+    brand: "AntarctiPure",
+    form: "softgel",
+    price: 24.99,
+    currency: "USD",
+    servingsPerContainer: 30,
+    servingSize: "2 softgels",
+    tags: ["omega3", "krill-oil"],
+    diet: ["pescatarian"],
+    actives: {
+      epa: { amount: 120, unit: "mg" },
+      dha: { amount: 60, unit: "mg" }
+    },
+    ingredientsText: "Krill oil providing omega‑3 (EPA + DHA) plus phospholipids."
+  },
+  {
+    id: "cod_liver_oil_liquid",
+    name: "Cod Liver Oil (Liquid)",
+    brand: "NordicHarbor",
+    form: "liquid",
+    price: 19.99,
+    currency: "USD",
+    servingsPerContainer: 50,
+    servingSize: "5 mL",
+    tags: ["omega3", "fish-oil", "liquid"],
+    diet: ["pescatarian"],
+    actives: {
+      epa: { amount: 400, unit: "mg" },
+      dha: { amount: 500, unit: "mg" }
+    },
+    ingredientsText: "Cod liver oil with omega‑3 fatty acids. Also naturally contains vitamins A and D."
+  },
+  {
+    id: "flaxseed_oil_1000",
+    name: "Flaxseed Oil 1000 (ALA)",
+    brand: "PlantCore",
+    form: "softgel",
+    price: 12.99,
+    currency: "USD",
+    servingsPerContainer: 100,
+    servingSize: "1 softgel",
+    tags: ["omega3", "plant-oil", "ala"],
+    diet: ["vegan"],
+    actives: {
+      ala: { amount: 600, unit: "mg" }
+    },
+    ingredientsText: "Flaxseed oil providing ALA (omega‑3). Does not list EPA/DHA."
+  },
+
+  // --- Heart / lipids alternatives ---
+  {
+    id: "plant_sterols_1600",
+    name: "Plant Sterols 1600",
+    brand: "CholestiCare",
+    form: "softgel",
+    price: 21.99,
+    currency: "USD",
+    servingsPerContainer: 30,
+    servingSize: "2 softgels",
+    tags: ["heart", "lipids"],
+    diet: ["vegetarian"],
+    actives: {
+      plant_sterols: { amount: 1600, unit: "mg" }
+    },
+    ingredientsText: "Plant sterols/stanols to support healthy cholesterol levels."
+  },
+  {
+    id: "psyllium_husk_powder",
+    name: "Psyllium Husk Powder",
+    brand: "FiberFirst",
+    form: "powder",
+    price: 14.99,
+    currency: "USD",
+    servingsPerContainer: 60,
+    servingSize: "1 tbsp",
+    tags: ["gut", "fiber", "heart"],
+    diet: ["vegan"],
+    actives: {
+      psyllium: { amount: 5, unit: "g" }
+    },
+    ingredientsText: "Soluble fiber (psyllium husk). Often used for digestive regularity and cholesterol support."
+  },
+  {
+    id: "berberine_complex_1000",
+    name: "Berberine Complex 1000",
+    brand: "MetaBalance",
+    form: "capsule",
+    price: 27.99,
+    currency: "USD",
+    servingsPerContainer: 30,
+    servingSize: "2 capsules",
+    tags: ["metabolic", "lipids"],
+    diet: ["vegan"],
+    actives: {
+      berberine: { amount: 1000, unit: "mg" }
+    },
+    ingredientsText: "Berberine HCl. Often used for metabolic markers (different mechanism than omega‑3)."
+  },
+  {
+    id: "coq10_100",
+    name: "CoQ10 100",
+    brand: "MitoSupport",
+    form: "softgel",
+    price: 24.99,
+    currency: "USD",
+    servingsPerContainer: 60,
+    servingSize: "1 softgel",
+    tags: ["heart", "energy"],
+    diet: ["vegetarian"],
+    actives: {
+      coq10: { amount: 100, unit: "mg" }
+    },
+    ingredientsText: "Coenzyme Q10 for mitochondrial and cardiovascular support."
+  },
+
+  // --- Brain / cognition alternatives ---
+  {
+    id: "phosphatidylserine_300",
+    name: "Phosphatidylserine 300",
+    brand: "NeuroEdge",
+    form: "capsule",
+    price: 26.99,
+    currency: "USD",
+    servingsPerContainer: 20,
+    servingSize: "3 capsules",
+    tags: ["brain", "focus"],
+    diet: ["vegetarian"],
+    actives: {
+      phosphatidylserine: { amount: 300, unit: "mg" }
+    },
+    ingredientsText: "Phosphatidylserine commonly used for cognitive support."
+  },
+
+  // --- Joints / inflammation alternatives ---
+  {
+    id: "curcumin_1000",
+    name: "Curcumin 1000",
+    brand: "JointEase",
+    form: "capsule",
+    price: 19.99,
+    currency: "USD",
+    servingsPerContainer: 30,
+    servingSize: "2 capsules",
+    tags: ["joints", "inflammation"],
+    diet: ["vegan"],
+    actives: {
+      curcumin: { amount: 1000, unit: "mg" }
+    },
+    ingredientsText: "Curcumin extract for joint comfort (different mechanism than omega‑3)."
+  },
+
+  // --- Sleep ---
+  {
+    id: "magnesium_glycinate_200",
+    name: "Magnesium Glycinate (200 mg)",
+    brand: "CalmNight",
+    form: "capsule",
+    price: 19.99,
+    currency: "USD",
+    servingsPerContainer: 60,
+    servingSize: "2 capsules",
+    tags: ["sleep", "magnesium", "relax"],
+    diet: ["vegan"],
+    actives: {
+      magnesium: { amount: 200, unit: "mg" } // elemental
+    },
+    qualityFactors: { magnesium: 1.0 },
+    ingredientsText: "Magnesium (as glycinate). Elemental magnesium 200 mg per serving."
+  },
+  {
+    id: "magnesium_oxide_250",
+    name: "Magnesium Oxide (250 mg)",
+    brand: "BudgetBasics",
+    form: "tablet",
+    price: 9.99,
+    currency: "USD",
+    servingsPerContainer: 100,
+    servingSize: "1 tablet",
+    tags: ["sleep", "magnesium"],
+    diet: ["vegan"],
+    actives: {
+      magnesium: { amount: 250, unit: "mg" } // elemental
+    },
+    // For demo purposes: pretend lower "effective" dose due to form differences.
+    // In real product: you'd use evidence, bioavailability data, and be careful with claims.
+    qualityFactors: { magnesium: 0.65 },
+    ingredientsText: "Magnesium (as oxide). Elemental magnesium 250 mg per serving."
+  },
+  {
+    id: "melatonin_1mg",
+    name: "Melatonin 1 mg",
+    brand: "SleepSimple",
+    form: "tablet",
+    price: 7.99,
+    currency: "USD",
+    servingsPerContainer: 120,
+    servingSize: "1 tablet",
+    tags: ["sleep", "melatonin"],
+    diet: ["vegan"],
+    actives: {
+      melatonin: { amount: 1, unit: "mg" }
+    },
+    ingredientsText: "Melatonin 1 mg for occasional sleep support."
+  },
+  {
+    id: "melatonin_5mg",
+    name: "Melatonin 5 mg",
+    brand: "SleepSimple",
+    form: "tablet",
+    price: 8.99,
+    currency: "USD",
+    servingsPerContainer: 90,
+    servingSize: "1 tablet",
+    tags: ["sleep", "melatonin"],
+    diet: ["vegan"],
+    actives: {
+      melatonin: { amount: 5, unit: "mg" }
+    },
+    ingredientsText: "Melatonin 5 mg for occasional sleep support."
+  },
+  {
+    id: "l_theanine_200",
+    name: "L‑Theanine 200",
+    brand: "ZenFocus",
+    form: "capsule",
+    price: 16.99,
+    currency: "USD",
+    servingsPerContainer: 60,
+    servingSize: "1 capsule",
+    tags: ["sleep", "stress", "relax"],
+    diet: ["vegan"],
+    actives: {
+      theanine: { amount: 200, unit: "mg" }
+    },
+    ingredientsText: "L‑theanine 200 mg for relaxation."
+  },
+  {
+    id: "sleep_blend_30",
+    name: "Sleep Blend (Mag + Theanine + Melatonin)",
+    brand: "NightStack",
+    form: "capsule",
+    price: 24.99,
+    currency: "USD",
+    servingsPerContainer: 30,
+    servingSize: "2 capsules",
+    tags: ["sleep", "blend"],
+    diet: ["vegan"],
+    actives: {
+      magnesium: { amount: 100, unit: "mg" },
+      theanine: { amount: 200, unit: "mg" },
+      melatonin: { amount: 2, unit: "mg" }
+    },
+    qualityFactors: { magnesium: 1.0 },
+    ingredientsText: "A blended sleep formula. (Demo product.)"
+  },
+
+  // --- Stress ---
+  {
+    id: "ashwagandha_ksm66_600",
+    name: "Ashwagandha (600 mg)",
+    brand: "AdaptogenCo",
+    form: "capsule",
+    price: 18.99,
+    currency: "USD",
+    servingsPerContainer: 30,
+    servingSize: "2 capsules",
+    tags: ["stress", "adaptogen"],
+    diet: ["vegan"],
+    actives: {
+      ashwagandha: { amount: 600, unit: "mg" }
+    },
+    ingredientsText: "Ashwagandha extract for stress support."
+  },
+  {
+    id: "rhodiola_300",
+    name: "Rhodiola 300",
+    brand: "AdaptogenCo",
+    form: "capsule",
+    price: 17.99,
+    currency: "USD",
+    servingsPerContainer: 60,
+    servingSize: "1 capsule",
+    tags: ["stress", "adaptogen", "energy"],
+    diet: ["vegan"],
+    actives: {
+      rhodiola: { amount: 300, unit: "mg" }
+    },
+    ingredientsText: "Rhodiola rosea for fatigue and stress support."
+  },
+
+  // --- Muscle / performance ---
+  {
+    id: "creatine_mono_5g",
+    name: "Creatine Monohydrate (5 g)",
+    brand: "GymBasics",
+    form: "powder",
+    price: 22.99,
+    currency: "USD",
+    servingsPerContainer: 100,
+    servingSize: "1 scoop",
+    tags: ["muscle", "performance"],
+    diet: ["vegan"],
+    actives: {
+      creatine: { amount: 5, unit: "g" }
+    },
+    ingredientsText: "Creatine monohydrate 5 g per serving."
+  },
+
+  // --- Gut ---
+  {
+    id: "probiotic_20b",
+    name: "Probiotic 20B",
+    brand: "GutGarden",
+    form: "capsule",
+    price: 29.99,
+    currency: "USD",
+    servingsPerContainer: 30,
+    servingSize: "1 capsule",
+    tags: ["gut", "probiotic"],
+    diet: ["vegetarian"],
+    actives: {
+      probiotic: { amount: 20, unit: "billionCFU" }
+    },
+    ingredientsText: "Multi-strain probiotic providing 20B CFU per serving. (Demo.)"
+  },
+  {
+    id: "inulin_prebiotic_5g",
+    name: "Prebiotic Inulin (5 g)",
+    brand: "GutGarden",
+    form: "powder",
+    price: 15.99,
+    currency: "USD",
+    servingsPerContainer: 60,
+    servingSize: "1 scoop",
+    tags: ["gut", "fiber"],
+    diet: ["vegan"],
+    actives: {
+      inulin: { amount: 5, unit: "g" }
+    },
+    ingredientsText: "Prebiotic fiber to support gut microbiome. (Demo.)"
+  }
+];
+
+/**
+ * ---------------------------
+ * KNOWLEDGE LAYER (tiny demo)
+ * In production, this would be a real evidence-backed ingredient↔outcome graph.
+ * ---------------------------
+ */
+const CONCEPTS = [
+  {
+    id: "omega3",
+    title: "Omega‑3 (EPA + DHA)",
+    triggers: ["omega", "omega-3", "omega 3", "fish oil", "krill", "algae", "epa", "dha"],
+    defaultOutcomeId: "omega3_general",
+    outcomes: [
+      {
+        id: "omega3_general",
+        label: "General omega‑3 support",
+        target: { ingredientKey: "epa_dha", unit: "mg", targetPerDay: 500 },
+        outcomeNotes: "We treat “omega” intent as EPA + DHA, not total oil weight."
+      },
+      {
+        id: "omega3_brain",
+        label: "Brain support (higher target)",
+        target: { ingredientKey: "epa_dha", unit: "mg", targetPerDay: 1000 },
+        outcomeNotes: "Demo target; real targets vary by use-case and evidence."
+      },
+      {
+        id: "omega3_joints",
+        label: "Joint / inflammation support (higher target)",
+        target: { ingredientKey: "epa_dha", unit: "mg", targetPerDay: 1000 },
+        outcomeNotes: "Demo target; real targets vary by use-case and evidence."
+      },
+      {
+        id: "omega3_triglycerides",
+        label: "Triglyceride support (often much higher dose)",
+        target: { ingredientKey: "epa_dha", unit: "mg", targetPerDay: 2000 },
+        outcomeNotes: "High-dose omega‑3 isn’t appropriate for everyone. Talk to a clinician."
+      }
+    ],
+    expansions: {
+      omega3_general: [
+        { ingredientKey: "plant_sterols", label: "Plant sterols", unit: "mg", targetPerDay: 2000, why: "Alternative for heart goals via a different mechanism." },
+        { ingredientKey: "psyllium", label: "Psyllium (soluble fiber)", unit: "g", targetPerDay: 10, why: "Alternative for heart goals; can support cholesterol." },
+        { ingredientKey: "coq10", label: "CoQ10", unit: "mg", targetPerDay: 100, why: "Often used for general cardiovascular support (different mechanism)." }
+      ],
+      omega3_brain: [
+        { ingredientKey: "phosphatidylserine", label: "Phosphatidylserine", unit: "mg", targetPerDay: 300, why: "Common cognitive-support ingredient." }
+      ],
+      omega3_joints: [
+        { ingredientKey: "curcumin", label: "Curcumin", unit: "mg", targetPerDay: 1000, why: "Common joint-comfort alternative (different mechanism)." }
+      ],
+      omega3_triglycerides: [
+        { ingredientKey: "berberine", label: "Berberine", unit: "mg", targetPerDay: 1000, why: "Metabolic marker support; different mechanism than omega‑3." }
+      ]
+    }
+  },
+
+  {
+    id: "sleep",
+    title: "Sleep support",
+    triggers: ["sleep", "insomnia", "rest", "bed", "melatonin", "magnesium", "theanine"],
+    defaultOutcomeId: "sleep_magnesium",
+    outcomes: [
+      {
+        id: "sleep_magnesium",
+        label: "Relaxation (Magnesium target)",
+        target: { ingredientKey: "magnesium", unit: "mg", targetPerDay: 200 },
+        outcomeNotes: "Demo focuses on magnesium; the ‘best’ approach depends on the person."
+      },
+      {
+        id: "sleep_melatonin",
+        label: "Fall asleep timing (Melatonin target)",
+        target: { ingredientKey: "melatonin", unit: "mg", targetPerDay: 1 },
+        outcomeNotes: "Demo target; melatonin dosing varies a lot in practice."
+      },
+      {
+        id: "sleep_theanine",
+        label: "Calm mind (L‑theanine target)",
+        target: { ingredientKey: "theanine", unit: "mg", targetPerDay: 200 },
+        outcomeNotes: "Demo target for relaxation."
+      }
+    ],
+    expansions: {
+      sleep_magnesium: [],
+      sleep_melatonin: [],
+      sleep_theanine: []
+    }
+  },
+
+  {
+    id: "stress",
+    title: "Stress support",
+    triggers: ["stress", "anxiety", "calm", "ashwagandha", "rhodiola", "adaptogen"],
+    defaultOutcomeId: "stress_ashwagandha",
+    outcomes: [
+      {
+        id: "stress_ashwagandha",
+        label: "Stress (Ashwagandha target)",
+        target: { ingredientKey: "ashwagandha", unit: "mg", targetPerDay: 600 },
+        outcomeNotes: "Demo target; products differ by extract standardization."
+      },
+      {
+        id: "stress_rhodiola",
+        label: "Fatigue + stress (Rhodiola target)",
+        target: { ingredientKey: "rhodiola", unit: "mg", targetPerDay: 300 },
+        outcomeNotes: "Demo target."
+      }
+    ],
+    expansions: {
+      stress_ashwagandha: [],
+      stress_rhodiola: []
+    }
+  },
+
+  {
+    id: "muscle",
+    title: "Muscle / performance",
+    triggers: ["creatine", "muscle", "gym", "lift", "workout", "strength"],
+    defaultOutcomeId: "muscle_creatine",
+    outcomes: [
+      {
+        id: "muscle_creatine",
+        label: "Creatine daily target",
+        target: { ingredientKey: "creatine", unit: "g", targetPerDay: 5 },
+        outcomeNotes: "Demo target for maintenance use."
+      }
+    ],
+    expansions: {
+      muscle_creatine: []
+    }
+  },
+
+  {
+    id: "gut",
+    title: "Gut support",
+    triggers: ["gut", "probiotic", "digestion", "fiber", "bloating"],
+    defaultOutcomeId: "gut_probiotic",
+    outcomes: [
+      {
+        id: "gut_probiotic",
+        label: "Probiotic target (20B CFU)",
+        target: { ingredientKey: "probiotic", unit: "billionCFU", targetPerDay: 20 },
+        outcomeNotes: "Demo target; probiotic efficacy depends heavily on strains."
+      },
+      {
+        id: "gut_prebiotic",
+        label: "Prebiotic fiber target (Inulin)",
+        target: { ingredientKey: "inulin", unit: "g", targetPerDay: 5 },
+        outcomeNotes: "Demo target."
+      }
+    ],
+    expansions: {
+      gut_probiotic: [],
+      gut_prebiotic: []
+    }
+  }
+];
+
+/**
+ * ---------------------------
+ * PRE-FILLED SCENARIOS
+ * ---------------------------
+ */
+const SCENARIOS = [
+  { label: "Omega‑3 value (EPA+DHA)", query: "omega", outcomeId: "omega3_general" },
+  { label: "Omega‑3 for triglycerides (demo)", query: "omega", outcomeId: "omega3_triglycerides" },
+  { label: "Sleep (magnesium)", query: "sleep", outcomeId: "sleep_magnesium" },
+  { label: "Sleep (melatonin)", query: "sleep", outcomeId: "sleep_melatonin" },
+  { label: "Stress (ashwagandha)", query: "stress", outcomeId: "stress_ashwagandha" },
+  { label: "Muscle (creatine)", query: "creatine", outcomeId: "muscle_creatine" },
+  { label: "Gut (probiotic)", query: "probiotic", outcomeId: "gut_probiotic" }
+];
+
+/**
+ * ---------------------------
+ * UTILITIES
+ * ---------------------------
+ */
+function money(v, currency = "USD") {
+  try {
+    return new Intl.NumberFormat(undefined, { style: "currency", currency }).format(v);
+  } catch {
+    return `$${v.toFixed(2)}`;
+  }
+}
+function round(v, digits = 2) {
+  const p = Math.pow(10, digits);
+  return Math.round(v * p) / p;
+}
+function safeLower(s) { return (s || "").toString().toLowerCase(); }
+function uniq(arr) { return Array.from(new Set(arr)); }
+
+function getConceptForQuery(query) {
+  const q = safeLower(query).trim();
+  if (!q) return null;
+
+  let best = null;
+  let bestScore = 0;
+
+  for (const c of CONCEPTS) {
+    let score = 0;
+    for (const t of c.triggers) {
+      if (q.includes(t)) score += 2;
+    }
+    // also score token overlap
+    const tokens = q.split(/\s+/).filter(x => x.length >= 3);
+    const hay = (p) => `${safeLower(p.name)} ${safeLower(p.ingredientsText)} ${safeLower((p.tags||[]).join(" "))}`;
+    const relatedHits = PRODUCTS.filter(p => tokens.some(tok => hay(p).includes(tok)) && (p.tags||[]).includes(c.id)).length;
+    score += Math.min(3, relatedHits); // small boost
+
+    if (score > bestScore) { bestScore = score; best = c; }
+  }
+  return bestScore > 0 ? best : null;
+}
+
+function computeEPA_DHA(product) {
+  // Provide a synthetic epa_dha active if EPA and DHA exist
+  const epa = product.actives?.epa;
+  const dha = product.actives?.dha;
+  if (epa && dha && epa.unit === "mg" && dha.unit === "mg") {
+    return { amount: epa.amount + dha.amount, unit: "mg", derived: true };
+  }
+  return null;
+}
+
+function getActive(product, ingredientKey) {
+  if (!product || !product.actives) return null;
+  if (ingredientKey === "epa_dha") {
+    // If explicitly present, use it; else derive from EPA + DHA
+    if (product.actives.epa_dha) return { ...product.actives.epa_dha, derived: false };
+    const derived = computeEPA_DHA(product);
+    return derived;
+  }
+  const a = product.actives[ingredientKey];
+  return a ? { ...a, derived: false } : null;
+}
+
+function convertAmount(amount, fromUnit, toUnit) {
+  if (fromUnit === toUnit) return amount;
+  // mg <-> g
+  if (fromUnit === "mg" && toUnit === "g") return amount / 1000;
+  if (fromUnit === "g" && toUnit === "mg") return amount * 1000;
+  return null; // non-convertible (e.g., billionCFU)
+}
+
+function getActiveInUnit(product, ingredientKey, unit) {
+  const a = getActive(product, ingredientKey);
+  if (!a) return null;
+  const v = convertAmount(a.amount, a.unit, unit);
+  if (v === null) return null;
+  return { amount: v, unit, derived: a.derived };
+}
+
+function getQualityFactor(product, ingredientKey) {
+  const qf = product.qualityFactors?.[ingredientKey];
+  return typeof qf === "number" ? qf : 1.0;
+}
+
+function computeValueForTarget(product, target) {
+  // target: { ingredientKey, unit, targetPerDay }
+  const perServing = getActiveInUnit(product, target.ingredientKey, target.unit);
+  if (!perServing || perServing.amount <= 0) {
+    return { eligible: false };
+  }
+
+  const qFactor = getQualityFactor(product, target.ingredientKey);
+  const effectivePerServing = perServing.amount * qFactor;
+
+  if (effectivePerServing <= 0) return { eligible: false };
+
+  const pricePerServing = product.price / product.servingsPerContainer;
+  const servingsNeeded = target.targetPerDay / effectivePerServing; // can be fractional
+
+  const costPerDay = servingsNeeded * pricePerServing;
+
+  // Soft practicality note (many capsules/day can be annoying)
+  let practicality = "normal";
+  if (servingsNeeded > 6) practicality = "high";
+  else if (servingsNeeded > 3) practicality = "medium";
+
+  // Value score: inverse of cost/day (higher is better)
+  const valueScore = 1 / costPerDay;
+
+  return {
+    eligible: true,
+    perServingRaw: perServing.amount,
+    perServingEffective: effectivePerServing,
+    unit: target.unit,
+    targetPerDay: target.targetPerDay,
+    servingsNeeded,
+    pricePerServing,
+    costPerDay,
+    valueScore,
+    qFactor,
+    derived: perServing.derived,
+    practicality
+  };
+}
+
+function productMatchesQuery(product, query) {
+  const q = safeLower(query).trim();
+  if (!q) return false;
+  const hay = `${safeLower(product.name)} ${safeLower(product.ingredientsText)} ${(product.tags||[]).map(safeLower).join(" ")}`;
+  const toks = uniq(q.split(/\s+/).filter(t => t.length >= 3));
+  // If query is just 1 short word like "omega", also allow direct contains
+  if (q.length >= 3 && hay.includes(q)) return true;
+  return toks.some(t => hay.includes(t));
+}
+
+function productRelatedToConcept(product, concept) {
+  if (!concept) return false;
+  const hay = `${safeLower(product.name)} ${safeLower(product.ingredientsText)} ${(product.tags||[]).map(safeLower).join(" ")}`;
+  if ((product.tags||[]).includes(concept.id)) return true;
+  return concept.triggers.some(t => hay.includes(t));
+}
+
+function passesDietFilter(product, dietValue) {
+  if (!dietValue) return true;
+  return (product.diet || []).includes(dietValue);
+}
+
+function scoreBadgeClass(costPerDay) {
+  if (costPerDay <= 0.50) return "good";
+  if (costPerDay <= 1.50) return "warn";
+  return "bad";
+}
+
+/**
+ * ---------------------------
+ * RENDERING
+ * ---------------------------
+ */
+const els = {
+  q: document.getElementById("q"),
+  goal: document.getElementById("goal"),
+  dose: document.getElementById("dose"),
+  maxCost: document.getElementById("maxCost"),
+  diet: document.getElementById("diet"),
+  showMath: document.getElementById("showMath"),
+  btnSearch: document.getElementById("btnSearch"),
+  statusPill: document.getElementById("statusPill"),
+  intentBox: document.getElementById("intentBox"),
+  directCards: document.getElementById("directCards"),
+  relatedCards: document.getElementById("relatedCards"),
+  altCards: document.getElementById("altCards"),
+  altIntro: document.getElementById("altIntro"),
+  scenarioChips: document.getElementById("scenarioChips")
+};
+
+function setStatus(text) {
+  els.statusPill.textContent = text;
+}
+
+function clearResults() {
+  els.intentBox.innerHTML = "";
+  els.directCards.innerHTML = "";
+  els.relatedCards.innerHTML = "";
+  els.altCards.innerHTML = "";
+  els.altIntro.style.display = "none";
+  els.altIntro.innerHTML = "";
+}
+
+function populateGoalsForConcept(concept) {
+  els.goal.innerHTML = "";
+  if (!concept) {
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = "No recognized goal (keyword search only)";
+    els.goal.appendChild(opt);
+    els.goal.disabled = true;
+    els.dose.value = "";
+    els.dose.disabled = true;
+    return;
+  }
+  els.goal.disabled = false;
+  els.dose.disabled = false;
+
+  for (const o of concept.outcomes) {
+    const opt = document.createElement("option");
+    opt.value = o.id;
+    opt.textContent = o.label;
+    els.goal.appendChild(opt);
+  }
+  // pick default
+  els.goal.value = concept.defaultOutcomeId;
+  const out = concept.outcomes.find(x => x.id === els.goal.value);
+  els.dose.value = out ? out.target.targetPerDay : "";
+}
+
+function renderIntent(concept, outcome, query) {
+  const div = document.createElement("div");
+  div.className = "noteBox";
+
+  if (!concept) {
+    div.innerHTML = `
+      <div class="badge"><strong>Interpretation</strong> Keyword search only</div>
+      <div class="badge"><strong>Query</strong> <span class="mono">${escapeHtml(query)}</span></div>
+      <div style="margin-top:8px;">
+        I didn’t recognize a known supplement intent in this prototype dataset, so I’m showing keyword matches only.
+        (In production, an LLM would infer intent and propose follow‑ups.)
+      </div>
+    `;
+    return div;
+  }
+
+  const t = outcome.target;
+  div.innerHTML = `
+    <div class="badge"><strong>Interpreted intent</strong> ${escapeHtml(concept.title)}</div>
+    <div class="badge"><strong>Goal</strong> ${escapeHtml(outcome.label)}</div>
+    <div class="badge"><strong>Target</strong> ${escapeHtml(t.ingredientKey)} = <span class="mono">${t.targetPerDay} ${t.unit}/day</span></div>
+    <div class="badge"><strong>Query</strong> <span class="mono">${escapeHtml(query)}</span></div>
+    <div style="margin-top:10px;">
+      <strong>Prototype logic:</strong> maps your query to a target ingredient (or compound), then ranks products by
+      <span class="mono">cost/day</span> to hit the target dose. It also expands results to alternatives tied to the same goal.
+      <div class="small" style="margin-top:6px;">Note: ${escapeHtml(outcome.outcomeNotes || "")}</div>
+    </div>
+  `;
+  return div;
+}
+
+function renderProductCard(product, value, target, reasonLines) {
+  const card = document.createElement("div");
+  card.className = "card";
+
+  const pricePerContainer = money(product.price, product.currency);
+  const pricePerServing = product.price / product.servingsPerContainer;
+
+  const activeLabel = `${target.ingredientKey} / serving`;
+  const activeAmountShown = value?.eligible
+    ? `${round(value.perServingRaw, target.unit === "billionCFU" ? 0 : 2)} ${target.unit}`
+    : "—";
+
+  const costShown = value?.eligible ? money(value.costPerDay, product.currency) : "—";
+  const servingsNeededShown = value?.eligible ? round(value.servingsNeeded, 2) : "—";
+
+  let kpiClass = "";
+  let practicalityText = "";
+  if (value?.eligible) {
+    kpiClass = scoreBadgeClass(value.costPerDay);
+    practicalityText =
+      value.practicality === "high" ? "High servings/day" :
+      value.practicality === "medium" ? "Many servings/day" : "Normal servings/day";
+  } else {
+    practicalityText = "No dose match";
+  }
+
+  const tags = (product.tags || []).slice(0, 6).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("");
+
+  const derivedNote = value?.eligible && value.derived
+    ? `<div class="small">Note: <span class="mono">${target.ingredientKey}</span> was derived from EPA + DHA.</div>`
+    : "";
+
+  const qFactorNote = value?.eligible && value.qFactor !== 1.0
+    ? `<div class="small">Quality factor applied: <span class="mono">${value.qFactor}</span> (demo to reflect form differences).</div>`
+    : "";
+
+  card.innerHTML = `
+    <div class="cardTop">
+      <div style="min-width: 260px;">
+        <div class="title">${escapeHtml(product.name)}</div>
+        <div class="meta">
+          ${escapeHtml(product.brand)} • ${escapeHtml(product.form)} • ${escapeHtml(product.servingSize)} •
+          ${pricePerContainer} / ${product.servingsPerContainer} servings
+          <span class="small">(${money(pricePerServing, product.currency)} per serving)</span>
+        </div>
+        ${tags ? `<div style="margin-top:6px;">${tags}</div>` : ""}
+      </div>
+
+      <div class="kpis">
+        <div class="kpi">
+          <p class="label">${escapeHtml(activeLabel)}</p>
+          <p class="val">${escapeHtml(activeAmountShown)}</p>
+        </div>
+        <div class="kpi">
+          <p class="label">Servings/day to target</p>
+          <p class="val">${escapeHtml(String(servingsNeededShown))}</p>
+        </div>
+        <div class="kpi">
+          <p class="label">Estimated cost/day</p>
+          <p class="val ${kpiClass}">${escapeHtml(String(costShown))}</p>
+          <p class="label">${escapeHtml(practicalityText)}</p>
+        </div>
+      </div>
+    </div>
+
+    <details ${els.showMath.checked ? "open" : ""}>
+      <summary>Why this result?</summary>
+      <ul>
+        ${reasonLines.map(x => `<li>${escapeHtml(x)}</li>`).join("")}
+      </ul>
+      ${derivedNote}
+      ${qFactorNote}
+    </details>
+  `;
+  return card;
+}
+
+function escapeHtml(s) {
+  return (s ?? "").toString()
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function runSearch() {
+  const query = els.q.value.trim();
+  setStatus("Searching…");
+  clearResults();
+
+  const concept = getConceptForQuery(query);
+
+  if (!concept) {
+    // Keyword search only
+    const keywordMatches = PRODUCTS
+      .filter(p => productMatchesQuery(p, query))
+      .slice(0, 20);
+
+    els.intentBox.appendChild(renderIntent(null, null, query));
+
+    if (keywordMatches.length === 0) {
+      els.directCards.innerHTML = `<div class="noteBox">No matches in the tiny demo dataset. Try a scenario chip above.</div>`;
+    } else {
+      for (const p of keywordMatches) {
+        const reason = [
+          "Matched by keyword in product name/ingredients/tags.",
+          "No ingredient intent inferred (in this prototype)."
+        ];
+        const dummyTarget = { ingredientKey: "n/a", unit: "n/a", targetPerDay: 0 };
+        const card = renderProductCard(p, { eligible:false }, dummyTarget, reason);
+        els.directCards.appendChild(card);
+      }
+    }
+
+    setStatus("Done (keyword)");
+    return;
+  }
+
+  // Ensure goal dropdown is aligned (in case user typed)
+  populateGoalsForConcept(concept);
+
+  const outcomeId = els.goal.value || concept.defaultOutcomeId;
+  const outcome = concept.outcomes.find(o => o.id === outcomeId) || concept.outcomes[0];
+
+  // Allow user to edit target dose
+  const editedDose = parseFloat(els.dose.value);
+  if (!Number.isNaN(editedDose) && editedDose > 0) {
+    outcome.target.targetPerDay = editedDose;
+  } else {
+    els.dose.value = outcome.target.targetPerDay;
+  }
+
+  els.intentBox.appendChild(renderIntent(concept, outcome, query));
+
+  const dietFilter = els.diet.value;
+  const maxCost = parseFloat(els.maxCost.value);
+
+  // Step (1): find related products
+  const related = PRODUCTS
+    .filter(p => passesDietFilter(p, dietFilter))
+    .filter(p => productRelatedToConcept(p, concept) || productMatchesQuery(p, query));
+
+  const target = outcome.target;
+
+  // Step (2)(5): score direct products by cost/day to target ingredient dose
+  const scored = related.map(p => {
+    const v = computeValueForTarget(p, target);
+    const isDirectDoseMatch = v.eligible;
+    return { product: p, value: v, isDirectDoseMatch };
+  });
+
+  const direct = scored
+    .filter(x => x.isDirectDoseMatch)
+    .filter(x => Number.isNaN(maxCost) ? true : x.value.costPerDay <= maxCost)
+    .sort((a, b) => a.value.costPerDay - b.value.costPerDay);
+
+  const notDirect = scored
+    .filter(x => !x.isDirectDoseMatch)
+    .slice(0, 12);
+
+  // Render direct matches
+  if (direct.length === 0) {
+    els.directCards.innerHTML = `
+      <div class="noteBox">
+        No direct dose‑matches found for <span class="mono">${escapeHtml(target.ingredientKey)}</span> in the demo dataset
+        (or filtered out by diet/cost).
+        Try a different goal or clear filters.
+      </div>
+    `;
+  } else {
+    for (const x of direct) {
+      const reasons = [];
+      reasons.push(`Included because it’s related to "${concept.title}" (trigger match or tag).`);
+      reasons.push(`It provides ${target.ingredientKey} in the label data (or derived from EPA + DHA).`);
+      reasons.push(`Ranked by lowest estimated cost/day to reach ${target.targetPerDay} ${target.unit}/day.`);
+      if (x.value.practicality !== "normal") reasons.push(`Practicality note: ${x.value.practicality} servings/day.`);
+      if (Number.isNaN(maxCost) === false) reasons.push(`Cost/day filter applied: ≤ ${money(maxCost, x.product.currency)}.`);
+      if (x.value.qFactor !== 1.0) reasons.push(`A demo “quality factor” was applied for forms (for realism).`);
+      const card = renderProductCard(x.product, x.value, target, reasons);
+      els.directCards.appendChild(card);
+    }
+  }
+
+  // Render related (no match)
+  if (notDirect.length === 0) {
+    els.relatedCards.innerHTML = `<div class="noteBox">None.</div>`;
+  } else {
+    for (const x of notDirect) {
+      const reasons = [];
+      reasons.push(`Related to "${concept.title}" by name/ingredients/tags.`);
+      if (concept.id === "omega3" && x.product.actives?.ala) {
+        reasons.push("This product lists ALA (plant omega‑3), but does not list EPA/DHA, so it doesn’t match the inferred EPA+DHA intent.");
+      } else {
+        reasons.push(`Doesn’t provide a computable dose for ${target.ingredientKey} in this demo dataset.`);
+      }
+      reasons.push("In production, this could still be shown, but it would rank lower because value can’t be computed.");
+      const card = renderProductCard(x.product, { eligible:false }, target, reasons);
+      els.relatedCards.appendChild(card);
+    }
+  }
+
+  // Step (4): expand to alternatives for same outcome
+  const expansions = concept.expansions?.[outcome.id] || [];
+  const altResults = [];
+
+  for (const alt of expansions) {
+    for (const p of PRODUCTS) {
+      if (!passesDietFilter(p, dietFilter)) continue;
+      // avoid duplicates already in direct related set
+      if (related.some(r => r.id === p.id)) continue;
+
+      const altTarget = { ingredientKey: alt.ingredientKey, unit: alt.unit, targetPerDay: alt.targetPerDay };
+      const v = computeValueForTarget(p, altTarget);
+      if (!v.eligible) continue;
+
+      if (!Number.isNaN(maxCost) && v.costPerDay > maxCost) continue;
+
+      altResults.push({
+        alt,
+        product: p,
+        value: v,
+        altTarget
+      });
+    }
+  }
+
+  // Sort alternatives by (ingredient group then cost)
+  altResults.sort((a, b) => {
+    if (a.alt.ingredientKey < b.alt.ingredientKey) return -1;
+    if (a.alt.ingredientKey > b.alt.ingredientKey) return 1;
+    return a.value.costPerDay - b.value.costPerDay;
+  });
+
+  if (altResults.length === 0) {
+    els.altCards.innerHTML = `<div class="noteBox">No alternatives found for this goal in the tiny demo dataset.</div>`;
+    els.altIntro.style.display = "none";
+  } else {
+    els.altIntro.style.display = "block";
+    els.altIntro.innerHTML = `
+      These are <strong>non‑omega</strong> products that can support a <em>similar goal</em> via different ingredients.
+      The prototype includes them because the selected goal is associated with EPA+DHA outcomes.
+      <br/><br/>
+      <span class="small">Important: alternatives ≠ equivalent effects. This is for demonstrating outcome expansion logic.</span>
+    `;
+
+    let lastGroup = null;
+
+    for (const r of altResults) {
+      if (r.alt.ingredientKey !== lastGroup) {
+        lastGroup = r.alt.ingredientKey;
+        const groupTitle = document.createElement("div");
+        groupTitle.className = "noteBox";
+        groupTitle.style.marginTop = "10px";
+        groupTitle.innerHTML = `
+          <strong>${escapeHtml(r.alt.label)}</strong> — target <span class="mono">${r.alt.targetPerDay} ${r.alt.unit}/day</span><br/>
+          <span class="small">${escapeHtml(r.alt.why)}</span>
+        `;
+        els.altCards.appendChild(groupTitle);
+      }
+
+      const reasons = [
+        `Included as an alternative ingredient for goal: "${outcome.label}".`,
+        `Matches alternative target: ${r.alt.label} (${r.alt.targetPerDay} ${r.alt.unit}/day).`,
+        `Ranked by lowest estimated cost/day for this alternative target.`,
+      ];
+      const card = renderProductCard(r.product, r.value, r.altTarget, reasons);
+      els.altCards.appendChild(card);
+    }
+  }
+
+  setStatus(`Done • ${direct.length} direct matches • ${altResults.length} alternatives`);
+}
+
+/**
+ * ---------------------------
+ * UI WIRING
+ * ---------------------------
+ */
+function renderScenarioChips() {
+  els.scenarioChips.innerHTML = "";
+  for (const s of SCENARIOS) {
+    const chip = document.createElement("div");
+    chip.className = "chip";
+    chip.textContent = s.label;
+    chip.addEventListener("click", () => {
+      els.q.value = s.query;
+
+      const concept = getConceptForQuery(s.query);
+      populateGoalsForConcept(concept);
+
+      // set outcome if exists
+      if (concept) {
+        const found = concept.outcomes.find(o => o.id === s.outcomeId);
+        if (found) {
+          els.goal.value = found.id;
+          els.dose.value = found.target.targetPerDay;
+        }
+      }
+      runSearch();
+    });
+    els.scenarioChips.appendChild(chip);
+  }
+}
+
+function onQueryChange() {
+  const query = els.q.value.trim();
+  const concept = getConceptForQuery(query);
+  populateGoalsForConcept(concept);
+}
+
+els.btnSearch.addEventListener("click", runSearch);
+els.q.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") runSearch();
+});
+els.q.addEventListener("input", () => {
+  // Lightweight “intent update” behavior
+  onQueryChange();
+});
+els.goal.addEventListener("change", () => {
+  const query = els.q.value.trim();
+  const concept = getConceptForQuery(query);
+  if (!concept) return;
+  const out = concept.outcomes.find(o => o.id === els.goal.value);
+  if (out) els.dose.value = out.target.targetPerDay;
+});
+els.dose.addEventListener("change", () => {
+  // no-op; used in runSearch
+});
+els.diet.addEventListener("change", runSearch);
+els.maxCost.addEventListener("change", runSearch);
+els.showMath.addEventListener("change", () => runSearch());
+
+// Init
+renderScenarioChips();
+els.q.value = "omega";
+onQueryChange();
+runSearch();
+</script>
+</body>
+</html>
