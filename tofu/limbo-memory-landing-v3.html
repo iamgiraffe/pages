@@ -1,0 +1,2615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Never Miss a Job — Voice note to booked job</title>
+  <meta name="description" content="Turn a quick voice note into a filled job form and a calendar-ready event. Built for field service owners, dispatchers, and crews who cannot afford to lose leads." />
+  <style>
+    :root{
+      --bg:#f7f4ee;
+      --bg-2:#fcfbf8;
+      --surface:#ffffff;
+      --surface-soft:#f2eee5;
+      --surface-soft-2:#ece7dc;
+      --ink:#171616;
+      --muted:#666159;
+      --muted-2:#8b857c;
+      --line:#e6dfd2;
+      --line-strong:#d8cfbf;
+      --green:#56c26e;
+      --green-soft:rgba(86,194,110,.12);
+      --green-deep:#2d9b47;
+      --red:#f35a57;
+      --red-soft:rgba(243,90,87,.12);
+      --blue:#5d89ff;
+      --shadow:0 25px 70px rgba(15,15,15,.08),0 4px 16px rgba(15,15,15,.04);
+      --shadow-soft:0 18px 40px rgba(15,15,15,.06),0 2px 10px rgba(15,15,15,.03);
+      --radius-xl:32px;
+      --radius-lg:24px;
+      --radius-md:18px;
+      --radius-sm:14px;
+      --max:1180px;
+      --header-h:84px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 700px at 92% -10%, rgba(93,137,255,.08), transparent 38%),
+        radial-gradient(900px 650px at -10% 10%, rgba(86,194,110,.08), transparent 30%),
+        linear-gradient(180deg, var(--bg-2), var(--bg));
+      line-height:1.5;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    button,input,textarea,select{font:inherit}
+    button{cursor:pointer}
+    .container{
+      width:min(var(--max), calc(100% - 32px));
+      margin:0 auto;
+    }
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:.6rem;
+      padding:.58rem .95rem;
+      background:rgba(255,255,255,.72);
+      border:1px solid rgba(0,0,0,.06);
+      border-radius:999px;
+      backdrop-filter: blur(8px);
+      color:var(--muted);
+      font-size:.93rem;
+      font-weight:600;
+      letter-spacing:.01em;
+    }
+    .eyebrow .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:var(--green);
+      box-shadow:0 0 0 6px var(--green-soft);
+    }
+    .section{padding:88px 0}
+    .section.tight{padding:64px 0}
+    .section-header{
+      max-width:760px;
+      margin:0 auto 28px;
+      text-align:center;
+    }
+    .section-header.left{
+      margin:0 0 28px;
+      text-align:left;
+    }
+    h1,h2,h3,h4,p{margin:0}
+    h1{
+      font-size:clamp(2.8rem, 5vw, 5.3rem);
+      line-height:.98;
+      letter-spacing:-.045em;
+      font-weight:800;
+    }
+    h2{
+      font-size:clamp(2rem, 4vw, 3.25rem);
+      line-height:1.02;
+      letter-spacing:-.04em;
+      font-weight:800;
+    }
+    h3{
+      font-size:clamp(1.2rem, 2vw, 1.45rem);
+      line-height:1.15;
+      letter-spacing:-.02em;
+      font-weight:700;
+    }
+    .lead{
+      font-size:clamp(1.05rem, 1.6vw, 1.22rem);
+      color:var(--muted);
+      max-width:64ch;
+    }
+    .muted{color:var(--muted)}
+    .small{font-size:.92rem;color:var(--muted)}
+    .label{
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      font-size:.82rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-weight:700;
+    }
+    .label::before{
+      content:"";
+      width:28px;height:1px;background:var(--line-strong);display:inline-block;
+    }
+    .btn{
+      appearance:none;
+      border:none;
+      border-radius:999px;
+      padding:1rem 1.3rem;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.7rem;
+      font-weight:700;
+      transition:transform .25s ease, box-shadow .25s ease, background .25s ease, color .25s ease, border-color .25s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-2px)}
+    .btn:active{transform:translateY(0)}
+    .btn-primary{
+      background:#101010;
+      color:#fff;
+      box-shadow:0 12px 24px rgba(0,0,0,.16);
+    }
+    .btn-primary:hover{box-shadow:0 18px 28px rgba(0,0,0,.22)}
+    .btn-secondary{
+      background:rgba(255,255,255,.78);
+      color:var(--ink);
+      border:1px solid rgba(0,0,0,.08);
+      backdrop-filter:blur(8px);
+    }
+    .btn-soft{
+      background:var(--surface-soft);
+      color:var(--ink);
+      border:1px solid var(--line);
+    }
+    .btn-ghost{
+      background:transparent;
+      color:var(--muted);
+      border:1px dashed var(--line-strong);
+    }
+    .btn .icon{
+      width:1.05rem;height:1.05rem;display:inline-flex;
+    }
+
+    /* Header */
+    .site-header{
+      position:sticky;
+      top:0;
+      z-index:40;
+      background:rgba(247,244,238,.82);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid rgba(0,0,0,.04);
+    }
+    .site-header .inner{
+      min-height:var(--header-h);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:24px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:.9rem;
+      font-weight:800;
+      letter-spacing:-.03em;
+    }
+    .brand-mark{
+      width:42px;height:42px;border-radius:14px;
+      background:linear-gradient(180deg, #fff, #f2efe8);
+      border:1px solid rgba(0,0,0,.06);
+      box-shadow:var(--shadow-soft);
+      display:grid;place-items:center;
+      position:relative;
+      overflow:hidden;
+    }
+    .brand-mark svg{width:22px;height:22px}
+    .brand-text{
+      display:flex;flex-direction:column;line-height:1;
+    }
+    .brand-text strong{font-size:1rem}
+    .brand-text span{font-size:.76rem;color:var(--muted);font-weight:600;letter-spacing:.02em}
+    .nav{
+      display:flex;align-items:center;gap:26px;
+      margin-left:auto;
+    }
+    .nav a{
+      color:var(--muted);
+      font-weight:600;
+      font-size:.97rem;
+      transition:color .25s ease;
+    }
+    .nav a:hover{color:var(--ink)}
+    .header-actions{display:flex;align-items:center;gap:12px}
+    .menu-toggle{
+      display:none;
+      width:48px;height:48px;border-radius:14px;
+      border:1px solid rgba(0,0,0,.08);
+      background:rgba(255,255,255,.78);
+      align-items:center;justify-content:center;
+      padding:0;
+    }
+    .menu-toggle span,.menu-toggle span::before,.menu-toggle span::after{
+      display:block;width:18px;height:2px;background:var(--ink);border-radius:4px;position:relative;transition:.25s ease;
+      content:"";
+    }
+    .menu-toggle span::before{position:absolute;top:-6px;left:0}
+    .menu-toggle span::after{position:absolute;top:6px;left:0}
+    .mobile-panel{
+      display:none;
+      padding:0 0 18px;
+    }
+    .mobile-panel .panel{
+      padding:18px;
+      border:1px solid rgba(0,0,0,.06);
+      border-radius:24px;
+      background:rgba(255,255,255,.82);
+      box-shadow:var(--shadow-soft);
+    }
+    .mobile-links{
+      display:grid;
+      gap:8px;
+      margin-bottom:14px;
+    }
+    .mobile-links a{
+      padding:12px 14px;
+      border-radius:14px;
+      background:var(--surface-soft);
+      color:var(--ink);
+      font-weight:700;
+    }
+    body.menu-open .menu-toggle span{background:transparent}
+    body.menu-open .menu-toggle span::before{transform:translateY(6px) rotate(45deg)}
+    body.menu-open .menu-toggle span::after{transform:translateY(-6px) rotate(-45deg)}
+    body.menu-open .mobile-panel{display:block}
+
+    /* Hero */
+    .hero{
+      padding:44px 0 40px;
+    }
+    .hero-grid{
+      display:grid;
+      grid-template-columns:minmax(0, 1.04fr) minmax(390px, .96fr);
+      align-items:center;
+      gap:46px;
+    }
+    .hero-copy{
+      position:relative;
+      z-index:1;
+    }
+    .hero-copy > * + *{margin-top:18px}
+    .hero-copy .lead{max-width:58ch}
+    .hero-actions{
+      display:flex;flex-wrap:wrap;gap:12px;
+      margin-top:26px;
+    }
+    .trust-row{
+      display:flex;flex-wrap:wrap;gap:12px;
+      margin-top:24px;
+    }
+    .trust-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:.55rem;
+      padding:.72rem .95rem;
+      background:rgba(255,255,255,.72);
+      border:1px solid rgba(0,0,0,.06);
+      border-radius:999px;
+      color:var(--muted);
+      font-weight:600;
+      font-size:.92rem;
+      backdrop-filter:blur(8px);
+    }
+    .trust-pill .tick{
+      width:18px;height:18px;border-radius:50%;
+      display:grid;place-items:center;
+      color:#fff;background:var(--green);
+      box-shadow:0 0 0 6px var(--green-soft);
+      font-size:.72rem;line-height:1;
+    }
+    .pain-quote{
+      margin-top:28px;
+      padding:22px 22px 20px;
+      border-radius:24px;
+      background:linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,255,255,.62));
+      border:1px solid rgba(0,0,0,.06);
+      box-shadow:var(--shadow-soft);
+      max-width:560px;
+      position:relative;
+      overflow:hidden;
+    }
+    .pain-quote::after{
+      content:"";
+      position:absolute;inset:auto auto -40px -20px;
+      width:150px;height:150px;border-radius:50%;
+      background:radial-gradient(circle, rgba(243,90,87,.13), transparent 60%);
+      pointer-events:none;
+    }
+    .pain-quote blockquote{
+      font-size:1.08rem;
+      line-height:1.45;
+      letter-spacing:-.015em;
+      font-weight:700;
+      margin:0 0 10px;
+    }
+    .pain-quote .attribution{
+      color:var(--muted);
+      font-size:.92rem;
+      display:flex;align-items:center;gap:10px;
+    }
+    .pain-quote .badge{
+      display:inline-flex;align-items:center;gap:.45rem;
+      padding:.48rem .72rem;
+      border-radius:999px;
+      background:var(--red-soft);
+      color:#b14240;
+      font-weight:700;
+      font-size:.82rem;
+    }
+
+    .hero-visual{
+      position:relative;
+      display:grid;
+      place-items:center;
+    }
+    .visual-shell{
+      width:min(100%, 520px);
+      position:relative;
+    }
+    .screen-steps{
+      display:flex;gap:10px;justify-content:center;flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+    .screen-step{
+      display:inline-flex;align-items:center;gap:.45rem;
+      padding:.62rem .9rem;
+      border-radius:999px;
+      border:1px solid rgba(0,0,0,.08);
+      background:rgba(255,255,255,.76);
+      color:var(--muted);
+      font-size:.86rem;
+      font-weight:700;
+      backdrop-filter:blur(8px);
+      transition:.25s ease;
+    }
+    .screen-step.active{
+      color:var(--ink);
+      background:#fff;
+      box-shadow:var(--shadow-soft);
+      border-color:rgba(0,0,0,.05);
+    }
+    .screen-step .num{
+      width:22px;height:22px;border-radius:50%;
+      display:grid;place-items:center;
+      background:var(--surface-soft);
+      color:var(--ink);
+      font-size:.75rem;
+    }
+    .phone{
+      position:relative;
+      width:min(100%, 470px);
+      aspect-ratio: 420 / 700;
+      border-radius:42px;
+      background:linear-gradient(180deg, #faf9f6, #f3efe7);
+      border:1px solid rgba(0,0,0,.08);
+      box-shadow:var(--shadow);
+      padding:16px;
+      overflow:hidden;
+    }
+    .phone::before{
+      content:"";
+      position:absolute;inset:0;
+      background:
+        radial-gradient(400px 180px at 50% -10%, rgba(93,137,255,.08), transparent 60%),
+        radial-gradient(240px 160px at 50% 120%, rgba(86,194,110,.08), transparent 60%);
+      pointer-events:none;
+    }
+    .phone-inner{
+      position:relative;
+      height:100%;
+      border-radius:30px;
+      background:#fff;
+      overflow:hidden;
+      border:1px solid rgba(0,0,0,.04);
+    }
+    .statusbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:16px 18px 8px;
+      font-weight:700;
+      font-size:.84rem;
+    }
+    .status-icons{
+      display:flex;gap:8px;align-items:center;
+      color:var(--ink);
+    }
+    .status-pill{
+      width:17px;height:10px;border:1.6px solid currentColor;border-radius:2px;position:relative;
+    }
+    .status-pill::after{
+      content:"";position:absolute;right:-4px;top:2px;width:2px;height:4px;background:currentColor;border-radius:1px;
+    }
+    .signal{
+      display:inline-flex;gap:2px;align-items:flex-end;
+    }
+    .signal span{display:block;width:2px;background:currentColor;border-radius:2px}
+    .signal span:nth-child(1){height:4px;opacity:.5}
+    .signal span:nth-child(2){height:6px;opacity:.7}
+    .signal span:nth-child(3){height:8px;opacity:.85}
+    .signal span:nth-child(4){height:10px}
+    .screens{
+      position:relative;
+      height:calc(100% - 44px);
+    }
+    .screen{
+      position:absolute;inset:0;
+      padding:10px 18px 18px;
+      opacity:0;
+      transform:translateX(16px) scale(.985);
+      transition:opacity .45s ease, transform .45s ease;
+      pointer-events:none;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+    .screen.active{
+      opacity:1;
+      transform:translateX(0) scale(1);
+      pointer-events:auto;
+    }
+    .screen h4{
+      font-size:1.25rem;
+      line-height:1.1;
+      letter-spacing:-.03em;
+      font-weight:800;
+    }
+    .screen p{color:var(--muted);font-size:.95rem}
+    .app-card-zone{
+      margin-top:8px;
+      background:var(--surface-soft);
+      border-radius:26px;
+      padding:18px;
+      min-height:210px;
+      border:1px solid rgba(0,0,0,.03);
+    }
+    .job-mini-list{
+      display:grid;gap:12px;
+      align-content:start;
+    }
+    .mini-job{
+      display:grid;
+      grid-template-columns:6px 1fr auto;
+      gap:12px;
+      align-items:center;
+      padding:14px 14px 14px 0;
+      background:#fff;
+      border-radius:16px;
+      box-shadow:0 8px 24px rgba(0,0,0,.06);
+      border:1px solid rgba(0,0,0,.04);
+      overflow:hidden;
+    }
+    .mini-job .bar{height:100%;background:var(--green)}
+    .mini-job strong{font-size:.9rem;display:block}
+    .mini-job span{font-size:.76rem;color:var(--muted)}
+    .check-round{
+      width:24px;height:24px;border-radius:50%;
+      background:var(--green);
+      color:#fff;display:grid;place-items:center;
+      margin-right:12px;font-size:.82rem;font-weight:900;
+    }
+    .hero-headline{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      padding:2px 2px 0;
+    }
+    .primary-cta-center{
+      margin-top:auto;
+      display:flex;
+      justify-content:center;
+    }
+    .mic-ring{
+      width:92px;height:92px;border-radius:50%;
+      background:var(--red);
+      color:#fff;
+      display:grid;place-items:center;
+      box-shadow:0 14px 28px rgba(243,90,87,.28);
+      margin-inline:auto;
+      flex-shrink:0;
+    }
+    .mic-ring svg{width:30px;height:30px}
+    .wave-strip{
+      display:flex;justify-content:center;align-items:flex-end;gap:4px;
+      height:76px;padding:0 10px;
+    }
+    .wave-strip span{
+      width:4px;background:#e1ddd6;border-radius:999px;
+      animation:wave 1.1s ease-in-out infinite;
+      animation-delay:calc(var(--i) * .06s);
+    }
+    .wave-strip.live span:nth-child(-n+12),
+    .wave-strip.live span:nth-last-child(-n+12){
+      background:#e7e1d6;
+    }
+    .wave-strip.live span:nth-child(13),
+    .wave-strip.live span:nth-child(14),
+    .wave-strip.live span:nth-child(15),
+    .wave-strip.live span:nth-child(16),
+    .wave-strip.live span:nth-child(17),
+    .wave-strip.live span:nth-child(18),
+    .wave-strip.live span:nth-child(19),
+    .wave-strip.live span:nth-child(20),
+    .wave-strip.live span:nth-child(21),
+    .wave-strip.live span:nth-child(22),
+    .wave-strip.live span:nth-child(23),
+    .wave-strip.live span:nth-child(24){
+      background:var(--red);
+    }
+    @keyframes wave{
+      0%,100%{height:12px}
+      50%{height:calc(16px + var(--h) * 1px)}
+    }
+    .timer{
+      font-size:3.25rem;line-height:1;letter-spacing:-.06em;font-weight:500;text-align:center;
+    }
+    .timer.red{color:var(--red)}
+    .processing-card{
+      display:grid;
+      align-content:center;
+      justify-items:center;
+      gap:10px;
+      height:100%;
+      min-height:360px;
+      padding-top:10px;
+    }
+    .spinner{
+      width:12px;height:12px;border-radius:3px;background:#111;animation:pulse 1s ease infinite;
+      margin-bottom:20px;
+    }
+    @keyframes pulse{
+      0%,100%{transform:scale(.8);opacity:.6}
+      50%{transform:scale(1.2);opacity:1}
+    }
+    .processing-card h4{font-size:2.05rem}
+    .status-list{
+      margin-top:12px;
+      display:grid;gap:10px;
+      align-self:start;
+      width:min(240px, 100%);
+    }
+    .status-item{
+      display:grid;
+      grid-template-columns:20px 1fr;
+      gap:10px;
+      align-items:center;
+      color:var(--muted);
+      font-size:.92rem;
+    }
+    .status-item .mark{
+      width:18px;height:18px;border-radius:50%;
+      border:1.5px solid var(--line-strong);
+      display:grid;place-items:center;
+      font-size:.68rem;
+      color:#fff;
+      background:#fff;
+    }
+    .status-item.done{color:var(--ink);font-weight:700}
+    .status-item.done .mark{
+      background:var(--green);
+      border-color:var(--green);
+    }
+    .edit-form{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      min-height:420px;
+    }
+    .form-grid{
+      display:grid;
+      gap:10px;
+    }
+    .mini-field .field-label{
+      font-size:.77rem;
+      font-weight:700;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+    .mini-field .field-value{
+      background:#fff;
+      border:1px solid rgba(0,0,0,.05);
+      box-shadow:0 6px 18px rgba(0,0,0,.03);
+      border-radius:14px;
+      padding:12px 14px;
+      font-weight:600;
+      font-size:.94rem;
+      min-height:47px;
+      display:flex;
+      align-items:center;
+    }
+    .source-pill{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:12px 14px;
+      background:#fff;border:1px solid rgba(0,0,0,.05);
+      border-radius:14px;
+      font-weight:600;
+    }
+    .source-left{display:flex;align-items:center;gap:10px}
+    .sound-mini{
+      display:flex;gap:2px;align-items:flex-end;height:16px;
+    }
+    .sound-mini span{width:3px;border-radius:99px;background:var(--muted-2)}
+    .sound-mini span:nth-child(1){height:9px}
+    .sound-mini span:nth-child(2){height:14px}
+    .sound-mini span:nth-child(3){height:7px}
+    .sound-mini span:nth-child(4){height:12px}
+    .play-tri{
+      width:0;height:0;border-left:8px solid var(--ink);border-top:6px solid transparent;border-bottom:6px solid transparent;
+    }
+    .schedule-btn{
+      margin-top:auto;
+      width:100%;
+    }
+    .floating-card{
+      position:absolute;
+      z-index:5;
+      padding:14px 16px;
+      border-radius:20px;
+      background:rgba(255,255,255,.86);
+      backdrop-filter:blur(10px);
+      border:1px solid rgba(0,0,0,.05);
+      box-shadow:var(--shadow-soft);
+      max-width:220px;
+    }
+    .floating-card.top{
+      top:96px;right:-26px;
+    }
+    .floating-card.bottom{
+      left:-16px;bottom:52px;
+    }
+    .floating-card strong{display:block;font-size:.95rem}
+    .floating-card span{display:block;color:var(--muted);font-size:.83rem;margin-top:3px}
+    .floating-row{
+      display:flex;align-items:center;gap:10px;
+    }
+    .pill-icon{
+      width:34px;height:34px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;
+      background:var(--surface-soft);
+    }
+    .pill-icon.green{background:var(--green-soft);color:var(--green-deep)}
+    .pill-icon.red{background:var(--red-soft);color:#c84845}
+
+    /* stat strip */
+    .stats-strip{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:16px;
+      margin-top:36px;
+    }
+    .stat-card{
+      background:rgba(255,255,255,.76);
+      border:1px solid rgba(0,0,0,.06);
+      border-radius:24px;
+      padding:22px;
+      box-shadow:var(--shadow-soft);
+      backdrop-filter:blur(10px);
+    }
+    .stat-card .big{
+      font-size:2.35rem;
+      line-height:1;
+      letter-spacing:-.06em;
+      font-weight:800;
+      margin-bottom:6px;
+    }
+    .stat-card p{color:var(--muted)}
+    .stat-card .big small{
+      font-size:1rem;
+      color:var(--muted);
+      letter-spacing:0;
+      font-weight:700;
+    }
+
+    /* Pain */
+    .pain-grid{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:18px;
+      margin-top:24px;
+    }
+    .pain-card, .feature-card, .audience-card, .faq-item, .demo-panel, .cta-panel, .story-card{
+      background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.76));
+      border:1px solid rgba(0,0,0,.06);
+      border-radius:28px;
+      box-shadow:var(--shadow-soft);
+      backdrop-filter:blur(8px);
+    }
+    .pain-card{
+      padding:26px;
+      position:relative;
+      overflow:hidden;
+      min-height:250px;
+    }
+    .pain-card::after{
+      content:"";
+      position:absolute;right:-42px;bottom:-42px;
+      width:160px;height:160px;border-radius:50%;
+      background:radial-gradient(circle, rgba(0,0,0,.045), transparent 70%);
+    }
+    .pain-icon{
+      width:54px;height:54px;border-radius:18px;background:var(--surface-soft);
+      display:grid;place-items:center;
+      margin-bottom:18px;
+      border:1px solid rgba(0,0,0,.04);
+    }
+    .pain-icon svg{width:26px;height:26px}
+    .pain-card p{color:var(--muted);margin-top:10px}
+    .pain-card .micro{
+      margin-top:18px;
+      display:inline-flex;align-items:center;gap:.5rem;
+      color:#b14240;
+      font-size:.84rem;font-weight:700;
+      background:var(--red-soft);
+      padding:.48rem .72rem;border-radius:999px;
+    }
+
+    /* How */
+    .steps{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:18px;
+      margin-top:30px;
+    }
+    .feature-card{
+      padding:28px;
+      position:relative;
+      overflow:hidden;
+    }
+    .feature-card .num{
+      width:42px;height:42px;border-radius:50%;
+      display:grid;place-items:center;
+      background:var(--surface-soft);
+      font-weight:800;
+      margin-bottom:18px;
+      border:1px solid rgba(0,0,0,.05);
+    }
+    .feature-card p{color:var(--muted);margin-top:10px}
+    .feature-card .check-list{
+      display:grid;gap:10px;margin-top:18px;
+    }
+    .feature-card .check-list span{
+      display:flex;align-items:flex-start;gap:10px;color:var(--muted);
+      font-size:.94rem;
+    }
+    .feature-card .check-list span i{
+      width:18px;height:18px;border-radius:50%;
+      background:var(--green);color:#fff;display:grid;place-items:center;font-style:normal;font-size:.72rem;flex-shrink:0;margin-top:2px;
+    }
+
+    /* Demo */
+    .demo-wrap{
+      display:grid;
+      grid-template-columns:minmax(0,.96fr) minmax(0,1.04fr);
+      gap:20px;
+      align-items:stretch;
+      margin-top:30px;
+    }
+    .demo-panel{
+      padding:28px;
+      position:relative;
+      overflow:hidden;
+    }
+    .demo-panel .panel-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:20px;
+    }
+    .demo-panel .panel-top .meta{
+      max-width:450px;
+    }
+    .demo-badge{
+      padding:.48rem .72rem;
+      background:var(--surface-soft);
+      border:1px solid var(--line);
+      border-radius:999px;
+      font-size:.84rem;font-weight:700;color:var(--muted);
+      white-space:nowrap;
+    }
+    .text-input-wrap{
+      position:relative;
+    }
+    .text-input{
+      width:100%;
+      min-height:210px;
+      resize:vertical;
+      border-radius:24px;
+      border:1px solid var(--line);
+      background:var(--surface-soft);
+      padding:18px 18px 56px;
+      outline:none;
+      transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
+      color:var(--ink);
+    }
+    .text-input:focus{
+      border-color:rgba(93,137,255,.36);
+      box-shadow:0 0 0 4px rgba(93,137,255,.12);
+      background:#fff;
+    }
+    .textarea-helper{
+      position:absolute;
+      right:16px;bottom:16px;
+      font-size:.82rem;color:var(--muted);
+      background:rgba(255,255,255,.88);
+      border:1px solid rgba(0,0,0,.05);
+      border-radius:999px;
+      padding:.25rem .55rem;
+      backdrop-filter:blur(8px);
+    }
+    .toolbar{
+      display:flex;flex-wrap:wrap;gap:10px;
+      margin-top:14px;
+    }
+    .toolbar .btn{padding:.88rem 1rem}
+    .record-btn.recording{
+      background:var(--red);
+      color:#fff;
+      box-shadow:0 14px 28px rgba(243,90,87,.24);
+    }
+    .demo-actions{
+      display:flex;flex-wrap:wrap;gap:12px;
+      margin-top:18px;
+    }
+    .demo-note{
+      margin-top:14px;
+      padding:14px 16px;
+      border-radius:18px;
+      background:var(--surface-soft);
+      border:1px dashed var(--line-strong);
+      color:var(--muted);
+      font-size:.93rem;
+    }
+    .process-strip{
+      display:grid;
+      gap:12px;
+      margin-top:10px;
+    }
+    .process-row{
+      display:grid;
+      grid-template-columns:20px 1fr auto;
+      gap:12px;
+      align-items:center;
+      padding:12px 14px;
+      border-radius:16px;
+      background:var(--surface-soft);
+      border:1px solid rgba(0,0,0,.04);
+      color:var(--muted);
+      transition:.25s ease;
+    }
+    .process-row .state{
+      width:20px;height:20px;border-radius:50%;
+      border:1.5px solid var(--line-strong);
+      display:grid;place-items:center;
+      font-size:.72rem;color:#fff;
+      background:#fff;
+    }
+    .process-row.active{
+      background:#fff;
+      color:var(--ink);
+      box-shadow:0 10px 18px rgba(0,0,0,.04);
+    }
+    .process-row.active .state{
+      border-color:var(--green);
+      background:var(--green);
+    }
+    .process-row .tag{
+      font-size:.76rem;
+      font-weight:700;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      color:var(--muted-2);
+    }
+    .results-empty{
+      min-height:480px;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      padding:18px;
+      border-radius:24px;
+      border:1px dashed var(--line-strong);
+      background:linear-gradient(180deg, var(--surface-soft), rgba(255,255,255,.55));
+    }
+    .results-empty .ghost-illustration{
+      width:92px;height:92px;border-radius:30px;
+      background:#fff;
+      box-shadow:var(--shadow-soft);
+      display:grid;place-items:center;
+      margin:0 auto 18px;
+      border:1px solid rgba(0,0,0,.05);
+    }
+    .results-empty p{color:var(--muted);max-width:32ch}
+    .result-shell{display:none}
+    .result-shell.show{display:block}
+    .result-top{
+      display:flex;align-items:center;justify-content:space-between;gap:14px;
+      margin-bottom:16px;
+    }
+    .result-tag{
+      display:inline-flex;align-items:center;gap:.5rem;
+      padding:.5rem .7rem;
+      border-radius:999px;
+      background:var(--green-soft);
+      color:var(--green-deep);
+      font-weight:700;
+      font-size:.84rem;
+    }
+    .result-fields{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+    .result-field{
+      border-radius:18px;
+      background:var(--surface-soft);
+      border:1px solid rgba(0,0,0,.04);
+      padding:14px 16px;
+    }
+    .result-field.full{grid-column:1/-1}
+    .result-field .k{
+      font-size:.77rem;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      color:var(--muted-2);
+      margin-bottom:8px;
+    }
+    .result-field .v{
+      font-weight:700;
+      line-height:1.35;
+      min-height:1.35em;
+    }
+    .calendar-preview{
+      margin-top:18px;
+      padding:18px;
+      border-radius:22px;
+      background:linear-gradient(180deg, #fff, #f7f6f2);
+      border:1px solid rgba(0,0,0,.05);
+      box-shadow:0 14px 28px rgba(0,0,0,.04);
+    }
+    .calendar-label{
+      font-size:.8rem;
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--muted);
+      margin-bottom:12px;
+    }
+    .calendar-item{
+      display:grid;
+      grid-template-columns:6px 1fr auto;
+      gap:14px;
+      align-items:center;
+      padding:14px 16px 14px 0;
+      border-radius:18px;
+      background:#f7f7f4;
+      border:1px solid rgba(0,0,0,.04);
+      overflow:hidden;
+    }
+    .calendar-item .bar{height:100%;background:var(--green)}
+    .calendar-item strong{display:block;font-size:1rem}
+    .calendar-item span{display:block;color:var(--muted);font-size:.86rem}
+    .calendar-check{
+      width:28px;height:28px;border-radius:50%;
+      display:grid;place-items:center;background:var(--green);color:#fff;font-weight:900;
+      margin-right:10px;
+    }
+
+    /* Story / differentiators */
+    .story-layout{
+      display:grid;
+      grid-template-columns:minmax(0, .88fr) minmax(0, 1.12fr);
+      gap:20px;
+      align-items:stretch;
+      margin-top:30px;
+    }
+    .story-card{
+      padding:30px;
+    }
+    .story-card.dark{
+      background:linear-gradient(180deg, #191919, #111111);
+      color:#fff;
+      border-color:rgba(255,255,255,.05);
+      box-shadow:0 28px 60px rgba(0,0,0,.22);
+    }
+    .story-card.dark p{color:rgba(255,255,255,.72)}
+    .story-card .quote{
+      font-size:1.45rem;
+      font-weight:800;
+      line-height:1.2;
+      letter-spacing:-.03em;
+      margin-top:8px;
+    }
+    .bullet-stack{
+      display:grid;gap:14px;
+      margin-top:22px;
+    }
+    .bullet-item{
+      display:grid;grid-template-columns:40px 1fr;gap:14px;align-items:start;
+      padding:14px;
+      border-radius:20px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .bullet-item .ico{
+      width:40px;height:40px;border-radius:14px;background:rgba(255,255,255,.08);display:grid;place-items:center;
+    }
+    .bullet-item strong{display:block;font-size:1rem}
+    .bullet-item span{display:block;margin-top:4px;color:rgba(255,255,255,.72);font-size:.92rem}
+    .stack-cards{
+      display:grid;gap:18px;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+    }
+    .stack-cards .feature-card{padding:24px}
+    .stack-cards .feature-card .num{
+      width:48px;height:48px;border-radius:16px;
+      background:var(--surface-soft);
+    }
+
+    /* Audience */
+    .audience-grid{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:18px;
+      margin-top:26px;
+    }
+    .audience-card{
+      padding:26px;
+    }
+    .audience-card p{margin-top:10px;color:var(--muted)}
+    .trade-tags{
+      display:flex;flex-wrap:wrap;gap:10px;margin-top:18px
+    }
+    .trade-tags span{
+      padding:.65rem .9rem;
+      border-radius:999px;
+      background:var(--surface-soft);
+      border:1px solid var(--line);
+      font-weight:700;
+      color:var(--muted);
+      font-size:.9rem;
+    }
+
+    /* FAQ */
+    .faq-list{
+      display:grid;
+      gap:14px;
+      margin-top:30px;
+    }
+    .faq-item{
+      overflow:hidden;
+    }
+    .faq-question{
+      width:100%;
+      text-align:left;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:18px;
+      padding:22px 24px;
+      background:transparent;
+      border:none;
+      color:var(--ink);
+      font-weight:800;
+      font-size:1rem;
+    }
+    .faq-question .plus{
+      width:34px;height:34px;border-radius:50%;
+      background:var(--surface-soft);
+      border:1px solid var(--line);
+      display:grid;place-items:center;
+      font-size:1.1rem;
+      flex-shrink:0;
+      transition:transform .25s ease, background .25s ease;
+    }
+    .faq-answer{
+      max-height:0;
+      overflow:hidden;
+      transition:max-height .3s ease;
+    }
+    .faq-answer .inner{
+      padding:0 24px 24px;
+      color:var(--muted);
+      max-width:72ch;
+    }
+    .faq-item.open .faq-question .plus{
+      transform:rotate(45deg);
+      background:#fff;
+    }
+    .faq-item.open .faq-answer{
+      max-height:220px;
+    }
+
+    /* CTA final */
+    .final-cta .cta-panel{
+      padding:34px;
+      display:grid;
+      grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);
+      gap:24px;
+      align-items:center;
+      background:
+        radial-gradient(420px 220px at 100% 0%, rgba(93,137,255,.12), transparent 65%),
+        radial-gradient(340px 220px at 0% 100%, rgba(86,194,110,.12), transparent 65%),
+        linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.86));
+    }
+    .cta-copy > * + *{margin-top:14px}
+    .cta-points{
+      display:flex;flex-wrap:wrap;gap:10px;
+      margin-top:18px;
+    }
+    .cta-points span{
+      padding:.62rem .85rem;border-radius:999px;background:var(--surface-soft);
+      border:1px solid var(--line);font-size:.9rem;font-weight:700;color:var(--muted);
+    }
+    .lead-form{
+      padding:24px;
+      border-radius:26px;
+      background:linear-gradient(180deg, #faf9f6, #f5f1e8);
+      border:1px solid rgba(0,0,0,.06);
+      box-shadow:var(--shadow-soft);
+    }
+    .lead-form-grid{
+      display:grid;
+      gap:12px;
+      margin-top:18px;
+    }
+    .field{
+      display:grid;gap:8px;
+    }
+    .field label{
+      font-size:.82rem;
+      font-weight:700;
+      color:var(--muted);
+      letter-spacing:.02em;
+    }
+    .field input,.field select{
+      width:100%;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#fff;
+      padding:14px 15px;
+      outline:none;
+      transition:border-color .2s ease, box-shadow .2s ease;
+    }
+    .field input:focus,.field select:focus{
+      border-color:rgba(93,137,255,.36);
+      box-shadow:0 0 0 4px rgba(93,137,255,.12);
+    }
+    .form-message{
+      margin-top:12px;
+      color:var(--green-deep);
+      font-weight:700;
+      min-height:1.4em;
+    }
+
+    footer{
+      padding:30px 0 50px;
+    }
+    .footer-row{
+      display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap;
+      padding-top:24px;
+      border-top:1px solid rgba(0,0,0,.06);
+      color:var(--muted);
+    }
+    .footer-row .small-links{
+      display:flex;gap:18px;flex-wrap:wrap;
+    }
+
+    /* reveal */
+    .reveal{
+      opacity:0;
+      transform:translateY(18px);
+      transition:opacity .65s ease, transform .65s ease;
+    }
+    .reveal.visible{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    /* sticky mobile cta */
+    .mobile-sticky{
+      position:fixed;
+      left:12px;right:12px;bottom:12px;
+      z-index:35;
+      display:none;
+      padding:10px;
+      border-radius:22px;
+      background:rgba(255,255,255,.84);
+      border:1px solid rgba(0,0,0,.07);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(12px);
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .mobile-sticky .small{
+      line-height:1.25;
+      font-size:.78rem;
+    }
+    .mobile-sticky .btn{padding:.85rem 1rem}
+
+    .hide-mobile{display:inline-flex}
+    .hide-desktop{display:none}
+
+    /* responsive */
+    @media (max-width: 1100px){
+      .hero-grid{
+        grid-template-columns:1fr;
+        gap:34px;
+      }
+      .hero-copy{max-width:760px}
+      .stats-strip,.pain-grid,.steps,.audience-grid{
+        grid-template-columns:repeat(2,1fr);
+      }
+      .demo-wrap,.story-layout,.final-cta .cta-panel{
+        grid-template-columns:1fr;
+      }
+      .stack-cards{
+        grid-template-columns:1fr 1fr;
+      }
+      .floating-card.top{right:0}
+      .floating-card.bottom{left:0}
+    }
+    @media (max-width: 820px){
+      :root{--header-h:74px}
+      .nav,.header-actions .btn-secondary{display:none}
+      .menu-toggle{display:inline-flex}
+      .header-actions .btn-primary{display:none}
+      .hero{padding-top:24px}
+      .section{padding:72px 0}
+      .container{width:min(var(--max), calc(100% - 24px))}
+      .stats-strip,.pain-grid,.steps,.audience-grid,.result-fields,.stack-cards{
+        grid-template-columns:1fr;
+      }
+      .phone{width:min(100%, 420px)}
+      .screen-step{font-size:.8rem}
+      .floating-card{
+        position:static;
+        max-width:none;
+        margin-top:12px;
+      }
+      .visual-shell{display:grid;gap:12px}
+      .final-cta .cta-panel{padding:24px}
+      .lead-form{padding:20px}
+      .mobile-sticky{display:flex}
+      .hide-mobile{display:none}
+      .hide-desktop{display:inline-flex}
+    }
+    @media (max-width: 560px){
+      .hero-actions,.demo-actions{flex-direction:column;align-items:stretch}
+      .hero-actions .btn,.demo-actions .btn,.toolbar .btn{width:100%}
+      .screen-steps{justify-content:flex-start}
+      .phone{aspect-ratio: 390 / 700;border-radius:34px;padding:12px}
+      .phone-inner{border-radius:24px}
+      .demo-panel,.pain-card,.feature-card,.audience-card,.story-card,.lead-form{padding:22px}
+      .pain-quote{padding:18px}
+      .section-header{margin-bottom:22px}
+      .cta-points{display:grid;grid-template-columns:1fr}
+      .footer-row{padding-bottom:74px}
+    }
+    @media (prefers-reduced-motion: reduce){
+      html{scroll-behavior:auto}
+      *{
+        animation:none !important;
+        transition:none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container inner">
+      <a href="#top" class="brand" aria-label="Never Miss a Job home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M5 13.5c1.8 0 1.8-3 3.6-3s1.8 6 3.6 6 1.8-11 3.6-11 1.8 8 3.6 8" stroke="#171616" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="brand-text">
+          <strong>Never Miss a Job</strong>
+          <span>Voice note → job → calendar</span>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="Primary">
+        <a href="#problem">Why leads get lost</a>
+        <a href="#how">How it works</a>
+        <a href="#demo">Try now</a>
+        <a href="#for-whom">Who it's for</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="btn btn-secondary hide-mobile" href="#how">See the flow</a>
+        <a class="btn btn-primary" href="#demo">Try voice to job</a>
+        <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mobilePanel" aria-label="Open menu">
+          <span></span>
+        </button>
+      </div>
+    </div>
+    <div class="container mobile-panel" id="mobilePanel">
+      <div class="panel">
+        <div class="mobile-links">
+          <a href="#problem">Why leads get lost</a>
+          <a href="#how">How it works</a>
+          <a href="#demo">Try now</a>
+          <a href="#for-whom">Who it's for</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <a class="btn btn-primary" href="#demo" style="width:100%">Try voice to job</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="container">
+        <div class="hero-grid">
+          <div class="hero-copy reveal">
+            <span class="eyebrow"><span class="dot"></span> For field service owners, dispatchers, and crews</span>
+            <h1>The lead you forgot is the job your competitor won.</h1>
+            <p class="lead">
+              When it’s inconvenient to write, just speak. A rough voice note becomes a filled job form and a calendar-ready event in about 60 seconds — so no client gets lost in your head, on paper, or in chat.
+            </p>
+
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#demo">
+                <span class="icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 4a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V7a3 3 0 0 1 3-3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M6 11.5a6 6 0 0 0 12 0M12 18v3M9 21h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                Try voice to job
+              </a>
+              <a class="btn btn-secondary" href="#how">See how it works</a>
+            </div>
+
+            <div class="trust-row" aria-label="Benefits">
+              <span class="trust-pill"><span class="tick">✓</span> No typing when your hands are full</span>
+              <span class="trust-pill"><span class="tick">✓</span> Review before it hits the calendar</span>
+              <span class="trust-pill"><span class="tick">✓</span> Nothing stuck in lead limbo</span>
+            </div>
+
+            <div class="pain-quote">
+              <span class="badge">Most expensive mistake in field service</span>
+              <blockquote>“I lost a client because I forgot to call them back. The job went to a competitor.”</blockquote>
+              <div class="attribution">
+                <span>The fear is not bad work. It is a missed opportunity that should have become revenue.</span>
+              </div>
+            </div>
+
+            <div class="stats-strip" aria-label="Key product outcomes">
+              <div class="stat-card">
+                <div class="big">60 <small>sec</small></div>
+                <p>From quick note to a structured, calendar-ready job.</p>
+              </div>
+              <div class="stat-card">
+                <div class="big">6+</div>
+                <p>Core details captured: client, location, date, time, job type, and notes.</p>
+              </div>
+              <div class="stat-card">
+                <div class="big">0</div>
+                <p>Loose scraps, forgotten callbacks, or “I’ll remember later.”</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-visual reveal">
+            <div class="visual-shell">
+              <div class="screen-steps" id="heroSteps" aria-label="App flow">
+                <button class="screen-step active" data-screen="0" type="button"><span class="num">1</span> Capture</button>
+                <button class="screen-step" data-screen="1" type="button"><span class="num">2</span> Voice note</button>
+                <button class="screen-step" data-screen="2" type="button"><span class="num">3</span> Extract</button>
+                <button class="screen-step" data-screen="3" type="button"><span class="num">4</span> Schedule</button>
+              </div>
+
+              <div class="phone" aria-label="Product preview">
+                <div class="phone-inner">
+                  <div class="statusbar">
+                    <span>9:41</span>
+                    <div class="status-icons">
+                      <span class="signal" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+                      <svg width="14" height="11" viewBox="0 0 14 11" fill="none" aria-hidden="true"><path d="M1.5 3.5C3.2 1.8 5 1 7 1s3.8.8 5.5 2.5M3.8 5.9C4.7 5 5.8 4.5 7 4.5S9.3 5 10.2 5.9M6 8.3c.3-.3.6-.4 1-.4s.7.1 1 .4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                      <span class="status-pill" aria-hidden="true"></span>
+                    </div>
+                  </div>
+
+                  <div class="screens">
+                    <section class="screen active" data-screen="0">
+                      <div class="hero-headline">
+                        <h4>Plan jobs with your voice or text</h4>
+                        <p>Describe the job in your own words. We turn it into a clean visit automatically.</p>
+                      </div>
+                      <div class="app-card-zone">
+                        <div class="job-mini-list">
+                          <div class="mini-job">
+                            <div class="bar"></div>
+                            <div>
+                              <strong>AC Maintenance — David Martinez</strong>
+                              <span>Wed, May 15 · 10:00 AM – 1:00 PM</span>
+                            </div>
+                            <div class="check-round">✓</div>
+                          </div>
+                          <div class="mini-job">
+                            <div class="bar"></div>
+                            <div>
+                              <strong>Ventilation Service — Emily Davis</strong>
+                              <span>Mon, Jun 3 · 8:30 AM – 11:30 AM</span>
+                            </div>
+                            <div class="check-round">✓</div>
+                          </div>
+                          <div class="mini-job">
+                            <div class="bar"></div>
+                            <div>
+                              <strong>AC System Repair — Michael Thompson</strong>
+                              <span>Fri, Jul 21 · 2:00 PM – 5:00 PM</span>
+                            </div>
+                            <div class="check-round">✓</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="primary-cta-center">
+                        <button type="button" class="btn btn-primary">Plan a job</button>
+                      </div>
+                    </section>
+
+                    <section class="screen" data-screen="1">
+                      <div class="hero-headline">
+                        <h4>Recording...</h4>
+                        <p>Hands busy? Leave a voice note now and clean it up later.</p>
+                      </div>
+                      <div class="app-card-zone" style="display:grid;align-content:center;gap:20px">
+                        <div class="timer red">0:47</div>
+                        <div class="wave-strip live" aria-hidden="true">
+                          <span style="--i:1;--h:17"></span><span style="--i:2;--h:26"></span><span style="--i:3;--h:14"></span><span style="--i:4;--h:30"></span><span style="--i:5;--h:16"></span><span style="--i:6;--h:28"></span><span style="--i:7;--h:10"></span><span style="--i:8;--h:26"></span><span style="--i:9;--h:14"></span><span style="--i:10;--h:20"></span><span style="--i:11;--h:15"></span><span style="--i:12;--h:24"></span><span style="--i:13;--h:28"></span><span style="--i:14;--h:31"></span><span style="--i:15;--h:24"></span><span style="--i:16;--h:29"></span><span style="--i:17;--h:18"></span><span style="--i:18;--h:25"></span><span style="--i:19;--h:31"></span><span style="--i:20;--h:22"></span><span style="--i:21;--h:15"></span><span style="--i:22;--h:17"></span><span style="--i:23;--h:22"></span><span style="--i:24;--h:14"></span><span style="--i:25;--h:20"></span><span style="--i:26;--h:12"></span><span style="--i:27;--h:18"></span><span style="--i:28;--h:10"></span>
+                        </div>
+                        <p style="text-align:center;color:var(--red);font-weight:600">Recording in progress…</p>
+                        <div class="mic-ring" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M12 4a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V7a3 3 0 0 1 3-3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M6 11.5a6 6 0 0 0 12 0M12 18v3M9 21h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <button type="button" class="btn btn-soft" style="width:100%">Type instead</button>
+                    </section>
+
+                    <section class="screen" data-screen="2">
+                      <div class="processing-card">
+                        <div class="spinner" aria-hidden="true"></div>
+                        <h4>Extracting details</h4>
+                        <p>Turning your note into a job</p>
+                        <div class="status-list">
+                          <div class="status-item done"><span class="mark">✓</span><span>Transcribing</span></div>
+                          <div class="status-item done"><span class="mark">✓</span><span>Extracting details</span></div>
+                          <div class="status-item"><span class="mark"></span><span>Adding to calendar</span></div>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section class="screen" data-screen="3">
+                      <div class="edit-form">
+                        <div class="hero-headline">
+                          <h4>Edit Visit</h4>
+                          <p>Review before you schedule. Clean enough for the office, simple enough for the truck.</p>
+                        </div>
+                        <div class="form-grid">
+                          <div class="mini-field">
+                            <div class="field-label">Client</div>
+                            <div class="field-value">Sarah Johnson</div>
+                          </div>
+                          <div class="mini-field">
+                            <div class="field-label">Location</div>
+                            <div class="field-value">142 Oak Street, Apt 3B</div>
+                          </div>
+                          <div class="mini-field">
+                            <div class="field-label">Date</div>
+                            <div class="field-value">April 24</div>
+                          </div>
+                          <div class="mini-field">
+                            <div class="field-label">Time</div>
+                            <div class="field-value">9:00 AM — 12:00 PM</div>
+                          </div>
+                          <div class="mini-field">
+                            <div class="field-label">Job Type</div>
+                            <div class="field-value">AC Repair</div>
+                          </div>
+                          <div class="mini-field">
+                            <div class="field-label">Notes</div>
+                            <div class="field-value">Entrance pin# 1234</div>
+                          </div>
+                        </div>
+                        <div class="source-pill">
+                          <div class="source-left">
+                            <div class="sound-mini" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+                            <span>Voice recording</span>
+                          </div>
+                          <div class="play-tri" aria-hidden="true"></div>
+                        </div>
+                        <button type="button" class="btn btn-primary schedule-btn">Schedule job</button>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </div>
+
+              <div class="floating-card top">
+                <div class="floating-row">
+                  <div class="pill-icon green" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
+                      <path d="m5 12 4.2 4.2L19 6.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <strong>Nothing gets lost</strong>
+                    <span>Every lead moves from note to form to calendar.</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="floating-card bottom">
+                <div class="floating-row">
+                  <div class="pill-icon red" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
+                      <path d="M12 4a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V7a3 3 0 0 1 3-3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M6 11.5a6 6 0 0 0 12 0M12 18v3M9 21h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <strong>Speak when it is convenient</strong>
+                    <span>Capture details now. Clean them up in seconds.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section tight" id="problem">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="label">Why deals disappear</span>
+          <h2>Lead limbo is where real revenue leaks out.</h2>
+          <p class="lead" style="margin:16px auto 0">
+            In field service, missed opportunities rarely look dramatic. They look like a note in your head, a callback you meant to make, or a detail you planned to write down later.
+          </p>
+        </div>
+
+        <div class="pain-grid">
+          <article class="pain-card reveal">
+            <div class="pain-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M8 6.5A4.5 4.5 0 0 1 12.5 2 4.5 4.5 0 0 1 17 6.5c0 1.8-1 3-2.1 4.1-1.1 1.1-2.2 2.1-2.2 3.4" stroke="#171616" stroke-width="2" stroke-linecap="round"/>
+                <path d="M12 20h.01M10 16h4" stroke="#171616" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>“I’ll remember later.”</h3>
+            <p>
+              A customer tells you the job between calls or on-site. You keep moving, then the follow-up slips, the address is fuzzy, or the callback never happens.
+            </p>
+            <div class="micro">Direct financial loss</div>
+          </article>
+
+          <article class="pain-card reveal">
+            <div class="pain-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M7 9.5c0-2.8 2.2-5 5-5s5 2.2 5 5v5a5 5 0 0 1-10 0v-5Z" stroke="#171616" stroke-width="2"/>
+                <path d="M5 12v2.5A7 7 0 0 0 19 14.5V12" stroke="#171616" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Voice notes without structure</h3>
+            <p>
+              The note exists, but it is buried in messages, missing the time window, or impossible for the office to turn into a clean visit without calling again.
+            </p>
+            <div class="micro">Chaos between truck and office</div>
+          </article>
+
+          <article class="pain-card reveal">
+            <div class="pain-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M7 4h10a2 2 0 0 1 2 2v12l-4-2-4 2-4-2-4 2V6a2 2 0 0 1 2-2h2Z" stroke="#171616" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M8 8h8M8 11h8" stroke="#171616" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Paper, chat, memory, then nothing</h3>
+            <p>
+              Sticky notes, text drafts, photos, and mental reminders all create the same risk: a good lead never becomes a scheduled job because the handoff breaks.
+            </p>
+            <div class="micro">A competitor gets the work</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="how">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="label">How it works</span>
+          <h2>From rough note to scheduled job, in a flow your crew will actually use.</h2>
+          <p class="lead" style="margin:16px auto 0">
+            The product does one important thing really well: it catches the lead in the moment, structures it, and pushes it toward a real follow-up.
+          </p>
+        </div>
+
+        <div class="steps">
+          <article class="feature-card reveal">
+            <div class="num">1</div>
+            <h3>Speak or type the details fast</h3>
+            <p>
+              On-site, in the van, or between calls, capture the job the easy way. Voice first when typing is annoying. Text when you want to be precise.
+            </p>
+            <div class="check-list">
+              <span><i>✓</i> One quick note instead of scattered reminders</span>
+              <span><i>✓</i> Works for leads, callbacks, and visit details</span>
+            </div>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="num">2</div>
+            <h3>Extract the details that matter</h3>
+            <p>
+              Client, location, date, time, job type, and notes are pulled into a structured visit preview, so the next step is obvious instead of messy.
+            </p>
+            <div class="check-list">
+              <span><i>✓</i> Built for real field-service phrasing</span>
+              <span><i>✓</i> Clean enough for the office to trust</span>
+            </div>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="num">3</div>
+            <h3>Review once, then schedule</h3>
+            <p>
+              You keep control. Check the result, make quick edits if needed, and turn it into a calendar-ready event — with no lead stuck in limbo.
+            </p>
+            <div class="check-list">
+              <span><i>✓</i> Simple review before anything is booked</span>
+              <span><i>✓</i> Better handoff from field to office</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="demo">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="label">Try it now</span>
+          <h2>Voice to a job in 60 seconds.</h2>
+          <p class="lead" style="margin:16px auto 0">
+            Use the sample note or dictate your own. This live page turns it into a structured visit preview so you can see the promise in one glance.
+          </p>
+        </div>
+
+        <div class="demo-wrap">
+          <article class="demo-panel reveal">
+            <div class="panel-top">
+              <div class="meta">
+                <h3>Describe the job the way your team naturally speaks</h3>
+                <p class="small" style="margin-top:8px">
+                  Example: “Tomorrow at 9am, AC repair for Sarah Johnson at 142 Oak Street Apt 3B. Likely compressor issue. Gate code 1234.”
+                </p>
+              </div>
+              <span class="demo-badge">Live demo</span>
+            </div>
+
+            <div class="text-input-wrap">
+              <textarea id="jobInput" class="text-input" placeholder="Leave a quick voice-style note or type the job details here..."></textarea>
+              <div class="textarea-helper" id="charCounter">0 characters</div>
+            </div>
+
+            <div class="toolbar">
+              <button type="button" class="btn btn-soft" id="sampleBtn">Use sample note</button>
+              <button type="button" class="btn btn-soft" id="clearBtn">Clear</button>
+              <button type="button" class="btn btn-secondary record-btn" id="recordBtn">
+                <span class="icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 4a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V7a3 3 0 0 1 3-3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M6 11.5a6 6 0 0 0 12 0M12 18v3M9 21h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                Tap to speak
+              </button>
+            </div>
+
+            <div class="demo-actions">
+              <button type="button" class="btn btn-primary" id="processBtn" style="min-width:220px">Turn it into a job</button>
+              <a href="#final-cta" class="btn btn-secondary">Get early access</a>
+            </div>
+
+            <div class="demo-note" id="speechStatus">
+              Your browser can use speech recognition if supported. Otherwise, type or paste a note and process it the same way.
+            </div>
+          </article>
+
+          <article class="demo-panel reveal">
+            <div class="panel-top">
+              <div class="meta">
+                <h3>Structured output</h3>
+                <p class="small" style="margin-top:8px">
+                  The goal is not a pretty transcript. The goal is a clean next step: who, where, when, what, and what to do next.
+                </p>
+              </div>
+              <span class="demo-badge" id="resultBadge">Waiting for input</span>
+            </div>
+
+            <div class="process-strip" id="processStrip" aria-live="polite">
+              <div class="process-row" data-step="0">
+                <div class="state"></div>
+                <div>
+                  <strong>Transcribing note</strong><br>
+                  <span class="small">Capture what was said clearly enough to use.</span>
+                </div>
+                <span class="tag">Pending</span>
+              </div>
+              <div class="process-row" data-step="1">
+                <div class="state"></div>
+                <div>
+                  <strong>Extracting details</strong><br>
+                  <span class="small">Pull out client, location, date, time, type, and notes.</span>
+                </div>
+                <span class="tag">Pending</span>
+              </div>
+              <div class="process-row" data-step="2">
+                <div class="state"></div>
+                <div>
+                  <strong>Creating calendar-ready job</strong><br>
+                  <span class="small">Show the reviewable form and event preview.</span>
+                </div>
+                <span class="tag">Pending</span>
+              </div>
+            </div>
+
+            <div class="results-empty" id="resultsEmpty">
+              <div>
+                <div class="ghost-illustration" aria-hidden="true">
+                  <svg width="42" height="42" viewBox="0 0 24 24" fill="none">
+                    <rect x="5" y="4" width="14" height="16" rx="3" stroke="#171616" stroke-width="1.8"/>
+                    <path d="M8 9h8M8 12h8M8 15h5" stroke="#171616" stroke-width="1.8" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <h3>Your clean job preview will appear here</h3>
+                <p style="margin:10px auto 0">Try the sample note to see how a rough field-service message becomes something ready to schedule.</p>
+              </div>
+            </div>
+
+            <div class="result-shell" id="resultShell">
+              <div class="result-top">
+                <span class="result-tag">✓ Ready to review</span>
+                <span class="small" id="sourceLabel">Source: typed note</span>
+              </div>
+
+              <div class="result-fields">
+                <div class="result-field">
+                  <div class="k">Client</div>
+                  <div class="v" id="outClient">—</div>
+                </div>
+                <div class="result-field">
+                  <div class="k">Job type</div>
+                  <div class="v" id="outJobType">—</div>
+                </div>
+                <div class="result-field full">
+                  <div class="k">Location</div>
+                  <div class="v" id="outLocation">—</div>
+                </div>
+                <div class="result-field">
+                  <div class="k">Date</div>
+                  <div class="v" id="outDate">—</div>
+                </div>
+                <div class="result-field">
+                  <div class="k">Time</div>
+                  <div class="v" id="outTime">—</div>
+                </div>
+                <div class="result-field full">
+                  <div class="k">Notes</div>
+                  <div class="v" id="outNotes">—</div>
+                </div>
+              </div>
+
+              <div class="calendar-preview">
+                <div class="calendar-label">Calendar preview</div>
+                <div class="calendar-item">
+                  <div class="bar"></div>
+                  <div>
+                    <strong id="calendarTitle">Service Visit — New Client</strong>
+                    <span id="calendarMeta">Date and time will appear here</span>
+                  </div>
+                  <div class="calendar-check">✓</div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-header left reveal">
+          <span class="label">Why it converts better than memory</span>
+          <h2>Built to stop the exact moment when good leads usually disappear.</h2>
+          <p class="lead" style="margin-top:16px">
+            This is not just note capture. It is a simple memory system and a visible pipeline for the person accountable for lost revenue.
+          </p>
+        </div>
+
+        <div class="story-layout">
+          <article class="story-card dark reveal">
+            <span class="label" style="color:rgba(255,255,255,.62)">The promise</span>
+            <div class="quote">No more “I meant to write that down.”</div>
+            <p style="margin-top:14px">
+              The job is captured in the moment, structured before it gets fuzzy, and moved into the calendar instead of disappearing between the field and the office.
+            </p>
+
+            <div class="bullet-stack">
+              <div class="bullet-item">
+                <div class="ico" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 4a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V7a3 3 0 0 1 3-3Z" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M6 11.5a6 6 0 0 0 12 0M12 18v3M9 21h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <strong>Memory capture</strong>
+                  <span>Speak now, before the details get delayed, buried, or forgotten.</span>
+                </div>
+              </div>
+
+              <div class="bullet-item">
+                <div class="ico" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M7 5h10a2 2 0 0 1 2 2v10l-4-2-4 2-4-2-4 2V7a2 2 0 0 1 2-2h2Z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M8 9h8M8 12h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <strong>Structured handoff</strong>
+                  <span>The office sees a real job form, not a messy reminder or half-complete chat.</span>
+                </div>
+              </div>
+
+              <div class="bullet-item">
+                <div class="ico" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <rect x="4" y="6" width="16" height="14" rx="3" stroke="#fff" stroke-width="2"/>
+                    <path d="M8 3v6M16 3v6M4 11h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <strong>No lead limbo</strong>
+                  <span>Every opportunity ends up in a visible next step instead of living only in someone’s head.</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <div class="stack-cards">
+            <article class="feature-card reveal">
+              <div class="num" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M13 3 4 14h6l-1 7 9-11h-6l1-7Z" stroke="#171616" stroke-width="2" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <h3>Fast enough for the field</h3>
+              <p>
+                Owners and techs do not need a complicated workflow. The best version is the one people actually use during a busy day.
+              </p>
+            </article>
+
+            <article class="feature-card reveal">
+              <div class="num" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 12h16M12 4v16" stroke="#171616" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <h3>Simple review before scheduling</h3>
+              <p>
+                You are not forced to trust a black box. Check the visit preview, fix anything quickly, then move forward.
+              </p>
+            </article>
+
+            <article class="feature-card reveal">
+              <div class="num" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M5 12.5 9.2 16.7 19 7" stroke="#171616" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <h3>Trustworthy, not flashy</h3>
+              <p>
+                The landing and the product both communicate the same thing: this is here to stop missed revenue, not add noise.
+              </p>
+            </article>
+
+            <article class="feature-card reveal">
+              <div class="num" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M5 6h14M5 12h14M5 18h8" stroke="#171616" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <h3>Clear next action</h3>
+              <p>
+                The whole page is designed around one conversion point: try the workflow, understand it instantly, and imagine it in your day.
+              </p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="for-whom">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="label">Who it is for</span>
+          <h2>Made for the person who cannot afford to lose the callback.</h2>
+          <p class="lead" style="margin:16px auto 0">
+            Sometimes that is the owner. Sometimes it is the dispatcher or office manager. Sometimes it is the tech who hears the lead first and needs a reliable handoff.
+          </p>
+        </div>
+
+        <div class="audience-grid">
+          <article class="audience-card reveal">
+            <h3>Owner / operator</h3>
+            <p>
+              When one missed follow-up means lost revenue, this becomes your backup memory and your lead-safety net.
+            </p>
+          </article>
+          <article class="audience-card reveal">
+            <h3>Dispatcher or office manager</h3>
+            <p>
+              You are the person responsible for making sure jobs do not disappear between the phone, the truck, and the calendar.
+            </p>
+          </article>
+          <article class="audience-card reveal">
+            <h3>Field tech who hears the job first</h3>
+            <p>
+              Capture the lead immediately, even when you cannot stop to write clean notes in the middle of work.
+            </p>
+          </article>
+        </div>
+
+        <div class="trade-tags reveal" aria-label="Trades">
+          <span>Electricians</span>
+          <span>Plumbers</span>
+          <span>HVAC technicians</span>
+          <span>Welders</span>
+          <span>Mechanics</span>
+          <span>General field service crews</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section tight" id="faq">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="label">FAQ</span>
+          <h2>Questions a practical buyer will ask</h2>
+        </div>
+
+        <div class="faq-list">
+          <article class="faq-item reveal open">
+            <button class="faq-question" type="button">
+              <span>What details can a voice note turn into?</span>
+              <span class="plus">+</span>
+            </button>
+            <div class="faq-answer">
+              <div class="inner">
+                Client, location, date, time, job type, and free-form notes are the core pieces. The goal is to turn a rough note into something a team can act on without re-listening five times.
+              </div>
+            </div>
+          </article>
+
+          <article class="faq-item reveal">
+            <button class="faq-question" type="button">
+              <span>Do I have to use voice, or can I type?</span>
+              <span class="plus">+</span>
+            </button>
+            <div class="faq-answer">
+              <div class="inner">
+                Both work. Voice is the fastest option when writing is inconvenient. Typing is there when you want to paste a note, add details, or use the same workflow from a desktop.
+              </div>
+            </div>
+          </article>
+
+          <article class="faq-item reveal">
+            <button class="faq-question" type="button">
+              <span>Who should own this workflow on a team?</span>
+              <span class="plus">+</span>
+            </button>
+            <div class="faq-answer">
+              <div class="inner">
+                The best owner is the person accountable for making sure no lead disappears. In a small shop that is usually the owner. In a larger team it is often the office manager, dispatcher, or whoever controls follow-up and scheduling.
+              </div>
+            </div>
+          </article>
+
+          <article class="faq-item reveal">
+            <button class="faq-question" type="button">
+              <span>Can I review before it goes to the calendar?</span>
+              <span class="plus">+</span>
+            </button>
+            <div class="faq-answer">
+              <div class="inner">
+                Yes. That review step is important. The promise is speed without losing control, so the visit preview appears first and can be edited before it becomes a calendar event.
+              </div>
+            </div>
+          </article>
+
+          <article class="faq-item reveal">
+            <button class="faq-question" type="button">
+              <span>Is this only for brand-new leads?</span>
+              <span class="plus">+</span>
+            </button>
+            <div class="faq-answer">
+              <div class="inner">
+                No. It fits new leads, callbacks, service follow-ups, and visit details captured while you are already on another job. Anywhere a rough note needs to become a clean next step, the workflow helps.
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section final-cta" id="final-cta">
+      <div class="container">
+        <div class="cta-panel reveal">
+          <div class="cta-copy">
+            <span class="label">Final call to action</span>
+            <h2>Stop relying on memory for revenue.</h2>
+            <p class="lead">
+              Capture the lead the moment it appears. Turn the note into a job. Put it on the calendar before it disappears. That is the whole promise.
+            </p>
+            <div class="cta-points">
+              <span>Voice first</span>
+              <span>Structured handoff</span>
+              <span>Calendar ready</span>
+              <span>No lead limbo</span>
+            </div>
+          </div>
+
+          <div class="lead-form">
+            <h3>Request early access</h3>
+            <p class="small" style="margin-top:8px">Leave your details to request a demo or early access.</p>
+
+            <form id="leadForm" novalidate>
+              <div class="lead-form-grid">
+                <div class="field">
+                  <label for="name">Name</label>
+                  <input id="name" name="name" type="text" placeholder="Your name" required />
+                </div>
+                <div class="field">
+                  <label for="email">Work email</label>
+                  <input id="email" name="email" type="email" placeholder="you@company.com" required />
+                </div>
+                <div class="field">
+                  <label for="role">Role</label>
+                  <select id="role" name="role" required>
+                    <option value="">Select your role</option>
+                    <option>Owner / operator</option>
+                    <option>Dispatcher</option>
+                    <option>Office manager</option>
+                    <option>Field technician</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary" type="submit" style="width:100%">Request early access</button>
+              </div>
+            </form>
+
+            <div class="form-message" id="formMessage" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-row">
+        <div class="brand" style="gap:.75rem">
+          <span class="brand-mark" aria-hidden="true" style="width:38px;height:38px;border-radius:12px">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M5 13.5c1.8 0 1.8-3 3.6-3s1.8 6 3.6 6 1.8-11 3.6-11 1.8 8 3.6 8" stroke="#171616" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="brand-text">
+            <strong>Never Miss a Job</strong>
+            <span>Capture it. Structure it. Schedule it.</span>
+          </span>
+        </div>
+        <div class="small-links">
+          <a href="#problem">Problem</a>
+          <a href="#how">How it works</a>
+          <a href="#demo">Try now</a>
+          <a href="#faq">FAQ</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="mobile-sticky" aria-hidden="false">
+    <div>
+      <strong style="display:block;font-size:.92rem;line-height:1.1">Voice to a job</strong>
+      <span class="small">Try the live flow in 60 sec</span>
+    </div>
+    <a class="btn btn-primary" href="#demo">Try now</a>
+  </div>
+
+  <script>
+    (function(){
+      const body = document.body;
+      const menuToggle = document.getElementById('menuToggle');
+      const mobilePanel = document.getElementById('mobilePanel');
+
+      if(menuToggle){
+        menuToggle.addEventListener('click', function(){
+          const open = !body.classList.contains('menu-open');
+          body.classList.toggle('menu-open', open);
+          menuToggle.setAttribute('aria-expanded', String(open));
+        });
+        mobilePanel.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', () => {
+            body.classList.remove('menu-open');
+            menuToggle.setAttribute('aria-expanded', 'false');
+          });
+        });
+      }
+
+      // reveal on scroll
+      const revealEls = document.querySelectorAll('.reveal');
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if(revealEls.length){
+        if(reduceMotion || !('IntersectionObserver' in window)){
+          revealEls.forEach(el => el.classList.add('visible'));
+        } else {
+          const io = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if(entry.isIntersecting){
+                entry.target.classList.add('visible');
+                io.unobserve(entry.target);
+              }
+            });
+          }, { threshold: 0.12 });
+          revealEls.forEach(el => io.observe(el));
+        }
+      }
+
+      // Hero phone screens
+      const heroSteps = [...document.querySelectorAll('.screen-step')];
+      const heroScreens = [...document.querySelectorAll('.screen')];
+      let heroIndex = 0;
+      let heroTimer = null;
+      const setHeroScreen = (index) => {
+        heroIndex = index;
+        heroSteps.forEach((btn, i) => btn.classList.toggle('active', i === index));
+        heroScreens.forEach((screen, i) => screen.classList.toggle('active', i === index));
+      };
+      const startHeroRotation = () => {
+        if(reduceMotion) return;
+        clearInterval(heroTimer);
+        heroTimer = setInterval(() => {
+          setHeroScreen((heroIndex + 1) % heroScreens.length);
+        }, 3400);
+      };
+      heroSteps.forEach((btn, i) => {
+        btn.addEventListener('click', () => {
+          setHeroScreen(i);
+          startHeroRotation();
+        });
+      });
+      setHeroScreen(0);
+      startHeroRotation();
+
+      // FAQ
+      document.querySelectorAll('.faq-item').forEach((item) => {
+        const btn = item.querySelector('.faq-question');
+        btn.addEventListener('click', () => {
+          const isOpen = item.classList.contains('open');
+          document.querySelectorAll('.faq-item').forEach(x => x.classList.remove('open'));
+          if(!isOpen) item.classList.add('open');
+        });
+      });
+
+      // Demo
+      const sampleText = 'Tomorrow at 9am to 12pm, AC repair for Sarah Johnson at 142 Oak Street Apt 3B. Likely compressor issue. Gate code 1234. Please confirm before arrival.';
+      const input = document.getElementById('jobInput');
+      const charCounter = document.getElementById('charCounter');
+      const sampleBtn = document.getElementById('sampleBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const processBtn = document.getElementById('processBtn');
+      const resultBadge = document.getElementById('resultBadge');
+      const resultsEmpty = document.getElementById('resultsEmpty');
+      const resultShell = document.getElementById('resultShell');
+      const speechStatus = document.getElementById('speechStatus');
+      const recordBtn = document.getElementById('recordBtn');
+      const sourceLabel = document.getElementById('sourceLabel');
+      const processRows = [...document.querySelectorAll('.process-row')];
+
+      const outputEls = {
+        client: document.getElementById('outClient'),
+        jobType: document.getElementById('outJobType'),
+        location: document.getElementById('outLocation'),
+        date: document.getElementById('outDate'),
+        time: document.getElementById('outTime'),
+        notes: document.getElementById('outNotes'),
+        title: document.getElementById('calendarTitle'),
+        meta: document.getElementById('calendarMeta')
+      };
+
+      let currentSource = 'typed note';
+      const updateCounter = () => {
+        const len = input.value.trim().length;
+        charCounter.textContent = len + (len === 1 ? ' character' : ' characters');
+      };
+      updateCounter();
+      input.addEventListener('input', updateCounter);
+
+      sampleBtn.addEventListener('click', () => {
+        input.value = sampleText;
+        currentSource = 'sample note';
+        updateCounter();
+        input.focus();
+      });
+
+      clearBtn.addEventListener('click', () => {
+        input.value = '';
+        currentSource = 'typed note';
+        updateCounter();
+        resultBadge.textContent = 'Waiting for input';
+        resultsEmpty.style.display = 'grid';
+        resultShell.classList.remove('show');
+        resetProcessRows();
+        input.focus();
+      });
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      let recognition = null;
+      let listening = false;
+
+      if(SpeechRecognition){
+        recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = true;
+        recognition.continuous = false;
+
+        recognition.onstart = () => {
+          listening = true;
+          currentSource = 'voice note';
+          recordBtn.classList.add('recording');
+          recordBtn.innerHTML = '<span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="7" y="7" width="10" height="10" rx="2" stroke="currentColor" stroke-width="2"/></svg></span> Listening…';
+          speechStatus.textContent = 'Listening now. Speak naturally, like you would between jobs.';
+        };
+
+        recognition.onresult = (event) => {
+          let transcript = '';
+          for(let i = event.resultIndex; i < event.results.length; i++){
+            transcript += event.results[i][0].transcript + ' ';
+          }
+          input.value = transcript.trim();
+          updateCounter();
+        };
+
+        recognition.onerror = (event) => {
+          speechStatus.textContent = 'Voice recognition had trouble in this browser. You can still type or paste a note and use the same flow.';
+          stopListeningState();
+        };
+
+        recognition.onend = () => {
+          stopListeningState();
+          if(input.value.trim()){
+            speechStatus.textContent = 'Voice note captured. Turn it into a job when you are ready.';
+          }
+        };
+      } else {
+        recordBtn.disabled = true;
+        recordBtn.classList.add('btn-ghost');
+        recordBtn.classList.remove('btn-secondary');
+        speechStatus.textContent = 'Speech recognition is not available in this browser preview. Type or paste a note to try the workflow.';
+      }
+
+      const stopListeningState = () => {
+        listening = false;
+        recordBtn.classList.remove('recording');
+        recordBtn.innerHTML = '<span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V7a3 3 0 0 1 3-3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6 11.5a6 6 0 0 0 12 0M12 18v3M9 21h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span> Tap to speak';
+      };
+
+      if(recognition){
+        recordBtn.addEventListener('click', () => {
+          if(listening){
+            recognition.stop();
+          } else {
+            recognition.start();
+          }
+        });
+      }
+
+      function resetProcessRows(){
+        processRows.forEach(row => {
+          row.classList.remove('active');
+          row.querySelector('.tag').textContent = 'Pending';
+        });
+      }
+
+      function activateStep(step){
+        processRows.forEach((row, index) => {
+          const tag = row.querySelector('.tag');
+          if(index < step){
+            row.classList.add('active');
+            tag.textContent = 'Done';
+          } else if(index === step){
+            row.classList.add('active');
+            tag.textContent = 'Working';
+          } else {
+            row.classList.remove('active');
+            tag.textContent = 'Pending';
+          }
+        });
+      }
+
+      function titleCase(str){
+        return str.replace(/\b([a-z])/g, s => s.toUpperCase());
+      }
+
+      function cleanText(str){
+        return str.replace(/\s+/g, ' ').replace(/\s([,.!?])/g, '$1').trim();
+      }
+
+      function formatDateObj(date){
+        return date.toLocaleDateString(undefined, { month:'long', day:'numeric' });
+      }
+
+      function nextWeekday(targetDay){
+        const date = new Date();
+        const current = date.getDay();
+        let diff = targetDay - current;
+        if(diff <= 0) diff += 7;
+        date.setDate(date.getDate() + diff);
+        return date;
+      }
+
+      function parseDateText(text){
+        const lower = text.toLowerCase();
+        const today = new Date();
+
+        const monthDate = lower.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2})\b/);
+        if(monthDate){
+          const date = new Date(today.getFullYear(), ['january','february','march','april','may','june','july','august','september','october','november','december'].indexOf(monthDate[1]), parseInt(monthDate[2],10));
+          return formatDateObj(date);
+        }
+        if(/\btoday\b/.test(lower)) return formatDateObj(today);
+        if(/\btomorrow\b/.test(lower)){
+          const date = new Date(today);
+          date.setDate(date.getDate()+1);
+          return formatDateObj(date);
+        }
+
+        const weekdays = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+        for(let i=0;i<weekdays.length;i++){
+          if(new RegExp('\\b' + weekdays[i] + '\\b').test(lower)){
+            return formatDateObj(nextWeekday(i));
+          }
+        }
+        return 'To be confirmed';
+      }
+
+      function normalizeTime(token){
+        if(!token) return '';
+        let value = token.toLowerCase().replace(/\./g,'').trim();
+        const match = value.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/);
+        if(!match) return titleCase(value);
+        let hour = parseInt(match[1],10);
+        const minute = match[2] || '00';
+        let meridiem = match[3];
+        if(!meridiem){
+          meridiem = hour >= 8 && hour <= 11 ? 'am' : 'pm';
+        }
+        if(hour > 12) hour = hour - 12;
+        return hour + ':' + minute.padStart(2, '0') + ' ' + meridiem.toUpperCase();
+      }
+
+      function addDefaultDuration(startText){
+        const match = startText.match(/^(\d{1,2}):(\d{2})\s(AM|PM)$/);
+        if(!match) return startText;
+        let hour = parseInt(match[1],10);
+        const minute = parseInt(match[2],10);
+        let isPM = match[3] === 'PM';
+        let total = (hour % 12) * 60 + minute + (isPM ? 12*60 : 0);
+        total += 120;
+        total = total % (24*60);
+        let outHour24 = Math.floor(total/60);
+        let outMin = total % 60;
+        const outMer = outHour24 >= 12 ? 'PM' : 'AM';
+        let outHour12 = outHour24 % 12;
+        if(outHour12 === 0) outHour12 = 12;
+        return startText + ' — ' + outHour12 + ':' + String(outMin).padStart(2,'0') + ' ' + outMer;
+      }
+
+      function parseTimeText(text){
+        const lower = text.toLowerCase().replace(/–/g, '-');
+        const range = lower.match(/\b(?:at\s+)?(\d{1,2}(?::\d{2})?\s?(?:am|pm)?)(?:\s*(?:-|to|until)\s*)(\d{1,2}(?::\d{2})?\s?(?:am|pm)?)\b/);
+        if(range){
+          return normalizeTime(range[1]) + ' — ' + normalizeTime(range[2]);
+        }
+        const single = lower.match(/\b(?:at|around|for)\s+(\d{1,2}(?::\d{2})?\s?(?:am|pm)?)\b/);
+        if(single){
+          return addDefaultDuration(normalizeTime(single[1]));
+        }
+        const bare = lower.match(/\b(\d{1,2}(?::\d{2})?\s?(?:am|pm))\b/);
+        if(bare){
+          return addDefaultDuration(normalizeTime(bare[1]));
+        }
+        return 'Time to confirm';
+      }
+
+      function parseClient(text){
+        const patterns = [
+          /(?:for|client is|customer is|customer|client)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})/,
+          /(?:mrs|mr|ms)\.?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/,
+        ];
+        for(const pattern of patterns){
+          const match = text.match(pattern);
+          if(match) return cleanText(match[1]);
+        }
+        const caps = text.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})\b/g) || [];
+        const blacklist = ['Tomorrow At', 'Please Confirm', 'AC Repair', 'HVAC Repair', 'Service Visit', 'Gate Code'];
+        const candidate = caps.find(item => !blacklist.includes(item));
+        return candidate || 'New client';
+      }
+
+      function parseLocation(text){
+        const addressRegex = /\b(\d{1,5}\s+[A-Za-z0-9#.,'\- ]+?(?:street|st|road|rd|avenue|ave|boulevard|blvd|lane|ln|drive|dr|court|ct|circle|cir|place|pl|highway|hwy|way)\b[^.!?\n]*)/ig;
+        const matches = [...text.matchAll(addressRegex)];
+        if(matches.length){
+          return cleanText(matches[matches.length - 1][1]);
+        }
+        const fallback = text.match(/(?:at|address is|located at)\s+([^.!?\n]+)/i);
+        if(fallback) return cleanText(fallback[1]);
+        return 'Location to confirm';
+      }
+
+      function parseJobType(text){
+        const lower = text.toLowerCase();
+        const types = [
+          [/(\bac\b|\ba\/c\b|hvac|compressor|furnace|heating|cooling|ventilation|thermostat)/, 'AC / HVAC Repair'],
+          [/(plumb|pipe|leak|drain|toilet|water heater|faucet|sewer)/, 'Plumbing Service'],
+          [/(electric|panel|wiring|breaker|outlet|lighting|generator)/, 'Electrical Service'],
+          [/(weld|fabricat|metal|steel)/, 'Welding Job'],
+          [/(brake|engine|oil change|transmission|mechanic|vehicle|car repair)/, 'Mechanical Service'],
+          [/(install|installation)/, 'Installation Visit'],
+          [/(estimate|quote)/, 'Estimate / Quote'],
+        ];
+        for(const [pattern, label] of types){
+          if(pattern.test(lower)) return label;
+        }
+        return 'Service Visit';
+      }
+
+      function parseNotes(text, extracted){
+        let cleaned = text;
+        cleaned = cleaned.replace(new RegExp(extracted.client.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), '');
+        cleaned = cleaned.replace(new RegExp(extracted.location.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '');
+        cleaned = cleaned.replace(/\b(today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/gi, '');
+        cleaned = cleaned.replace(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}\b/gi, '');
+        cleaned = cleaned.replace(/\b\d{1,2}(?::\d{2})?\s?(am|pm)?(?:\s*(?:-|to|until)\s*\d{1,2}(?::\d{2})?\s?(am|pm)?)?\b/gi, '');
+        cleaned = cleaned.replace(/\b(ac|a\/c|hvac|compressor|furnace|heating|cooling|ventilation|plumb(?:ing)?|pipe|leak|drain|toilet|electric(?:al)?|panel|wiring|breaker|weld(?:ing)?|mechanic(?:al)?|service|repair|job|visit|estimate|quote)\b/gi, '');
+        cleaned = cleaned.replace(/\b(for|at|please|confirm|before|arrival|client|customer|address|is)\b/gi, '');
+        cleaned = cleanText(cleaned);
+        if(cleaned.length < 12){
+          return 'Captured from note. Review and add anything the team needs before scheduling.';
+        }
+        return cleaned;
+      }
+
+      function extractJob(text){
+        const cleanedInput = cleanText(text);
+        const client = parseClient(cleanedInput);
+        const location = parseLocation(cleanedInput);
+        const date = parseDateText(cleanedInput);
+        const time = parseTimeText(cleanedInput);
+        const jobType = parseJobType(cleanedInput);
+        const notes = parseNotes(cleanedInput, { client, location });
+        const title = `${jobType} — ${client}`;
+        const meta = `${date} · ${time}`;
+        return { client, location, date, time, jobType, notes, title, meta };
+      }
+
+      function populateResults(data){
+        outputEls.client.textContent = data.client;
+        outputEls.jobType.textContent = data.jobType;
+        outputEls.location.textContent = data.location;
+        outputEls.date.textContent = data.date;
+        outputEls.time.textContent = data.time;
+        outputEls.notes.textContent = data.notes;
+        outputEls.title.textContent = data.title;
+        outputEls.meta.textContent = data.meta;
+        sourceLabel.textContent = 'Source: ' + currentSource;
+        resultBadge.textContent = 'Job preview ready';
+      }
+
+      function showResults(data){
+        resultsEmpty.style.display = 'none';
+        resultShell.classList.add('show');
+        populateResults(data);
+      }
+
+      async function fakeProcess(text){
+        resetProcessRows();
+        resultBadge.textContent = 'Processing…';
+        const steps = [0, 1, 2];
+        for(const step of steps){
+          activateStep(step);
+          await new Promise(resolve => setTimeout(resolve, 520));
+        }
+        processRows.forEach(row => {
+          row.classList.add('active');
+          row.querySelector('.tag').textContent = 'Done';
+        });
+        return extractJob(text);
+      }
+
+      processBtn.addEventListener('click', async () => {
+        const text = input.value.trim();
+        if(!text){
+          resultBadge.textContent = 'Add a note first';
+          input.focus();
+          input.style.borderColor = 'rgba(243,90,87,.45)';
+          input.style.boxShadow = '0 0 0 4px rgba(243,90,87,.12)';
+          setTimeout(() => {
+            input.style.borderColor = '';
+            input.style.boxShadow = '';
+          }, 1100);
+          return;
+        }
+        processBtn.disabled = true;
+        processBtn.textContent = 'Processing…';
+        const result = await fakeProcess(text);
+        showResults(result);
+        processBtn.disabled = false;
+        processBtn.textContent = 'Turn it into a job';
+      });
+
+      // Lead form
+      const leadForm = document.getElementById('leadForm');
+      const formMessage = document.getElementById('formMessage');
+
+      leadForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const role = document.getElementById('role').value.trim();
+
+        if(!name || !email || !role){
+          formMessage.style.color = '#b14240';
+          formMessage.textContent = 'Please complete all fields before requesting access.';
+          return;
+        }
+        const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        if(!validEmail){
+          formMessage.style.color = '#b14240';
+          formMessage.textContent = 'Please use a valid email address.';
+          return;
+        }
+
+        const payload = { name, email, role, createdAt: new Date().toISOString() };
+        try{
+          localStorage.setItem('nmj-early-access', JSON.stringify(payload));
+        } catch(err){}
+        formMessage.style.color = 'var(--green-deep)';
+        formMessage.textContent = 'Thanks — your request has been captured for this prototype.';
+        leadForm.reset();
+      });
+
+      // Seed demo output with sample if the page is visited with hash
+      if(window.location.hash === '#demo'){
+        input.value = sampleText;
+        updateCounter();
+      }
+    })();
+  </script>
+</body>
+</html>
