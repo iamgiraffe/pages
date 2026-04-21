@@ -1,0 +1,2423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Limbo — Voice to a job in 60 seconds</title>
+  <meta name="description" content="Never miss a job again. Leave a quick voice note, let Limbo turn it into a filled job form and a calendar event, and stop losing leads to chaos." />
+  <meta name="theme-color" content="#111111" />
+  <style>
+    :root {
+      --bg: #fbfaf7;
+      --bg-2: #f6f2ea;
+      --surface: #ffffff;
+      --surface-soft: #f7f4ee;
+      --surface-warm: #efeade;
+      --text: #1f1d19;
+      --muted: #6e665a;
+      --line: rgba(31, 29, 25, 0.10);
+      --line-strong: rgba(31, 29, 25, 0.16);
+      --shadow: 0 22px 60px rgba(28, 23, 15, 0.08);
+      --shadow-strong: 0 28px 80px rgba(18, 18, 18, 0.18);
+      --accent: #28b15a;
+      --accent-soft: #e8f7ee;
+      --danger: #ff5b57;
+      --danger-soft: rgba(255, 91, 87, 0.12);
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+      --max: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 52%, #ffffff 100%);
+      color: var(--text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      pointer-events: none;
+      z-index: -1;
+      filter: blur(18px);
+      opacity: 0.9;
+    }
+
+    body::before {
+      top: -8vh;
+      left: -6vw;
+      width: 42vw;
+      height: 42vw;
+      background: radial-gradient(circle at center, rgba(239, 232, 220, 0.95), transparent 62%);
+    }
+
+    body::after {
+      right: -10vw;
+      top: 16vh;
+      width: 30vw;
+      height: 30vw;
+      background: radial-gradient(circle at center, rgba(232, 247, 238, 0.8), transparent 68%);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea, select { font: inherit; }
+    img { display: block; max-width: 100%; }
+
+    .container {
+      width: min(var(--max), calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .section {
+      padding: 88px 0;
+      position: relative;
+    }
+
+    .section-tight {
+      padding: 28px 0 0;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(17, 17, 17, 0.04);
+      border: 1px solid rgba(17, 17, 17, 0.06);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      color: #4d463a;
+      text-transform: uppercase;
+    }
+
+    .eyebrow-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(40, 177, 90, 0.14);
+    }
+
+    h1, h2, h3, h4, p { margin: 0; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      padding: 16px 0;
+      transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .topbar.is-scrolled {
+      background: rgba(251, 250, 247, 0.80);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(31, 29, 25, 0.08);
+      box-shadow: 0 12px 34px rgba(25, 22, 18, 0.07);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-radius: 999px;
+      padding: 12px 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #161616, #252525);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 16px 30px rgba(17, 17, 17, 0.14);
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      flex-shrink: 0;
+    }
+
+    .brand-copy {
+      min-width: 0;
+    }
+
+    .brand-copy strong {
+      display: block;
+      font-size: 18px;
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+
+    .brand-copy span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 5px;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .nav-links a {
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 0;
+      border-radius: 999px;
+      padding: 16px 24px;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: -0.02em;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
+      white-space: nowrap;
+    }
+
+    .button:hover { transform: translateY(-1px); }
+    .button:active { transform: translateY(0); }
+
+    .button-primary {
+      background: #111111;
+      color: #ffffff;
+      box-shadow: 0 18px 40px rgba(17, 17, 17, 0.18);
+    }
+
+    .button-primary:hover {
+      box-shadow: 0 22px 48px rgba(17, 17, 17, 0.22);
+    }
+
+    .button-secondary {
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .button-secondary:hover {
+      background: #ffffff;
+      border-color: var(--line-strong);
+    }
+
+    .button-small {
+      padding: 11px 16px;
+      font-size: 14px;
+    }
+
+    .hero {
+      padding-top: 44px;
+      padding-bottom: 64px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
+      gap: 44px;
+      align-items: center;
+    }
+
+    .hero-copy {
+      max-width: 650px;
+    }
+
+    .hero-title {
+      font-size: clamp(42px, 7vw, 74px);
+      line-height: 0.96;
+      letter-spacing: -0.06em;
+      margin: 18px 0 22px;
+      text-wrap: balance;
+    }
+
+    .hero-title span {
+      display: block;
+      font-size: clamp(18px, 2.15vw, 24px);
+      line-height: 1.24;
+      letter-spacing: -0.03em;
+      font-weight: 650;
+      color: #595246;
+      margin-top: 14px;
+    }
+
+    .lead {
+      font-size: clamp(18px, 2.15vw, 21px);
+      line-height: 1.55;
+      color: #50493d;
+      max-width: 620px;
+    }
+
+    .hero-cta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 28px;
+    }
+
+    .microproof {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 18px;
+      margin-top: 24px;
+      color: #4c4539;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .microproof .item {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .microproof .check {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      box-shadow: inset 0 0 0 1px rgba(40, 177, 90, 0.12);
+    }
+
+    .microproof .check svg,
+    .status-ok svg,
+    .badge-ok svg,
+    .success-pill svg,
+    .calendar-success svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .pain-quote {
+      margin-top: 30px;
+      background: linear-gradient(140deg, rgba(255, 255, 255, 0.92), rgba(247, 243, 235, 0.92));
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 18px 18px 18px 20px;
+      box-shadow: var(--shadow);
+      max-width: 610px;
+    }
+
+    .pain-quote strong {
+      display: block;
+      font-size: 14px;
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+      color: #655d51;
+    }
+
+    .pain-quote p {
+      font-size: 17px;
+      color: #3f392f;
+      line-height: 1.55;
+    }
+
+    .hero-visual {
+      position: relative;
+      isolation: isolate;
+    }
+
+    .visual-wrap {
+      position: relative;
+      padding: 24px;
+      background: linear-gradient(165deg, rgba(255, 255, 255, 0.9), rgba(244, 239, 230, 0.92));
+      border: 1px solid rgba(31, 29, 25, 0.08);
+      border-radius: 32px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .visual-wrap::before,
+    .visual-wrap::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      pointer-events: none;
+      filter: blur(6px);
+    }
+
+    .visual-wrap::before {
+      width: 220px;
+      height: 220px;
+      left: -30px;
+      bottom: 40px;
+      background: radial-gradient(circle, rgba(40, 177, 90, 0.15), transparent 70%);
+    }
+
+    .visual-wrap::after {
+      width: 240px;
+      height: 240px;
+      right: -40px;
+      top: -30px;
+      background: radial-gradient(circle, rgba(255, 91, 87, 0.11), transparent 72%);
+    }
+
+    .visual-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .visual-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: 999px;
+      background: rgba(17, 17, 17, 0.04);
+      border: 1px solid rgba(17, 17, 17, 0.06);
+      font-size: 13px;
+      font-weight: 800;
+      color: #4a4338;
+      letter-spacing: -0.01em;
+    }
+
+    .visual-pill span {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(40, 177, 90, 0.14);
+      flex-shrink: 0;
+    }
+
+    .audience-burst {
+      text-align: right;
+      color: #5f574a;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.4;
+      letter-spacing: -0.01em;
+    }
+
+    .pipeline-track {
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .mini-step {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.76);
+      border: 1px solid var(--line);
+      font-size: 13px;
+      font-weight: 700;
+      color: #6a6257;
+      cursor: pointer;
+      transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+    }
+
+    .mini-step:hover {
+      transform: translateY(-1px);
+    }
+
+    .mini-step.is-active {
+      background: #ffffff;
+      color: var(--text);
+      border-color: rgba(31, 29, 25, 0.14);
+      box-shadow: 0 12px 30px rgba(27, 22, 16, 0.08);
+    }
+
+    .mini-step .num {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: #eee7db;
+      font-weight: 900;
+      color: #433c31;
+      flex-shrink: 0;
+      transition: background 0.18s ease, color 0.18s ease;
+    }
+
+    .mini-step.is-active .num {
+      background: #111111;
+      color: #ffffff;
+    }
+
+    .phone-shell {
+      position: relative;
+      width: min(100%, 430px);
+      margin: 0 auto;
+      background: linear-gradient(180deg, #151515, #0e0e0e);
+      border-radius: 38px;
+      padding: 12px;
+      box-shadow: var(--shadow-strong);
+      z-index: 1;
+    }
+
+    .phone-notch {
+      width: 138px;
+      height: 28px;
+      background: #0a0a0a;
+      border-radius: 0 0 16px 16px;
+      margin: 0 auto 2px;
+    }
+
+    .phone-inner {
+      position: relative;
+      min-height: 560px;
+      padding: 18px;
+      border-radius: 28px;
+      background: #fbfaf7;
+      overflow: hidden;
+    }
+
+    .phone-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 18px;
+      color: #1f1d19;
+    }
+
+    .phone-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .phone-tab {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: #f1ece4;
+      color: #6b6457;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.18s ease, color 0.18s ease;
+    }
+
+    .phone-tab.is-active {
+      background: #111111;
+      color: #ffffff;
+    }
+
+    .phone-stage {
+      position: absolute;
+      inset: 92px 18px 18px 18px;
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .phone-stage.is-active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .screen-card {
+      background: #ffffff;
+      border: 1px solid rgba(17, 17, 17, 0.06);
+      border-radius: 24px;
+      box-shadow: 0 18px 40px rgba(30, 25, 17, 0.08);
+      padding: 18px;
+    }
+
+    .screen-soft {
+      background: var(--surface-warm);
+      border-radius: 22px;
+      padding: 14px;
+    }
+
+    .record-ui,
+    .form-ui,
+    .calendar-ui {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .record-ui h3,
+    .form-ui h3,
+    .calendar-ui h3 {
+      font-size: 18px;
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+    }
+
+    .screen-sub {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .wave-panel {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    .timer {
+      font-size: 64px;
+      line-height: 1;
+      letter-spacing: -0.06em;
+      margin-bottom: 14px;
+    }
+
+    .wave {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 4px;
+      height: 62px;
+      margin-bottom: 10px;
+    }
+
+    .wave span {
+      width: 6px;
+      height: var(--h, 24px);
+      border-radius: 999px;
+      background: #dfd8cc;
+      transform-origin: bottom center;
+      animation: bounce 1.4s ease-in-out infinite;
+      animation-delay: var(--d, 0s);
+    }
+
+    .wave span.active {
+      background: var(--danger);
+    }
+
+    .record-caption {
+      color: #5f584c;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .record-button {
+      width: 78px;
+      height: 78px;
+      margin: 0 auto;
+      border-radius: 999px;
+      background: var(--danger);
+      display: grid;
+      place-items: center;
+      color: #ffffff;
+      box-shadow: 0 18px 40px rgba(255, 91, 87, 0.26);
+      border: 0;
+    }
+
+    .record-button svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .alt-entry {
+      margin-top: auto;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 14px 16px;
+      text-align: center;
+      font-weight: 800;
+      background: #ffffff;
+      color: #363127;
+    }
+
+    .field-mock-grid {
+      display: grid;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .field-mock {
+      border-radius: 14px;
+      background: #f7f4ee;
+      padding: 12px;
+    }
+
+    .field-mock label {
+      display: block;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #7a7266;
+      margin-bottom: 8px;
+    }
+
+    .field-mock .line {
+      height: 12px;
+      border-radius: 8px;
+      background: #e5ded0;
+    }
+
+    .field-mock .line.short { width: 56%; }
+    .field-mock .line.med { width: 72%; }
+    .field-mock .line.long { width: 88%; }
+
+    .save-btn {
+      margin-top: auto;
+      display: grid;
+      place-items: center;
+      background: #111111;
+      color: #ffffff;
+      border-radius: 999px;
+      padding: 15px 16px;
+      font-weight: 800;
+      box-shadow: 0 16px 32px rgba(17, 17, 17, 0.16);
+    }
+
+    .job-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: #ffffff;
+      border: 1px solid rgba(17, 17, 17, 0.06);
+      box-shadow: 0 14px 30px rgba(17, 17, 17, 0.08);
+    }
+
+    .job-card .bar {
+      width: 4px;
+      border-radius: 999px;
+      background: var(--accent);
+      align-self: stretch;
+      flex-shrink: 0;
+    }
+
+    .job-card h4 {
+      font-size: 15px;
+      letter-spacing: -0.03em;
+      margin-bottom: 4px;
+    }
+
+    .job-card p {
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .badge-ok {
+      margin-left: auto;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--accent-soft);
+      color: var(--accent);
+      flex-shrink: 0;
+      box-shadow: inset 0 0 0 1px rgba(40, 177, 90, 0.1);
+    }
+
+    .calendar-note {
+      margin-top: auto;
+      padding: 16px;
+      border-radius: 18px;
+      background: #f2ede4;
+      color: #4d463a;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .float-note {
+      position: absolute;
+      border-radius: 18px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 40px rgba(17, 17, 17, 0.08);
+      color: #3c362d;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      z-index: 2;
+    }
+
+    .float-note small {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .float-note.one {
+      top: 18px;
+      right: -16px;
+    }
+
+    .float-note.two {
+      bottom: 26px;
+      left: -10px;
+    }
+
+    .audience-card {
+      background: linear-gradient(135deg, rgba(17, 17, 17, 0.96), rgba(34, 34, 34, 0.96));
+      color: #ffffff;
+      border-radius: 28px;
+      padding: 22px 26px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px 24px;
+      flex-wrap: wrap;
+      box-shadow: 0 26px 60px rgba(17, 17, 17, 0.24);
+    }
+
+    .audience-card strong {
+      display: block;
+      font-size: 18px;
+      letter-spacing: -0.03em;
+      margin-bottom: 4px;
+    }
+
+    .audience-card p {
+      color: rgba(255, 255, 255, 0.74);
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pill {
+      padding: 11px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .section-heading {
+      max-width: 800px;
+      margin: 0 auto 34px;
+      text-align: center;
+    }
+
+    .section-heading h2 {
+      font-size: clamp(32px, 5.2vw, 54px);
+      line-height: 1.02;
+      letter-spacing: -0.05em;
+      margin: 14px 0 16px;
+      text-wrap: balance;
+    }
+
+    .section-heading p {
+      max-width: 700px;
+      margin: 0 auto;
+      color: #5d564a;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .grid-3,
+    .steps-grid,
+    .persona-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .grid-2,
+    .promise-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      position: relative;
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(31, 29, 25, 0.08);
+      border-radius: 26px;
+      padding: 26px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: auto auto -30px -30px;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle, rgba(239, 232, 220, 0.7), transparent 68%);
+      pointer-events: none;
+    }
+
+    .icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      background: #f1ecdf;
+      display: grid;
+      place-items: center;
+      color: #191919;
+      margin-bottom: 18px;
+      box-shadow: inset 0 0 0 1px rgba(31, 29, 25, 0.04);
+    }
+
+    .icon-wrap svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .card h3 {
+      font-size: 24px;
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+      margin-bottom: 10px;
+      text-wrap: balance;
+    }
+
+    .card p {
+      font-size: 16px;
+      line-height: 1.65;
+      color: #5b5448;
+    }
+
+    .step-count {
+      display: inline-grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background: #111111;
+      color: #ffffff;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      margin-bottom: 18px;
+      box-shadow: 0 16px 28px rgba(17, 17, 17, 0.16);
+    }
+
+    .step-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #f5f0e8;
+      color: #5c5449;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-top: 18px;
+    }
+
+    .step-label span {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .input-panel,
+    .result-card,
+    .calendar-preview {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(31, 29, 25, 0.08);
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .input-panel::before,
+    .result-card::before,
+    .calendar-preview::before {
+      content: "";
+      position: absolute;
+      inset: auto auto -24px -24px;
+      width: 110px;
+      height: 110px;
+      background: radial-gradient(circle, rgba(239, 232, 220, 0.65), transparent 68%);
+      pointer-events: none;
+    }
+
+    .demo-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: #4d463b;
+      letter-spacing: -0.01em;
+    }
+
+    textarea.note-input {
+      width: 100%;
+      min-height: 264px;
+      resize: vertical;
+      border: 1px solid rgba(31, 29, 25, 0.08);
+      border-radius: 22px;
+      padding: 18px;
+      background: #ffffff;
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.6;
+      outline: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    textarea.note-input:focus {
+      border-color: rgba(17, 17, 17, 0.18);
+      box-shadow: 0 0 0 5px rgba(17, 17, 17, 0.04);
+    }
+
+    .sample-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .sample-btn {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: #2b261f;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .sample-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(31, 29, 25, 0.16);
+      background: #fcfbf8;
+    }
+
+    .demo-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .process-status {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      color: #635b4f;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+    }
+
+    .status-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: #e0d9cd;
+      flex-shrink: 0;
+      transition: background 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .status-item small {
+      color: #8a816f;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+
+    .status-item.is-active {
+      border-color: rgba(17, 17, 17, 0.14);
+      color: var(--text);
+      background: #fffdfa;
+    }
+
+    .status-item.is-active .status-dot {
+      background: #111111;
+      box-shadow: 0 0 0 7px rgba(17, 17, 17, 0.08);
+    }
+
+    .status-item.is-done {
+      border-color: rgba(40, 177, 90, 0.18);
+      background: #fbfefa;
+    }
+
+    .status-item.is-done .status-dot {
+      background: var(--accent);
+      box-shadow: 0 0 0 7px rgba(40, 177, 90, 0.12);
+    }
+
+    .output-stack {
+      display: grid;
+      gap: 20px;
+    }
+
+    .output-stack.is-loading {
+      opacity: 0.68;
+      transform: scale(0.995);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .result-top,
+    .calendar-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .result-top h3,
+    .calendar-top h3 {
+      font-size: 32px;
+      letter-spacing: -0.05em;
+      line-height: 1;
+    }
+
+    .status-ok,
+    .calendar-success {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #2d7747;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      box-shadow: inset 0 0 0 1px rgba(40, 177, 90, 0.12);
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 16px;
+      margin-top: 18px;
+    }
+
+    .field {
+      padding: 14px;
+      border-radius: 18px;
+      background: var(--surface-soft);
+      box-shadow: inset 0 0 0 1px rgba(17, 17, 17, 0.03);
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #7a7266;
+      margin-bottom: 8px;
+    }
+
+    .field strong {
+      display: block;
+      font-size: 16px;
+      line-height: 1.4;
+      letter-spacing: -0.02em;
+      color: #221f18;
+    }
+
+    .calendar-copy {
+      color: #625b4f;
+      font-size: 15px;
+      line-height: 1.55;
+      margin-top: 14px;
+    }
+
+    .event-card {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #ffffff, #f4efe7);
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 40px rgba(17, 17, 17, 0.06);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .event-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -18px -24px auto;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle, rgba(40, 177, 90, 0.12), transparent 70%);
+      pointer-events: none;
+    }
+
+    .event-bar {
+      width: 4px;
+      align-self: stretch;
+      background: var(--accent);
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+
+    .event-title {
+      font-size: 18px;
+      line-height: 1.15;
+      letter-spacing: -0.04em;
+      margin-bottom: 6px;
+      font-weight: 900;
+    }
+
+    .event-meta {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    .success-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: #f2efe8;
+      color: #3f392f;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .promise-card {
+      min-height: 220px;
+    }
+
+    .promise-card p strong {
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .persona-card .who {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #f6f1e7;
+      color: #5b5448;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 16px;
+    }
+
+    .persona-card .who span {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #111111;
+    }
+
+    .faq-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    .faq-item {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(31, 29, 25, 0.08);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .faq-question {
+      width: 100%;
+      padding: 22px 24px;
+      border: 0;
+      background: none;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      text-align: left;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      cursor: pointer;
+    }
+
+    .faq-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: #f3eee4;
+      color: #3f392f;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      font-size: 20px;
+      font-weight: 700;
+      transition: transform 0.25s ease, background 0.25s ease;
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+    }
+
+    .faq-answer-inner {
+      padding: 0 24px 22px;
+      color: #5d5549;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .faq-item.is-open .faq-icon {
+      transform: rotate(45deg);
+      background: #111111;
+      color: #ffffff;
+    }
+
+    .final-box {
+      background: linear-gradient(180deg, #161616 0%, #20201f 100%);
+      color: #ffffff;
+      border-radius: 32px;
+      padding: 54px 28px;
+      box-shadow: 0 26px 60px rgba(17, 17, 17, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .final-box::before,
+    .final-box::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      pointer-events: none;
+      opacity: 0.85;
+    }
+
+    .final-box::before {
+      width: 220px;
+      height: 220px;
+      top: -70px;
+      right: -40px;
+      background: radial-gradient(circle, rgba(40, 177, 90, 0.24), transparent 68%);
+    }
+
+    .final-box::after {
+      width: 220px;
+      height: 220px;
+      bottom: -90px;
+      left: -20px;
+      background: radial-gradient(circle, rgba(255, 91, 87, 0.18), transparent 72%);
+    }
+
+    .final-row {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .final-copy h2 {
+      font-size: clamp(34px, 5vw, 54px);
+      line-height: 1.02;
+      letter-spacing: -0.05em;
+      margin-bottom: 14px;
+      max-width: 720px;
+      text-wrap: balance;
+    }
+
+    .final-copy p {
+      color: rgba(255, 255, 255, 0.76);
+      font-size: 18px;
+      line-height: 1.65;
+      max-width: 640px;
+    }
+
+    .final-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .final-actions .button-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .final-actions .button-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .footer {
+      padding: 28px 0 56px;
+      color: #7a7368;
+    }
+
+    .footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      font-size: 14px;
+    }
+
+    .footer strong {
+      color: #39342c;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .mobile-cta {
+      display: none;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: scaleY(0.55); }
+      50% { transform: scaleY(1); }
+    }
+
+    @media (max-width: 1100px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-copy,
+      .lead,
+      .pain-quote {
+        max-width: none;
+      }
+
+      .visual-wrap {
+        max-width: 640px;
+        margin: 0 auto;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .grid-3,
+      .steps-grid,
+      .persona-grid,
+      .grid-2,
+      .promise-grid,
+      .demo-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .float-note {
+        display: none;
+      }
+
+      .section {
+        padding: 76px 0;
+      }
+
+      .field-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body { padding-bottom: 92px; }
+      .container { width: min(var(--max), calc(100% - 20px)); }
+      .topbar { padding: 10px 0; }
+      .nav { padding: 10px 12px; }
+      .brand-mark { width: 36px; height: 36px; border-radius: 12px; }
+      .brand-copy strong { font-size: 17px; }
+      .brand-copy span { font-size: 12px; }
+      .button { padding: 15px 20px; }
+      .hero { padding-top: 26px; }
+      .hero-title { font-size: clamp(36px, 13vw, 56px); }
+      .hero-cta .button { width: 100%; }
+      .audience-card { padding: 18px; }
+      .visual-wrap,
+      .card,
+      .input-panel,
+      .result-card,
+      .calendar-preview,
+      .final-box { border-radius: 24px; }
+      .phone-inner { min-height: 520px; }
+      .pipeline-track { flex-direction: column; }
+      .section-heading h2 { font-size: clamp(30px, 11vw, 44px); }
+      .result-top h3,
+      .calendar-top h3 { font-size: 28px; }
+      .mobile-cta {
+        display: flex;
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        z-index: 50;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(31, 29, 25, 0.08);
+        box-shadow: 0 18px 40px rgba(17, 17, 17, 0.14);
+        backdrop-filter: blur(18px);
+      }
+      .mobile-cta strong {
+        display: block;
+        font-size: 14px;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+      .mobile-cta span {
+        display: block;
+        font-size: 12px;
+        color: #686052;
+        margin-top: 4px;
+        line-height: 1.25;
+      }
+      .mobile-cta .button {
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar" id="topbar">
+    <div class="container">
+      <nav class="nav" aria-label="Primary">
+        <a class="brand" href="#top">
+          <div class="brand-mark">L</div>
+          <div class="brand-copy">
+            <strong>Limbo</strong>
+            <span>Never miss a job</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="#how">How it works</a>
+          <a href="#demo">Try now</a>
+          <a href="#fit">Who it is for</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <a class="button button-primary button-small" href="#demo">Voice to a job</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero section" id="top">
+      <div class="container hero-grid">
+        <div class="hero-copy reveal">
+          <div class="eyebrow"><span class="eyebrow-dot"></span> Never Miss a Job</div>
+          <h1 class="hero-title">
+            Voice to a job in 60 seconds.
+            <span>When writing it down is inconvenient, leave a quick voice note. Limbo turns it into a filled job form and a calendar event before the lead disappears in the chaos.</span>
+          </h1>
+          <p class="lead">For field service owners, dispatchers, office managers, and the person who cannot afford a missed callback. No more “I’ll remember.” No more lost notes. No more jobs slipping to a competitor.</p>
+          <div class="hero-cta">
+            <a class="button button-primary" href="#demo">Try now</a>
+            <a class="button button-secondary" href="#how">See how it works</a>
+          </div>
+          <div class="microproof" aria-label="Product highlights">
+            <div class="item"><span class="check" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.2 6.3 11.5 13 4.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>No lost notes</div>
+            <div class="item"><span class="check" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.2 6.3 11.5 13 4.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Review before scheduling</div>
+            <div class="item"><span class="check" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.2 6.3 11.5 13 4.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Built for field service teams</div>
+          </div>
+          <div class="pain-quote">
+            <strong>The fear everyone in the field understands</strong>
+            <p>“I lost a client because I forgot to call them back. The job went to a competitor.” A missed opportunity is not a small inconvenience. It is direct revenue loss.</p>
+          </div>
+        </div>
+
+        <div class="hero-visual reveal">
+          <div class="visual-wrap">
+            <div class="visual-top">
+              <div class="visual-pill"><span></span> Limbo Pipeline</div>
+              <div class="audience-burst">Voice note → filled form →<br/>calendar event</div>
+            </div>
+
+            <div class="pipeline-track" aria-label="Hero flow steps">
+              <button class="mini-step is-active" data-hero-index="0" type="button">
+                <span class="num">1</span>
+                <span>Capture the note</span>
+              </button>
+              <button class="mini-step" data-hero-index="1" type="button">
+                <span class="num">2</span>
+                <span>Extract the details</span>
+              </button>
+              <button class="mini-step" data-hero-index="2" type="button">
+                <span class="num">3</span>
+                <span>Schedule the visit</span>
+              </button>
+            </div>
+
+            <div class="phone-shell" aria-hidden="true">
+              <div class="phone-notch"></div>
+              <div class="phone-inner">
+                <div class="phone-status">
+                  <span>9:41</span>
+                  <span>●●●</span>
+                </div>
+                <div class="phone-tabs">
+                  <div class="phone-tab is-active" data-hero-index="0">Record</div>
+                  <div class="phone-tab" data-hero-index="1">Confirm</div>
+                  <div class="phone-tab" data-hero-index="2">Schedule</div>
+                </div>
+
+                <div class="phone-stage is-active" data-stage="0">
+                  <div class="record-ui screen-card">
+                    <h3>Record audio</h3>
+                    <p class="screen-sub">Tap once and leave the details while you are on site, driving between jobs, or finishing a call.</p>
+                    <div class="wave-panel">
+                      <div>
+                        <div class="timer">0:47</div>
+                        <div class="wave" aria-hidden="true">
+                          <span style="--h:16px;--d:.02s" class="active"></span>
+                          <span style="--h:28px;--d:.08s" class="active"></span>
+                          <span style="--h:38px;--d:.14s" class="active"></span>
+                          <span style="--h:24px;--d:.18s" class="active"></span>
+                          <span style="--h:46px;--d:.24s" class="active"></span>
+                          <span style="--h:34px;--d:.28s" class="active"></span>
+                          <span style="--h:18px;--d:.34s" class="active"></span>
+                          <span style="--h:42px;--d:.38s" class="active"></span>
+                          <span style="--h:26px;--d:.44s" class="active"></span>
+                          <span style="--h:48px;--d:.50s" class="active"></span>
+                          <span style="--h:34px;--d:.56s" class="active"></span>
+                          <span style="--h:20px;--d:.62s"></span>
+                          <span style="--h:30px;--d:.68s"></span>
+                          <span style="--h:18px;--d:.74s"></span>
+                        </div>
+                        <div class="record-caption">Recording in progress…</div>
+                      </div>
+                    </div>
+                    <button class="record-button" type="button" aria-label="Record audio preview">
+                      <svg viewBox="0 0 24 24" fill="none"><path d="M12 15.6a3.7 3.7 0 0 0 3.7-3.7V7.8A3.7 3.7 0 1 0 8.3 7.8v4.1a3.7 3.7 0 0 0 3.7 3.7ZM5.9 11.9a6.1 6.1 0 0 0 12.2 0M12 18v3.1M8.8 21.1h6.4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="alt-entry">Type instead</div>
+                  </div>
+                </div>
+
+                <div class="phone-stage" data-stage="1">
+                  <div class="form-ui screen-card">
+                    <h3>Edit Visit</h3>
+                    <p class="screen-sub">Client, location, date, time, job type, and notes are already filled. You only confirm.</p>
+                    <div class="field-mock-grid">
+                      <div class="field-mock"><label>Client</label><div class="line med"></div></div>
+                      <div class="field-mock"><label>Location</label><div class="line long"></div></div>
+                      <div class="field-mock"><label>Date</label><div class="line short"></div></div>
+                      <div class="field-mock"><label>Time</label><div class="line med"></div></div>
+                      <div class="field-mock"><label>Job type</label><div class="line short"></div></div>
+                      <div class="field-mock"><label>Notes</label><div class="line long"></div></div>
+                    </div>
+                    <div class="save-btn">Schedule job</div>
+                  </div>
+                </div>
+
+                <div class="phone-stage" data-stage="2">
+                  <div class="calendar-ui screen-soft">
+                    <h3>Plan jobs with your voice or text</h3>
+                    <p class="screen-sub">The job is no longer stuck in your head. It is visible, scheduled, and ready for the team.</p>
+                    <div class="job-card">
+                      <div class="bar"></div>
+                      <div>
+                        <h4>AC Maintenance — David Martinez</h4>
+                        <p>Wed, May 15 · 10:00 AM — 1:00 PM</p>
+                      </div>
+                      <div class="badge-ok"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.2 6.3 11.5 13 4.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    </div>
+                    <div class="job-card">
+                      <div class="bar"></div>
+                      <div>
+                        <h4>Ventilation Service — Emily Davis</h4>
+                        <p>Mon, Jun 3 · 8:30 AM — 11:30 AM</p>
+                      </div>
+                      <div class="badge-ok"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.2 6.3 11.5 13 4.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    </div>
+                    <div class="job-card">
+                      <div class="bar"></div>
+                      <div>
+                        <h4>AC System Repair — Michael Thompson</h4>
+                        <p>Fri, Jul 21 · 2:00 PM — 5:00 PM</p>
+                      </div>
+                      <div class="badge-ok"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.2 6.3 11.5 13 4.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    </div>
+                    <div class="calendar-note">Nothing gets lost in the in-between stage. Limbo gives every lead a place to live until it becomes a real job on the calendar.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="float-note one">No more “I’ll remember”<small>Capture it while it is fresh</small></div>
+            <div class="float-note two">Callback protected<small>From rough note to scheduled visit</small></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-tight">
+      <div class="container reveal">
+        <div class="audience-card">
+          <div>
+            <strong>Made for the person who owns the callback.</strong>
+            <p>Owner-operator, dispatcher, office manager, estimator, or anyone responsible for making sure no lead gets forgotten between the first message and the booked visit.</p>
+          </div>
+          <div class="pill-row" aria-label="Audience pills">
+            <span class="pill">Owner-operators</span>
+            <span class="pill">Dispatch &amp; office</span>
+            <span class="pill">Small field crews</span>
+            <span class="pill">Electricians</span>
+            <span class="pill">Plumbers</span>
+            <span class="pill">HVAC</span>
+            <span class="pill">Welders</span>
+            <span class="pill">Mechanics</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="problem">
+      <div class="container">
+        <div class="section-heading reveal">
+          <div class="eyebrow"><span class="eyebrow-dot"></span> Why jobs get lost</div>
+          <h2>The dangerous moment is not the call. It is what happens right after.</h2>
+          <p>Field service work is chaotic by nature. You are in the truck, on a ladder, under a sink, on the shop floor, or in between jobs. That is exactly when details disappear.</p>
+        </div>
+
+        <div class="grid-3">
+          <article class="card reveal">
+            <div class="icon-wrap" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M7 5.5A2.5 2.5 0 0 1 9.5 3h5A2.5 2.5 0 0 1 17 5.5v13A2.5 2.5 0 0 1 14.5 21h-5A2.5 2.5 0 0 1 7 18.5v-13ZM10 17h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <h3>“I’ll remember” is not a system</h3>
+            <p>Half-finished texts, scraps of paper, and mental notes do not survive a busy day. The lead may feel safe in the moment, but it is still one interruption away from being lost.</p>
+          </article>
+
+          <article class="card reveal">
+            <div class="icon-wrap" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 8.5h16M7 4v3M17 4v3M6.5 20h11A2.5 2.5 0 0 0 20 17.5v-9A2.5 2.5 0 0 0 17.5 6h-11A2.5 2.5 0 0 0 4 8.5v9A2.5 2.5 0 0 0 6.5 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>If it never reaches the calendar, it is still at risk</h3>
+            <p>A lead is not protected just because you heard it. It becomes real only when the details are captured, organized, and turned into an actual scheduled visit.</p>
+          </article>
+
+          <article class="card reveal">
+            <div class="icon-wrap" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12c1.8-3.2 4.5-4.8 8-4.8S18.2 8.8 20 12c-1.8 3.2-4.5 4.8-8 4.8S5.8 15.2 4 12Zm8 2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Missed callbacks feel small until the money is gone</h3>
+            <p>The lost job is usually invisible at first. Then the competitor gets the work, the customer moves on, and the gap between intention and follow-up becomes a direct financial loss.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="how">
+      <div class="container">
+        <div class="section-heading reveal">
+          <div class="eyebrow"><span class="eyebrow-dot"></span> How it works</div>
+          <h2>From memory to booked job — with nothing lost in between.</h2>
+          <p>Limbo creates a simple pipeline for the messy middle: capture the note, extract the important details, review it once, and put it on the calendar.</p>
+        </div>
+
+        <div class="steps-grid">
+          <article class="card reveal">
+            <div class="step-count">1</div>
+            <h3>Capture the moment</h3>
+            <p>Leave a quick voice message when writing is awkward or impossible. You do it while the information is fresh, not later when details have already started to fade.</p>
+            <div class="step-label"><span></span> Memory capture</div>
+          </article>
+
+          <article class="card reveal">
+            <div class="step-count">2</div>
+            <h3>Let Limbo structure the chaos</h3>
+            <p>The raw note becomes a clean job card with the client, location, date, time, job type, and notes already organized. The in-between stage finally has a home.</p>
+            <div class="step-label"><span></span> Limbo pipeline</div>
+          </article>
+
+          <article class="card reveal">
+            <div class="step-count">3</div>
+            <h3>Confirm and schedule</h3>
+            <p>You review the result, fix anything if needed, and schedule the visit. What used to live in memory is now a visible event the team can act on.</p>
+            <div class="step-label"><span></span> Calendar ready</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="demo">
+      <div class="container">
+        <div class="section-heading reveal">
+          <div class="eyebrow"><span class="eyebrow-dot"></span> Try now</div>
+          <h2>Paste a quick note and watch it become a job.</h2>
+          <p>This demo shows the core promise of the product: rough input in, clean job out. Use one of the sample notes or paste your own.</p>
+        </div>
+
+        <div class="demo-grid">
+          <div class="input-panel reveal">
+            <label class="demo-label" for="noteInput">Quick note or voice message transcript</label>
+            <textarea class="note-input" id="noteInput">Sarah Johnson needs AC repair at 142 Oak Street, Apt 3B on April 24 from 9 AM to 12 PM. Entrance pin 1234.</textarea>
+            <div class="sample-row">
+              <button class="sample-btn" type="button" data-sample="Sarah Johnson needs AC repair at 142 Oak Street, Apt 3B on April 24 from 9 AM to 12 PM. Entrance pin 1234.">AC repair</button>
+              <button class="sample-btn" type="button" data-sample="Emily Davis has a ventilation service call at 18 River Road tomorrow 8:30 AM to 11:30 AM. Call when you're outside.">Ventilation</button>
+              <button class="sample-btn" type="button" data-sample="Michael Thompson wants brake repair at 77 Lincoln Ave Friday 2 PM to 5 PM. Gate code 5512.">Mechanic</button>
+            </div>
+            <div class="demo-actions">
+              <button class="button button-primary" id="processBtn" type="button">Turn into a job</button>
+              <button class="button button-secondary" id="clearBtn" type="button">Clear</button>
+            </div>
+
+            <div class="process-status" aria-live="polite">
+              <div class="status-item" data-status-step="0">
+                <div class="status-left">
+                  <span class="status-dot"></span>
+                  <span>Transcribing note</span>
+                </div>
+                <small>Step 1</small>
+              </div>
+              <div class="status-item" data-status-step="1">
+                <div class="status-left">
+                  <span class="status-dot"></span>
+                  <span>Extracting details</span>
+                </div>
+                <small>Step 2</small>
+              </div>
+              <div class="status-item" data-status-step="2">
+                <div class="status-left">
+                  <span class="status-dot"></span>
+                  <span>Adding to calendar</span>
+                </div>
+                <small>Step 3</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="output-stack reveal" id="outputStack">
+            <div class="result-card">
+              <div class="result-top">
+                <h3>Edit Visit</h3>
+                <div class="status-ok"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.2 6.3 11.5 13 4.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Pre-filled from note</div>
+              </div>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label>Client</label>
+                  <strong id="outClient">Sarah Johnson</strong>
+                </div>
+                <div class="field">
+                  <label>Location</label>
+                  <strong id="outLocation">142 Oak Street, Apt 3B</strong>
+                </div>
+                <div class="field">
+                  <label>Date</label>
+                  <strong id="outDate">April 24</strong>
+                </div>
+                <div class="field">
+                  <label>Time</label>
+                  <strong id="outTime">9:00 AM — 12:00 PM</strong>
+                </div>
+                <div class="field">
+                  <label>Job type</label>
+                  <strong id="outJob">AC Repair</strong>
+                </div>
+                <div class="field full">
+                  <label>Notes</label>
+                  <strong id="outNotes">Entrance pin 1234.</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="calendar-preview">
+              <div class="calendar-top">
+                <h3>Calendar event</h3>
+                <div class="calendar-success"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.2 6.3 11.5 13 4.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Ready to schedule</div>
+              </div>
+              <p class="calendar-copy">The rough note is now a real job card and a clear calendar event. No more lost scraps, no more “I meant to call them back,” and no more leads living only in memory.</p>
+              <div class="event-card">
+                <div class="event-bar"></div>
+                <div>
+                  <div class="event-title" id="eventTitle">AC Repair — Sarah Johnson</div>
+                  <div class="event-meta" id="eventMeta">April 24 · 9:00 AM — 12:00 PM<br/>142 Oak Street, Apt 3B</div>
+                  <div class="success-pill"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.2 6.3 11.5 13 4.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Lead protected in the pipeline</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-heading reveal">
+          <div class="eyebrow"><span class="eyebrow-dot"></span> What changes</div>
+          <h2>The promise is simple: no lead gets lost between memory and calendar.</h2>
+          <p>Limbo is not just about speed. It is about protecting revenue from the messy handoff between hearing a job and actually scheduling it.</p>
+        </div>
+
+        <div class="promise-grid">
+          <article class="card promise-card reveal">
+            <div class="icon-wrap" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4 10-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Capture now. Confirm later.</h3>
+            <p><strong>The important thing is that the lead survives the moment.</strong> When it is inconvenient to type, you still capture the opportunity. The review step happens after the pressure is gone.</p>
+          </article>
+
+          <article class="card promise-card reveal">
+            <div class="icon-wrap" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 8h16M7 4v4M17 4v4M6.5 20h11A2.5 2.5 0 0 0 20 17.5v-8A2.5 2.5 0 0 0 17.5 7h-11A2.5 2.5 0 0 0 4 9.5v8A2.5 2.5 0 0 0 6.5 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Every opportunity has a place to live</h3>
+            <p><strong>The “limbo” stage becomes visible and manageable.</strong> Instead of floating between voicemail, memory, paper, and follow-up, the lead sits in one clear pipeline until it becomes a scheduled job.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="fit">
+      <div class="container">
+        <div class="section-heading reveal">
+          <div class="eyebrow"><span class="eyebrow-dot"></span> Who it is for</div>
+          <h2>For whoever is responsible for making sure nothing slips.</h2>
+          <p>The best fit is not a trade label. It is the role: the person who feels the pain when a lead is forgotten, a callback is missed, or a note goes missing.</p>
+        </div>
+
+        <div class="persona-grid">
+          <article class="card persona-card reveal">
+            <div class="who"><span></span> Owner-operator</div>
+            <h3>You answer the phone and do the work</h3>
+            <p>You are quoting jobs, handling customers, driving, ordering parts, and working with your hands. Limbo makes sure the next opportunity does not vanish between tasks.</p>
+          </article>
+
+          <article class="card persona-card reveal">
+            <div class="who"><span></span> Dispatch / office</div>
+            <h3>You own the follow-up</h3>
+            <p>When the business is growing, missed details become a team problem. Limbo turns rough handoffs into clear, reviewable job records before they become missed appointments.</p>
+          </article>
+
+          <article class="card persona-card reveal">
+            <div class="who"><span></span> Crew lead / estimator</div>
+            <h3>You catch jobs in the middle of the day</h3>
+            <p>Some leads happen on site, in the yard, or between visits. Limbo helps you capture the opportunity now and organize it properly when you have a minute.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="faq">
+      <div class="container">
+        <div class="section-heading reveal">
+          <div class="eyebrow"><span class="eyebrow-dot"></span> FAQ</div>
+          <h2>Questions people ask before they trust a new workflow.</h2>
+          <p>A landing page converts better when it removes friction. These are the concerns most likely to matter to a field service owner or team lead.</p>
+        </div>
+
+        <div class="faq-wrap">
+          <div class="faq-item reveal is-open">
+            <button class="faq-question" type="button" aria-expanded="true">
+              <span>Do I still review the job before it is scheduled?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer" style="max-height: 240px;">
+              <div class="faq-answer-inner">Yes. The point is not to send anything blindly. Limbo pre-fills the form so the hard part is already done, then you confirm the details and schedule the visit with confidence.</div>
+            </div>
+          </div>
+
+          <div class="faq-item reveal">
+            <button class="faq-question" type="button" aria-expanded="false">
+              <span>What kinds of details can be captured from a note?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">Client name, address, date, time, job type, and free-form notes are the essentials. The value is not perfect wording. The value is getting the job into a clear structure fast enough that it does not get lost.</div>
+            </div>
+          </div>
+
+          <div class="faq-item reveal">
+            <button class="faq-question" type="button" aria-expanded="false">
+              <span>Is this for owners only?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">No. It is for whoever feels the cost of a missed callback. In a small business that is often the owner. In a growing team it may be a dispatcher, office manager, estimator, or crew lead.</div>
+            </div>
+          </div>
+
+          <div class="faq-item reveal">
+            <button class="faq-question" type="button" aria-expanded="false">
+              <span>Why is voice the right starting point?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">Because the moment a lead arrives is usually the worst moment to type. Voice is faster, lower-friction, and more realistic for people working in trucks, on site, in workshops, or between customer calls.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container reveal">
+        <div class="final-box">
+          <div class="final-row">
+            <div class="final-copy">
+              <h2>Stop letting good jobs die in the gap between the call and the calendar.</h2>
+              <p>Try the flow now and see what happens when a rough voice note becomes a clean, scheduled visit. One simple habit change can protect the jobs you are already earning.</p>
+            </div>
+            <div class="final-actions">
+              <a class="button button-primary" href="#demo">Try now</a>
+              <a class="button button-secondary" href="#how">See the flow</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-row">
+      <div><strong>Limbo</strong> — Voice to a job in 60 seconds.</div>
+      <div>Built for field service teams that cannot afford a missed callback.</div>
+    </div>
+  </footer>
+
+  <div class="mobile-cta" aria-hidden="false">
+    <div>
+      <strong>Voice to a job in 60 seconds</strong>
+      <span>Try the live demo on this page</span>
+    </div>
+    <a class="button button-primary button-small" href="#demo">Try now</a>
+  </div>
+
+  <script>
+    (function () {
+      const topbar = document.getElementById('topbar');
+      const handleScroll = () => {
+        topbar.classList.toggle('is-scrolled', window.scrollY > 6);
+      };
+      handleScroll();
+      window.addEventListener('scroll', handleScroll, { passive: true });
+
+      const heroButtons = Array.from(document.querySelectorAll('[data-hero-index]'));
+      const heroSteps = Array.from(document.querySelectorAll('.mini-step'));
+      const heroTabs = Array.from(document.querySelectorAll('.phone-tab'));
+      const heroStages = Array.from(document.querySelectorAll('.phone-stage'));
+      let heroIndex = 0;
+      let heroTimer;
+
+      function setHero(index) {
+        heroIndex = index;
+        heroSteps.forEach((step, i) => step.classList.toggle('is-active', i === index));
+        heroTabs.forEach((tab, i) => tab.classList.toggle('is-active', i === index));
+        heroStages.forEach((stage, i) => stage.classList.toggle('is-active', i === index));
+      }
+
+      function restartHeroTimer() {
+        clearInterval(heroTimer);
+        heroTimer = setInterval(() => {
+          setHero((heroIndex + 1) % heroStages.length);
+        }, 3600);
+      }
+
+      heroButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const next = Number(button.getAttribute('data-hero-index'));
+          setHero(next);
+          restartHeroTimer();
+        });
+      });
+
+      setHero(0);
+      restartHeroTimer();
+
+      const revealItems = document.querySelectorAll('.reveal');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+
+      revealItems.forEach((item) => observer.observe(item));
+
+      const faqItems = document.querySelectorAll('.faq-item');
+      faqItems.forEach((item) => {
+        const button = item.querySelector('.faq-question');
+        const answer = item.querySelector('.faq-answer');
+        button.addEventListener('click', () => {
+          const isOpen = item.classList.contains('is-open');
+          faqItems.forEach((other) => {
+            other.classList.remove('is-open');
+            other.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+            other.querySelector('.faq-answer').style.maxHeight = '0px';
+          });
+          if (!isOpen) {
+            item.classList.add('is-open');
+            button.setAttribute('aria-expanded', 'true');
+            answer.style.maxHeight = answer.scrollHeight + 'px';
+          }
+        });
+      });
+
+      const noteInput = document.getElementById('noteInput');
+      const processBtn = document.getElementById('processBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const outputStack = document.getElementById('outputStack');
+      const statusItems = Array.from(document.querySelectorAll('[data-status-step]'));
+      const sampleButtons = document.querySelectorAll('.sample-btn');
+
+      const outClient = document.getElementById('outClient');
+      const outLocation = document.getElementById('outLocation');
+      const outDate = document.getElementById('outDate');
+      const outTime = document.getElementById('outTime');
+      const outJob = document.getElementById('outJob');
+      const outNotes = document.getElementById('outNotes');
+      const eventTitle = document.getElementById('eventTitle');
+      const eventMeta = document.getElementById('eventMeta');
+
+      const months = ['january','february','march','april','may','june','july','august','september','october','november','december','jan','feb','mar','apr','jun','jul','aug','sep','sept','oct','nov','dec'];
+      const weekdays = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday','mon','tue','tues','wed','thu','thur','thurs','fri','sat','sun','today','tomorrow'];
+
+      sampleButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          noteInput.value = btn.getAttribute('data-sample') || '';
+          noteInput.focus();
+        });
+      });
+
+      clearBtn.addEventListener('click', () => {
+        noteInput.value = '';
+        noteInput.focus();
+        resetStatus();
+      });
+
+      function titleCase(value) {
+        return value
+          .toLowerCase()
+          .split(/\s+/)
+          .filter(Boolean)
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      }
+
+      function normalizeSpaces(value) {
+        return value.replace(/\s+/g, ' ').trim();
+      }
+
+      function ensurePeriod(value) {
+        if (!value) return value;
+        return /[.!?]$/.test(value) ? value : value + '.';
+      }
+
+      function formatTimeRange(range) {
+        if (!range) return 'To confirm';
+        const parts = range.match(/(\d{1,2}(?::\d{2})?\s?(?:am|pm|AM|PM)?)\s*(?:-|–|to)\s*(\d{1,2}(?::\d{2})?\s?(?:am|pm|AM|PM)?)/i);
+        if (!parts) return titleCase(range.replace(/\b(am|pm)\b/gi, (m) => m.toUpperCase()));
+        const formatOne = (value, fallbackMeridiem) => {
+          const trimmed = value.trim();
+          if (/am|pm/i.test(trimmed)) {
+            return trimmed.replace(/\b(am|pm)\b/gi, (m) => m.toUpperCase()).replace(/\s+/g, ' ');
+          }
+          return (trimmed + ' ' + fallbackMeridiem).replace(/\s+/g, ' ').trim();
+        };
+        const endMeridiemMatch = parts[2].match(/(am|pm)/i);
+        const startMeridiemMatch = parts[1].match(/(am|pm)/i);
+        const endMeridiem = endMeridiemMatch ? endMeridiemMatch[1].toUpperCase() : (startMeridiemMatch ? startMeridiemMatch[1].toUpperCase() : '');
+        const startMeridiem = startMeridiemMatch ? startMeridiemMatch[1].toUpperCase() : endMeridiem;
+        return formatOne(parts[1], startMeridiem).trim() + ' — ' + formatOne(parts[2], endMeridiem).trim();
+      }
+
+      function detectClient(text) {
+        const patterns = [
+          /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})(?:\s+from\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})?\s+(?:needs|need|wants|want|has|have|called|calls|is|needs\b)/,
+          /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})\b/,
+          /for\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})\b/
+        ];
+
+        for (const pattern of patterns) {
+          const match = text.match(pattern);
+          if (match && match[1]) {
+            const candidate = normalizeSpaces(match[1]);
+            const first = candidate.split(' ')[0].toLowerCase();
+            if (!months.includes(first) && !weekdays.includes(first)) {
+              return candidate;
+            }
+          }
+        }
+
+        const words = text.match(/\b[A-Z][a-z]+\b/g) || [];
+        const filtered = words.filter((word) => !months.includes(word.toLowerCase()) && !weekdays.includes(word.toLowerCase()));
+        if (filtered.length >= 2) return filtered.slice(0, 2).join(' ');
+        if (filtered.length === 1) return filtered[0];
+        return 'New Client';
+      }
+
+      function detectAddress(text) {
+        const regex = /\b\d{1,5}\s+[A-Za-z0-9.'#-]+(?:\s+[A-Za-z0-9.'#-]+){0,6}\s(?:Street|St|Avenue|Ave|Road|Rd|Lane|Ln|Boulevard|Blvd|Drive|Dr|Court|Ct|Way|Terrace|Ter)\b(?:,?\s*(?:Apt|Apartment|Suite|Ste|Unit)\s*[A-Za-z0-9-]+)?/i;
+        const match = text.match(regex);
+        return match ? normalizeSpaces(match[0].replace(/\s+,/g, ',')) : 'Address to confirm';
+      }
+
+      function detectDate(text) {
+        const monthRegex = /\b(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\s+\d{1,2}\b/i;
+        const relativeRegex = /\b(?:today|tomorrow|next week|this afternoon|this morning|this evening)\b/i;
+        const weekdayRegex = /\b(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|Mon|Tue|Tues|Wed|Thu|Thur|Thurs|Fri|Sat|Sun)\b/i;
+        const explicit = text.match(monthRegex);
+        if (explicit) return titleCase(explicit[0]);
+        const relative = text.match(relativeRegex);
+        if (relative) return titleCase(relative[0]);
+        const weekday = text.match(weekdayRegex);
+        if (weekday) return titleCase(weekday[0]);
+        return 'Next available date';
+      }
+
+      function detectTime(text) {
+        const rangeRegex = /\b\d{1,2}(?::\d{2})?\s?(?:AM|PM|am|pm)?\s*(?:-|–|to)\s*\d{1,2}(?::\d{2})?\s?(?:AM|PM|am|pm)?\b/;
+        const match = text.match(rangeRegex);
+        if (match) return formatTimeRange(match[0]);
+        if (/\bmorning\b/i.test(text)) return 'Morning';
+        if (/\bafternoon\b/i.test(text)) return 'Afternoon';
+        if (/\bevening\b/i.test(text)) return 'Evening';
+        return 'Time to confirm';
+      }
+
+      function detectJob(text) {
+        const jobs = [
+          ['Ventilation Service', /ventilation/i],
+          ['AC Repair', /ac repair|air conditioner|hvac|furnace|cooling|heating/i],
+          ['Electrical Service', /electrical|electric|wiring|panel|breaker|outlet/i],
+          ['Plumbing Service', /plumb|sink|toilet|leak|pipe|drain|clogged/i],
+          ['Brake Repair', /brake/i],
+          ['Mechanical Repair', /mechanic|engine|garage/i],
+          ['Welding Job', /weld/i],
+          ['Service Call', /service call|repair|install|maintenance/i]
+        ];
+        for (const [label, regex] of jobs) {
+          if (regex.test(text)) return label;
+        }
+        return 'Service Call';
+      }
+
+      function detectNotes(text) {
+        const clean = normalizeSpaces(text);
+        const sentences = clean.split(/(?<=[.!?])\s+/).map((item) => item.trim()).filter(Boolean);
+        const noteSentence = sentences.find((sentence) => /entrance|gate|code|pin|call|text|parking|dog|unit|apt|suite/i.test(sentence));
+        if (noteSentence) return ensurePeriod(noteSentence);
+        if (sentences.length > 1) return ensurePeriod(sentences[sentences.length - 1]);
+        return 'Captured from voice note.';
+      }
+
+      function parseNote(note) {
+        const text = normalizeSpaces(note);
+        return {
+          client: detectClient(text),
+          location: detectAddress(text),
+          date: detectDate(text),
+          time: detectTime(text),
+          job: detectJob(text),
+          notes: detectNotes(text)
+        };
+      }
+
+      function resetStatus() {
+        statusItems.forEach((item) => item.classList.remove('is-active', 'is-done'));
+      }
+
+      function setOutput(data) {
+        outClient.textContent = data.client;
+        outLocation.textContent = data.location;
+        outDate.textContent = data.date;
+        outTime.textContent = data.time;
+        outJob.textContent = data.job;
+        outNotes.textContent = data.notes;
+        eventTitle.textContent = data.job + ' — ' + data.client;
+        eventMeta.innerHTML = data.date + ' · ' + data.time + '<br/>' + data.location;
+      }
+
+      function animateProcessing() {
+        resetStatus();
+        outputStack.classList.add('is-loading');
+        processBtn.disabled = true;
+        processBtn.style.opacity = '0.75';
+
+        statusItems.forEach((item, index) => {
+          setTimeout(() => {
+            statusItems.forEach((inner, innerIndex) => {
+              if (innerIndex < index) {
+                inner.classList.add('is-done');
+                inner.classList.remove('is-active');
+              } else if (innerIndex === index) {
+                inner.classList.add('is-active');
+              } else {
+                inner.classList.remove('is-active', 'is-done');
+              }
+            });
+          }, index * 420);
+        });
+
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            statusItems.forEach((item) => {
+              item.classList.remove('is-active');
+              item.classList.add('is-done');
+            });
+            outputStack.classList.remove('is-loading');
+            processBtn.disabled = false;
+            processBtn.style.opacity = '1';
+            resolve();
+          }, 1450);
+        });
+      }
+
+      processBtn.addEventListener('click', async () => {
+        const note = noteInput.value.trim();
+        if (!note) {
+          noteInput.focus();
+          noteInput.style.borderColor = 'rgba(255, 91, 87, 0.45)';
+          noteInput.style.boxShadow = '0 0 0 5px rgba(255, 91, 87, 0.10)';
+          setTimeout(() => {
+            noteInput.style.borderColor = 'rgba(31, 29, 25, 0.08)';
+            noteInput.style.boxShadow = 'none';
+          }, 1200);
+          return;
+        }
+        const data = parseNote(note);
+        await animateProcessing();
+        setOutput(data);
+      });
+
+      setOutput(parseNote(noteInput.value));
+    })();
+  </script>
+</body>
+</html>
